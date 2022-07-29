@@ -16,7 +16,7 @@ import toolbox
 
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "18 March 2022"
+__version__ = "29 July 2022"
 
 
 def build_hurricane_data(data_path, settings, verbose=0):
@@ -90,7 +90,6 @@ def build_hurricane_data(data_path, settings, verbose=0):
         missing = None
 
     elif settings["target"] == "longitude":
-        # x_names = ["AVDX", "EMDX", "EGDX", "HWDX", "LONC"]
         x_names = [
             "NCT","VMAX0",
             "AVDX", "EMDX", "EGDX", "HWDX",
@@ -101,7 +100,6 @@ def build_hurricane_data(data_path, settings, verbose=0):
         missing = -9999
 
     elif settings["target"] == "latitude":
-        # x_names = ["AVDY", "EMDY", "EGDY", "HWDY", "LATC"]
         x_names = [
             "NCT", "VMAX0",
             "AVDY", "EMDY", "EGDY", "HWDY",
