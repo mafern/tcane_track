@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import copy
-
 import toolbox
 
 
@@ -46,7 +45,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         shape = [n_train, n_features].
 
     onehot_train : numpy.ndarray
-        The training split of the scaled y data is in the first column.
+        The training split of the y data is in the first column.
         The remaining columns are filled with zeros. The number of columns
         equal the number of distribution parameters.
         shape = [n_train, n_parameters].
@@ -56,7 +55,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         shape = [n_val, n_features].
 
     onehot_val : numpy.ndarray
-        The validation split of the scaled y data is in the first column.
+        The validation split of the y data is in the first column.
         The remaining columns are filled with zeros. The number of columns
         equal the number of distribution parameters.
         shape = [n_val, n_parameters].
@@ -76,53 +75,20 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     Notes
     -----
-    * No scaling or normalization is applied during data preparation.
+    * No scaling or normalization is applied during data extraction.
 
     """
     # Setup for the selected target.
-    if settings["target"] == "intensity":
-        x_names = [
-            "NCI","VMAX0",
-            "DSDV", "LGDV", "HWDV", "AVDV",
-            "VMXC", "DV12", "SLAT", "SSTN", "SHDC", "DTL",
-        ]
-        y_name = ["OBDV"]
-        missing = None
-
-    elif settings["target"] == "longitude":
-        x_names = [
-            "NCT","VMAX0",
-            "AVDX", "EMDX", "EGDX", "HWDX",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
-        ]
-        y_name = ["OBDX"]
-        missing = -9999
-
-    elif settings["target"] == "latitude":
-        x_names = [
-            "NCT", "VMAX0",
-            "AVDY", "EMDY", "EGDY", "HWDY",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
-        ]
-        y_name = ["OBDY"]
-        missing = -9999
-
-    elif settings["target"] == "radial":
-        x_names = [
-            "NCT",
-            "AVDX", "EMDX", "EGDX", "HWDX",
-            "AVDY", "EMDY", "EGDY", "HWDY",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SHDC", "SSTN", "DTL",
-            "DSDV", "LGDV", "HWDV", "AVDV",
-        ]
-        y_name = ["OBDR"]
-        missing = -9999
-
-    else:
-        raise NotImplementedError
+    x_names = [
+        "NCT", "VMAX0",
+        "AVDX", "EMDX", "EGDX", "HWDX",
+        "AVDY", "EMDY", "EGDY", "HWDY",
+        "LONC", "LATC",
+        "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
+        "DSDV", "LGDV", "HWDV", "AVDV",
+    ]
+    y_names = ["OBDX", "OBDY"]
+    missing = -9999
 
     # Get the data from the specified file and filter out the unwanted rows.
     datafile_path = data_path + settings["filename"]
@@ -135,59 +101,20 @@ def build_hurricane_data(data_path, settings, verbose=0):
     ]
 
     if missing is not None:
-        df = df.drop(df.index[df[y_name[0]] == missing])
+        df = df.drop(df.index[df[y_names[0]] == missing])
+        df = df.drop(df.index[df[y_names[1]] == missing])
 
     # Shuffle the rows in the df Dataframe, using the numpy rng.
     # rng = np.random.default_rng(settings['rng_seed'])
     df = df.sample(frac=1,random_state=settings['rng_seed'])
     df = df.reset_index(drop=True)
 
-    #======================================================================
+    #------------------------------------------------------
     # Train/Validation/Test Split
     
     # Get the testing data
     if settings["test_condition"] is None:
         pass
-    elif settings["test_condition"] == "cluster":
-        
-        from scipy.cluster.vq import kmeans,vq
-        numclust = 6
-        
-        data = np.copy(df[x_names].to_numpy())
-        data_mean = np.mean(data,axis=0)
-        data_std  = np.std(data,axis=0)
-        data = (data - data_mean)/data_std
-
-        clusters, dist = kmeans(data, numclust, iter=500, seed=settings["rng_seed"])
-        cluster_label, _ = vq(data,clusters)
-        class_freq = np.bincount(cluster_label)
-        cluster_out = np.argmin(class_freq)
-
-        index = np.where(cluster_label == cluster_out)[0]
-        df_test = df.iloc[index]
-        x_test = df_test[x_names].to_numpy()
-        y_test = np.squeeze(df_test[y_name].to_numpy())
-        df_test = df_test.reset_index(drop=True)
-        
-        df = df.drop(index)
-        df = df.reset_index(drop=True)
-        
-        if verbose != 0:
-            fig, axs = plt.subplots(1,2, figsize=(15,5))
-            plt.sca(axs[0])
-            plt.hist(cluster_label,np.arange(-.5,numclust+.5,1.), width=.98)
-            plt.title('Sample Count by Cluster')
-            plt.ylabel('number of samples')
-            plt.xlabel('cluster')
-            plt.xticks((0,1,2,3))
-            plt.sca(axs[1])
-            for ic in np.arange(0,numclust):
-                plt.plot(x_names,clusters[ic,:], label='cluster ' + str(ic),linewidth=2)
-            plt.legend()
-            plt.title('Cluster Centroid')
-            plt.ylabel('standardized units')
-            plt.xlabel('predictor')
-            plt.show() 
     else:
         years = settings["years_test"]
         if verbose != 0:
@@ -195,7 +122,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         index = df.index[df['year'].isin(years)]   
         df_test = df.iloc[index]
         x_test = df_test[x_names].to_numpy()
-        y_test = np.squeeze(df_test[y_name].to_numpy())
+        y_test = np.squeeze(df_test[y_names].to_numpy())
         df_test = df_test.reset_index(drop=True)
         
         df = df.drop(index)
@@ -218,7 +145,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         
     df_val = df.iloc[index]
     x_val = df_val[x_names].to_numpy()
-    y_val = np.squeeze(df_val[y_name].to_numpy())
+    y_val = np.squeeze(df_val[y_names].to_numpy())
     df_val = df_val.reset_index(drop=True)
     
     df = df.drop(index)
@@ -234,36 +161,29 @@ def build_hurricane_data(data_path, settings, verbose=0):
         df_train = df.copy()
     else:
         df_train = df.iloc[:settings["n_train"]]
+        
     x_train = df_train[x_names].to_numpy()
-    y_train = np.squeeze(df_train[y_name].to_numpy())
+    y_train = np.squeeze(df_train[y_names].to_numpy())
     df_train = df_train.reset_index(drop=True)
     
-    #======================================================================    
-    # Create 'onehot' y arrays. The y values go in the first column, and the
-    # remaining columns are zero -- i.e. dummy columns.  These dummy columns
-    # are required by tensorflow; the number of columns must equal the number
-    # of distribution parameters.
-    if settings["uncertainty_type"] in ("bnn","mcdrop","reg"):
-        n_parameters = 1
-    elif "bnnshash" in settings["uncertainty_type"]:
-        n_parameters = 1    
-    elif "shash2" in settings["uncertainty_type"]:
-        n_parameters = 2
-    elif "shash3" in settings["uncertainty_type"]:
-        n_parameters = 3
-    elif "shash4" in settings["uncertainty_type"]:
-        n_parameters = 4
+    #------------------------------------------------------
+    # Create 'onehot' y arrays. The y values go in the 
+    # first column, and the remaining columns are zero -- 
+    # i.e. dummy columns.  These dummy columns are required
+    # by TensorFlow; the number of columns must equal the 
+    # number of distribution parameters.
+    if settings["uncertainty_type"] in ("bivariate_normal"):
+        n_parameters = 5
     else:
         raise NotImplementedError
-    
            
     onehot_train = np.zeros((len(y_train), n_parameters))
     onehot_val = np.zeros((len(y_val), n_parameters))
     onehot_test = np.zeros((len(y_test), n_parameters))    
 
-    onehot_train[:, 0] = y_train
-    onehot_val[:, 0] = y_val
-    onehot_test[:, 0] = y_test
+    onehot_train[:, 0:2] = y_train
+    onehot_val[:, 0:2] = y_val
+    onehot_test[:, 0:2] = y_test
 
     # Make a descriptive dictionary.
     data_summary = {
@@ -275,7 +195,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         "onehot_val_shape": tuple(onehot_val.shape),
         "onehot_test_shape": tuple(onehot_test.shape),        
         "x_names": x_names,
-        "y_name": y_name,
+        "y_names": y_names,
     }
 
     # Report the results.
@@ -283,9 +203,12 @@ def build_hurricane_data(data_path, settings, verbose=0):
         pprint.pprint(data_summary, width=80)
 
     if verbose >= 2:
-        toolbox.print_summary_statistics({"y_train" : onehot_train[:,0], 
-                                          "y_val"   : onehot_val[:,0], 
-                                          "y_test"  : onehot_test[:,0]}, 
+        toolbox.print_summary_statistics({"y_train lat" : onehot_train[:,0],
+                                          "y_val   lat" : onehot_val[:,0],
+                                          "y_test  lat" : onehot_test[:,0],
+                                          "y_train lng" : onehot_train[:,1],
+                                          "y_val   lng" : onehot_val[:,1],
+                                          "y_test  lng" : onehot_test[:,1]},
                                          sigfigs=1)
         
     # change dtype of onehot
