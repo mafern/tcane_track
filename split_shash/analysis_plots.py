@@ -38,61 +38,9 @@ def adjust_spines(ax, spines):
     else:
             ax.xaxis.set_ticks([])  
 
-def plot_sample(ax, onehot_val, shash_incs, shash_cpd, bnn_cpd, sample=130):
-    plt.sca(ax)  
-
-    if(shash_cpd.shape[0]<sample):
-        sample = shash_cpd.shape[0]-1
-    
-    bins = np.arange(np.min(shash_incs),np.max(shash_incs)+2,2)
-
-    # results for SHASH
-    plt.plot(shash_incs,
-             shash_cpd[sample,:],
-             color=clr_shash,
-             linewidth=4,
-             label='SHASH',
-            )
-
-    # results for BNN
-    if bnn_cpd is not None:
-        plt.hist(bnn_cpd[sample,:],
-                 bins=bins,
-                 histtype=u'step',
-                 density=True, 
-                 color=clr_bnn,
-                 linewidth=2,
-                 label='BNN',
-                )
-
-    # truth
-    plt.axvline(x=onehot_val[sample,0],color=clr_truth,linestyle='--')
-    plt.text(x=onehot_val[sample,0]+1, 
-             y = .09, 
-             s = 'truth', 
-             color=clr_truth,
-             fontsize=12,
-             horizontalalignment='left',
-            )
-    plt.legend()
-    
-    plt.ylim(0,0.1)
-    plt.xlim(-45,45)
-
-    ax = plt.gca()
-    xticks = ax.get_xticks()
-    yticks = np.around(ax.get_yticks(),2)
-    ax.set_xticks(xticks.astype(int),xticks.astype(int))
-    ax.set_yticks(yticks,yticks)
-
-    plt.title('validation sample ' + str(sample))
-    plt.xlabel('predicted deviation from consensus (knots)')
-    plt.ylabel('probability density function')    
-
     
     
-    
-def plot_pits(ax, x_val, onehot_val, model_shash, shash_cpd, bnn_cpd):
+def plot_pits(ax, x_val, onehot_val, model_shash, shash_cpd):
     plt.sca(ax)      
     
     # shash pit
@@ -112,22 +60,6 @@ def plot_pits(ax, x_val, onehot_val, model_shash, shash_cpd, bnn_cpd):
              label='SHASH',
             )
     
-    # bnn pit    
-    if bnn_cpd is not None:
-        bins, hist_bnn, D_bnn, EDp_bnn = model_diagnostics.compute_pit('bnn',onehot_val, bnn_cpd)
-        plt.bar(hist_bnn[1][:-1]+3*bins_inc/6+bins_inc/6,
-                 hist_bnn[0],
-                 width=bins_inc/3,
-                 color=clr_bnn,
-                 label='BNN',
-                )
-        plt.text(0.,np.max(yticks)*.94,
-                 'BNN ~~~~D: ' + str(np.round(D_bnn,4)) + ' (' + str(np.round(EDp_bnn,3)) +  ')', 
-                 color=clr_bnn,
-                 verticalalignment='top',             
-                 fontsize=12)
-        
-
     # make the figure pretty
     plt.axhline(y=.1, 
                 linestyle='--',
@@ -152,85 +84,4 @@ def plot_pits(ax, x_val, onehot_val, model_shash, shash_cpd, bnn_cpd):
     plt.legend(loc=1)
     plt.title('PIT histogram comparison', fontsize=FS, color='k')
     
-def plot_medians(ax, onehot_val, shash_cpd, bnn_cpd, shash_med):
-    plt.sca(ax)
     
-    bnn_med = np.median(bnn_cpd,axis=1)
-    shash_error = np.mean(np.abs(shash_med - onehot_val[:,0]))
-    bnn_error = np.mean(np.abs(bnn_med - onehot_val[:,0]))
-
-    plt.plot(shash_med,
-             bnn_med,
-             linestyle='None',
-             marker='.',
-             color='dimgray',
-             markerfacecolor='violet',
-             markersize=7,
-             markeredgewidth=.5,
-            )
-
-    plt.xlabel('SHASH median')
-    plt.ylabel('BNN median')
-
-    plt.plot((-100,100),(-100,100),'--',color='dimgray', linewidth=1.)
-    plt.axis('scaled')
-    plt.xlim(-25,25)
-    plt.ylim(-25,25)
-
-    ax = plt.gca()
-    xticks = ax.get_xticks()
-    yticks = ax.get_yticks()
-    plt.xticks(xticks.astype(int),xticks.astype(int))
-    plt.yticks(yticks.astype(int),yticks.astype(int))
-
-    plt.text(-29,27,
-             'SHASH mean $|$error$|$: ' + str(np.round(shash_error,2)), 
-             color='dimgray',         
-             fontsize=12)
-    plt.text(-29,24,
-             'BNN ~~~~mean $|$error$|$: ' + str(np.round(bnn_error,2)), 
-             color='dimgray',
-             fontsize=12)
-
-    plt.title('Median vs Median')    
-    
-def plot_nlls(ax, x_val, onehot_val, model_shash, shash_cpd, bnn_cpd):
-    plt.sca(ax)
-    
-    shash_nloglike = model_diagnostics.compute_nll('shash', onehot_val, model_shash=model_shash, x_val=x_val)
-    bnn_nloglike   = model_diagnostics.compute_nll('bnn', onehot_val, bnn_cpd=bnn_cpd)
-    plt.plot(shash_nloglike.numpy(),
-             bnn_nloglike,
-             linestyle='None',
-             marker='.',
-             color='dimgray',
-             markerfacecolor='violet',
-             markersize=7,
-             markeredgewidth=.5,
-            )
-
-    plt.xlabel('SHASH negative log-likelihood')
-    plt.ylabel('BNN negative log-likelihood')
-
-    plt.plot((-100,100),(-100,100),'--',color='dimgray', linewidth=1.)
-    plt.axis('scaled')
-    plt.xlim(2,11)
-    plt.ylim(2,11)
-
-    ax = plt.gca()
-    xticks = ax.get_xticks()
-    yticks = ax.get_yticks()
-    plt.xticks(xticks.astype(int),xticks.astype(int))
-    plt.yticks(yticks.astype(int),yticks.astype(int))
-
-    plt.text(2.1,10.6,
-             'SHASH mean NLL: ' + str(np.round(np.nanmean(shash_nloglike.numpy()),3)), 
-             color='dimgray',         
-             fontsize=12)
-    plt.text(2.1,10.2,
-             'BNN ~~~~mean NLL: ' + str(np.round(np.nanmean(bnn_nloglike),3)),
-             color='dimgray',
-             fontsize=12)
-
-    plt.title('NLL Comparison')    
-        

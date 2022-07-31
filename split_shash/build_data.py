@@ -12,6 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import copy
 
+import sys
+sys.path.append('../')
 import toolbox
 
 
@@ -80,16 +82,8 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     """
     # Setup for the selected target.
-    if settings["target"] == "intensity":
-        x_names = [
-            "NCI","VMAX0",
-            "DSDV", "LGDV", "HWDV", "AVDV",
-            "VMXC", "DV12", "SLAT", "SSTN", "SHDC", "DTL",
-        ]
-        y_name = ["OBDV"]
-        missing = None
 
-    elif settings["target"] == "longitude":
+    if settings["target"] == "longitude":
         x_names = [
             "NCT","VMAX0",
             "AVDX", "EMDX", "EGDX", "HWDX",
@@ -107,18 +101,6 @@ def build_hurricane_data(data_path, settings, verbose=0):
             "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
         ]
         y_name = ["OBDY"]
-        missing = -9999
-
-    elif settings["target"] == "radial":
-        x_names = [
-            "NCT",
-            "AVDX", "EMDX", "EGDX", "HWDX",
-            "AVDY", "EMDY", "EGDY", "HWDY",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SHDC", "SSTN", "DTL",
-            "DSDV", "LGDV", "HWDV", "AVDV",
-        ]
-        y_name = ["OBDR"]
         missing = -9999
 
     else:
@@ -148,46 +130,6 @@ def build_hurricane_data(data_path, settings, verbose=0):
     # Get the testing data
     if settings["test_condition"] is None:
         pass
-    elif settings["test_condition"] == "cluster":
-        
-        from scipy.cluster.vq import kmeans,vq
-        numclust = 6
-        
-        data = np.copy(df[x_names].to_numpy())
-        data_mean = np.mean(data,axis=0)
-        data_std  = np.std(data,axis=0)
-        data = (data - data_mean)/data_std
-
-        clusters, dist = kmeans(data, numclust, iter=500, seed=settings["rng_seed"])
-        cluster_label, _ = vq(data,clusters)
-        class_freq = np.bincount(cluster_label)
-        cluster_out = np.argmin(class_freq)
-
-        index = np.where(cluster_label == cluster_out)[0]
-        df_test = df.iloc[index]
-        x_test = df_test[x_names].to_numpy()
-        y_test = np.squeeze(df_test[y_name].to_numpy())
-        df_test = df_test.reset_index(drop=True)
-        
-        df = df.drop(index)
-        df = df.reset_index(drop=True)
-        
-        if verbose != 0:
-            fig, axs = plt.subplots(1,2, figsize=(15,5))
-            plt.sca(axs[0])
-            plt.hist(cluster_label,np.arange(-.5,numclust+.5,1.), width=.98)
-            plt.title('Sample Count by Cluster')
-            plt.ylabel('number of samples')
-            plt.xlabel('cluster')
-            plt.xticks((0,1,2,3))
-            plt.sca(axs[1])
-            for ic in np.arange(0,numclust):
-                plt.plot(x_names,clusters[ic,:], label='cluster ' + str(ic),linewidth=2)
-            plt.legend()
-            plt.title('Cluster Centroid')
-            plt.ylabel('standardized units')
-            plt.xlabel('predictor')
-            plt.show() 
     else:
         years = settings["years_test"]
         if verbose != 0:
@@ -243,11 +185,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     # remaining columns are zero -- i.e. dummy columns.  These dummy columns
     # are required by tensorflow; the number of columns must equal the number
     # of distribution parameters.
-    if settings["uncertainty_type"] in ("bnn","mcdrop","reg"):
-        n_parameters = 1
-    elif "bnnshash" in settings["uncertainty_type"]:
-        n_parameters = 1    
-    elif "shash2" in settings["uncertainty_type"]:
+    if "shash2" in settings["uncertainty_type"]:
         n_parameters = 2
     elif "shash3" in settings["uncertainty_type"]:
         n_parameters = 3
