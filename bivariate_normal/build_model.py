@@ -7,24 +7,22 @@ Exponentiate(keras.layers.Layer)
 Functions
 ---------
 make_model(settings, x_train, onehot_train, model_compile)
-build_shash_model(hiddens, input_shape, output_shape, ridge_penalty, act_fun, rng_seed)
-build_bnn_model(hiddens, input_shape, output_shape, ridge_penalty, act_fun, rng_seed)
-build_bnnshash_model(hiddens, input_shape, output_shape, ridge_penalty, act_fun, rng_seed)
+build_bivariate_normal_model(hiddens, input_shape, output_shape, ridge_penalty, act_fun, rng_seed)
 
 """
 import numpy as np
 
 import tensorflow as tf
-from tensorflow.keras import regularizers
 from tensorflow import keras
+from tensorflow.keras import regularizers
+from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
-from distributions import shash2_dist, shash3_dist, shash4_dist, normal_dist
 from custom_loss import compute_shash_NLL, compute_NLL
 from custom_metrics import CustomMAE, InterquartileCapture, SignTest
-from tensorflow.keras import optimizers
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "21 January 2022"
+__version__ = "01 August 2022"
+
 
 class Exponentiate(keras.layers.Layer):
     """Custom layer to exp the sigma and tau estimates inline."""
@@ -37,42 +35,43 @@ class Exponentiate(keras.layers.Layer):
 
 
 def make_model(settings, x_train, onehot_train, model_compile=False):
+    model = build_bivariate_normal_model(
+        x_train,
+        onehot_train,
+        hiddens=settings["hiddens"],
+        output_shape=onehot_train.shape[1],
+        ridge_penalty=settings["ridge_param"],
+        act_fun=settings["act_fun"],
+        rng_seed=settings["rng_seed"],
+    )
 
-    if settings["uncertainty_type"][:5] == "shash":   
-        model = build_shash_model(
-            x_train,
-            onehot_train,
-            hiddens=settings["hiddens"],
-            output_shape=onehot_train.shape[1],
-            ridge_penalty=settings["ridge_param"],
-            act_fun=settings["act_fun"],
-            dropout_rate=settings["dropout_rate"],
-            rng_seed=settings["rng_seed"],                    
+    if model_compile == True:
+        model.compile(
+            optimizer=optimizers.Adam(
+                learning_rate=settings["learning_rate"],
+            ),
+            loss=compute_shash_NLL,
+            metrics=[
+                CustomMAE(name="custom_mae"),
+                InterquartileCapture(name="interquartile_capture"),
+                SignTest(name="sign_test"),
+            ],
         )
 
-        if model_compile == True:        
-            model.compile(
-                optimizer=optimizers.Adam(
-                    learning_rate=settings["learning_rate"],
-                ),
-                loss=compute_shash_NLL,
-                metrics=[
-                    CustomMAE(name="custom_mae"),
-                    InterquartileCapture(name="interquartile_capture"),
-                    SignTest(name="sign_test"),
-                ],
-            )
-    else:
-        raise NotImplementedError
-    
     return model
-    
-    
-    
-def build_shash_model(
-    x_train, onehot_train, hiddens, output_shape, ridge_penalty=[0.0,], act_fun="relu", rng_seed=999, dropout_rate=[0.0,],
+
+
+def build_bivariate_normal_model(
+    x_train,
+    onehot_train,
+    hiddens,
+    ridge_penalty=[
+        0.0,
+    ],
+    act_fun="relu",
+    rng_seed=999,
 ):
-    """Build the fully-connected shash network architecture with
+    """Build the fully-connected bivariate normal network architecture with
     internal scaling.
 
     Arguments
@@ -90,9 +89,6 @@ def build_shash_model(
     hiddens : list (integers)
         Numeric list containing the number of neurons for each layer.
 
-    output_shape : integer {2, 3, 4}
-        The number of distribution output parameters to be learned.
-
     ridge_penalty : float, default=0.0
         The L2 regularization penalty for the first layer.
 
@@ -105,43 +101,47 @@ def build_shash_model(
 
     Notes
     -----
-    * The number of output units is determined by the output_shape argument.
-        If output_shape is:
-        2 -> output_layer = [mu_unit, sigma_unit]
-        3 -> output_layer = [mu_unit, sigma_unit, gamma_unit]
-        4 -> output_layer = [mu_unit, sigma_unit, gamma_unit, tau_unit]
-
-    * Unlike most of EAB's models, the features are normalized within the
-        network.  That is, the x_train, y_train, ... y_test should not be
-        externally normalized or scaled.
-
-    * In essence, the network is learning the shash parameters for the
-        normalized y values. Say mu_z and sigma_z where
-
-            z = (y - y_avg)/y_std
-
-        The mu_unit and sigma_unit layers rescale the learned mu_z
-        and sigma_z parameters back to the dimensions of the y values.
-        Specifically,
-
-            mu_y    = y_std * mu_z + y_avg
-            sigma_y = y_std * sigma_z
-
-        However, since the model works with log(sigma) we must use
-
-            log(sigma_y) = log(y_std * sigma_z) = log(y_std) + log(sigma_z)
-
-    * Note the gamma and tau parameters of the shash distribution are
-        dimensionless by definition. So we do not need to rescale gamma
-        and tau.
-
+    * The first layer of the network model normalizes the x input
+        values automatically. We must normalize the y target values
+        manually.
+        
+    * We have two target variates in this model: OBDX and OBDY. There
+        are too many x's and y's wandering through our notation to keep
+        everything straight.  To clarify this mess, we define 
+        
+            u = OBDX, with statistics u_avg and u_std
+            v = OBDY, with statistics v_avg and v_std
+        
+        Then we define the normalized versions as
+        
+            U = (u - u_avg)/u_std
+            V = (v - v_avg)/v_std
+        
+    * The conditional bivariate normal distribution has five parameters:
+    
+            ev_u, ev_v, cov_uu, cov_vv, and cov_uv.
+        
+    * The network predicts the parameters of the normalized variates:
+    
+            ev_U, ev_V, log(cov_UU), log(cov_VV), and cov_UV.
+        
+        The "log" terms are necessary to guarantee positive variances.
+        
+    * To recover the parameters of the conditional bivariate normal 
+        distribution we use:
+        
+            ev_u = ev_U * u_std + u_avg
+            ev_v = ev_V * v_std + v_avg
+        
+            cov_uu = exp(log(cov_UU)) * u_std * u_std
+            cov_vv = exp(log(cov_VV)) * v_std * v_std
+            cov_uv = cov_UV * u_std * v_std
+    
     """
     # set inputs
     if len(hiddens) != len(ridge_penalty):
-        ridge_penalty = np.ones(np.shape(hiddens))*ridge_penalty
-    if len(hiddens) != len(dropout_rate):
-        dropout_rate = np.ones((len(hiddens)+1,))*dropout_rate
-    
+        ridge_penalty = np.ones(np.shape(hiddens)) * ridge_penalty
+
     # The avg and std for feature normalization are computed from x_train.
     # Using the .adapt method, these are set once and do not change, but
     # the constants travel with the model.
@@ -150,142 +150,125 @@ def build_shash_model(
     normalizer = tf.keras.layers.Normalization()
     normalizer.adapt(x_train)
     x = normalizer(inputs)
-    
-    x = tf.keras.layers.Dropout(
-        rate=dropout_rate[0],
-        seed=rng_seed,            
-    )(x)        
 
-    # linear network only
-    if hiddens[0] == 0:
+    # Initialize the hidden layers.
+    for ilayer, layer_size in enumerate(hiddens):
         x = tf.keras.layers.Dense(
-            units=1,
-            activation="linear",
-            use_bias=True,
-            kernel_regularizer=regularizers.l1_l2(l1=0.00, l2=ridge_penalty[0]),
-            bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+0),
-            kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+0),
-        )(x)
-    else:
-        # Initialize the first hidden layer.
-        x = tf.keras.layers.Dense(
-            units=hiddens[0],
+            units=layer_size,
             activation=act_fun,
             use_bias=True,
-            kernel_regularizer=regularizers.l1_l2(l1=0.00, l2=ridge_penalty[0]),
-            bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+0),
-            kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+0),
+            kernel_regularizer=regularizers.l1_l2(
+                l1=0.00, l2=ridge_penalty[ilayer]
+            ),
+            bias_initializer=tf.keras.initializers.RandomNormal(
+                seed=rng_seed + ilayer
+            ),
+            kernel_initializer=tf.keras.initializers.RandomNormal(
+                seed=rng_seed + ilayer
+            ),
         )(x)
 
-        # Initialize the subsequent hidden layers.
-        for ilayer, layer_size in enumerate(hiddens[1:]):
-            
-            x = tf.keras.layers.Dropout(
-                rate=dropout_rate[ilayer+1],
-                seed=rng_seed,            
-            )(x)            
-            
-            x = tf.keras.layers.Dense(
-                units=layer_size,
-                activation=act_fun,
-                use_bias=True,
-                kernel_regularizer=regularizers.l1_l2(l1=0.00, l2=ridge_penalty[ilayer+1]),
-                bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+ilayer+1),
-                kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+ilayer+1),
-            )(x)
-            
-    # final dropout prior to output layer
-    x = tf.keras.layers.Dropout(
-        rate=dropout_rate[-1],
-        seed=rng_seed,            
-    )(x) 
-            
-    # Compute the mean and standard deviation of the y_train data to rescale
-    # the mu and sigma parameters.
-    y_avg = np.mean(onehot_train[:, 0])
-    y_std = np.std(onehot_train[:, 0])
+    # Compute the mean and standard deviation of the training target 
+    # data. These are used to normalize the data and then to rescale
+    # the parameters.
+    u_avg = np.mean(onehot_train[:, 0])
+    u_std = np.std(onehot_train[:, 0])
 
-    # mu_unit.  The network predicts the scaled mu_z, then the resclaing
-    # layer scales it up to mu_y.
-    mu_z_unit = tf.keras.layers.Dense(
+    v_avg = np.mean(onehot_train[:, 1])
+    v_std = np.std(onehot_train[:, 1])
+
+    # Units to predict the conditional expect value of u.
+    ev_U_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
-        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+100),
-        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed+100),
-        name="mu_z_unit",
+        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
+        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
+        name="ev_U_unit",
     )(x)
 
-    mu_unit = tf.keras.layers.Rescaling(
-        scale=y_std,
-        offset=y_avg,
-        name="mu_unit",
-    )(mu_z_unit)
+    ev_u_unit = tf.keras.layers.Rescaling(
+        scale=u_std,
+        offset=u_avg,
+        name="ev_u_unit",
+    )(ev_U_unit)
 
-    # sigma_unit. The network predicts the log of the scaled sigma_z, then
-    # the resclaing layer scales it up to log of sigma y, and the custom
-    # Exponentiate layer converts it to sigma_y.
-    log_sigma_z_unit = tf.keras.layers.Dense(
+    # Units to predict the conditional expect value of v.    
+    ev_V_unit = tf.keras.layers.Dense(
+        units=1,
+        activation="linear",
+        use_bias=True,
+        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
+        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
+        name="ev_V_unit",
+    )(x)
+
+    ev_v_unit = tf.keras.layers.Rescaling(
+        scale=v_std,
+        offset=v_avg,
+        name="ev_v_unit",
+    )(ev_V_unit)
+    
+    # Units to predict the conditional variance of u.
+    log_cov_UU_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="log_sigma_z_unit",
+        name="log_cov_UU_unit",
     )(x)
 
-    log_sigma_unit = tf.keras.layers.Rescaling(
-        scale=1.0,
-        offset=np.log(y_std),
-        name="log_sigma_unit",
-    )(log_sigma_z_unit)
+    cov_UU_unit = Exponentiate(
+        name="cov_UU_unit",
+    )(log_cov_UU_unit)
+    
+    cov_uu_unit = tf.keras.layers.Rescaling(
+        scale=std_u*std_u,
+        offset=0.0,
+        name="cov_uu_unit",
+    )(cov_UU_unit)
 
-    sigma_unit = Exponentiate(
-        name="sigma_unit",
-    )(log_sigma_unit)
+    # Units to predict the conditional variance of v.
+    log_cov_VV_unit = tf.keras.layers.Dense(
+        units=1,
+        activation="linear",
+        use_bias=True,
+        bias_initializer=tf.keras.initializers.Zeros(),
+        kernel_initializer=tf.keras.initializers.Zeros(),
+        name="log_cov_VV_unit",
+    )(x)
 
-    # Add gamma and tau units if requested.
-    if output_shape == 2:
-        output_layer = tf.keras.layers.concatenate([mu_unit, sigma_unit], axis=1)
+    cov_VV_unit = Exponentiate(
+        name="cov_VV_unit",
+    )(log_cov_VV_unit)
+    
+    cov_vv_unit = tf.keras.layers.Rescaling(
+        scale=std_v*std_v,
+        offset=0.0,
+        name="cov_vv_unit",
+    )(cov_VV_unit)
+    
+    # Units to predict the conditional covariance of u and v.
+    cov_UV_unit = tf.keras.layers.Dense(
+        units=1,
+        activation="linear",
+        use_bias=True,
+        bias_initializer=tf.keras.initializers.Zeros(),
+        kernel_initializer=tf.keras.initializers.Zeros(),
+        name="cov_UV_unit",
+    )(x)
+   
+    cov_uv_unit = tf.keras.layers.Rescaling(
+        scale=std_u*std_v,
+        offset=0.0,
+        name="cov_uv_unit",
+    )(cov_UV_unit)
 
-    else:
-        # gamma_unit. The network predicts the gamma directly.
-        gamma_unit = tf.keras.layers.Dense(
-            units=1,
-            activation="linear",
-            use_bias=True,
-            bias_initializer=tf.keras.initializers.Zeros(),
-            kernel_initializer=tf.keras.initializers.Zeros(),
-            name="gamma_unit",
-        )(x)
-
-        if output_shape == 3:
-            output_layer = tf.keras.layers.concatenate(
-                [mu_unit, sigma_unit, gamma_unit], axis=1
-            )
-
-        else:
-            # tau_unit. The network predicts the log of the tau, then
-            # the custom Exponentiate layer converts it to tau.
-            log_tau_unit = tf.keras.layers.Dense(
-                units=1,
-                activation="linear",
-                use_bias=True,
-                bias_initializer=tf.keras.initializers.Zeros(),
-                kernel_initializer=tf.keras.initializers.Zeros(),
-                name="log_tau_unit",
-            )(x)
-
-            tau_unit = Exponentiate(
-                name="tau_unit",
-            )(log_tau_unit)
-
-            if output_shape == 4:
-                output_layer = tf.keras.layers.concatenate(
-                    [mu_unit, sigma_unit, gamma_unit, tau_unit], axis=1
-                )
-            else:
-                raise NotImplementedError
+    
+    output_layer = tf.keras.layers.concatenate(
+        [ev_u_unit, ev_v_unit, cov_uu_unit, cov_vv_unit, cov_uv_unit], axis=1
+    )
 
     model = tf.keras.models.Model(inputs=inputs, outputs=output_layer)
     return model

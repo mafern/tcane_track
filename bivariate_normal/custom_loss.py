@@ -3,32 +3,32 @@
 
 Functions
 ---------
-compute_bnnshash_NLL(y,distr)
-compute_NLL(y,distr)
+compute_NLL(y_true, param)
 
 """
 import tensorflow as tf
-import shash_tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "27 May 2022"
-
-def compute_NLL(y, distr): 
-    return -distr.log_prob(y) 
+__version__ = "01 August 2022"
 
 
-def compute_shash_NLL(y_true, pred):
-    """Negative log-likelihood loss using the sinh-arcsinh normal distribution.
+def compute_NLL(y_true, param):
+    """Negative log-likelihood loss using the bivariate normal distribution.
 
     Arguments
     ---------
     y_true : tensor
-        The ground truth values.
-        shape = [batch_size, n_parameter]
+        The ground truth values.  The first column holds ODBX, the second 
+        column holds ODBY. The remaining three columns are filled with zeros.
+        shape = [batch_size, 5]
 
-    pred :
-        The predicted local conditionsal distribution parameter values.
-        shape = [batch_size, n_parameters]
+    param :
+        The predicted local conditional distribution parameters:
+        
+            ev_u, ev_v, cov_uu, cov_vv, cov_uv
+            
+        where u = OBDX, and v = OBDy.
+        shape = [batch_size, 5]
 
     Returns
     -------
@@ -38,32 +38,14 @@ def compute_shash_NLL(y_true, pred):
 
     Notes
     -----
-    * The value of n_parameters depends on the chosen form of the conditional
-        sinh-arcsinh normal distribution.
-            shash2 -> n_parameter = 2, i.e. mu, sigma
-            shash3 -> n_parameter = 3, i.e. mu, sigma, gamma
-            shash4 -> n_parameter = 4, i.e. mu, sigma, gamma, tau
-
-    * Since sigma and tau must be strictly positive, the network learns the
-        log of these two parameters.
-
-    * If gamma is not learned (i.e. shash2), they are set to 0.
-
-    * If tau is not learned (i.e. shash2 or shash3), they are set to 1.
 
     """
-    mu = pred[:, 0]
-    sigma = pred[:, 1]
+    ev_u = param[:, 0]
+    ev_v = param[:, 1]
 
-    if pred.shape[1] >= 3:
-        gamma = pred[:, 2]
-    else:
-        gamma = tf.zeros_like(mu)
-
-    if pred.shape[1] >= 4:
-        tau = pred[:, 3]
-    else:
-        tau = tf.ones_like(mu)
+    cov_uu = param[:, 2]
+    cov_vv = param[:, 3]
+    cov_uv = param[:, 4]
 
     dist = shash_tfp.Shash(mu, sigma, gamma, tau)
     loss = -dist.log_prob(y_true[:, 0])

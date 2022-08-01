@@ -51,7 +51,7 @@
     * Nested Grid point (13.5-4.5-1.5km)
 
 #### Difference (north-south) between the model predicted track and the track model consensus.
-* __OBDY__ : north-south difference [km] of the observed storm position minus that of the track model consensus. _This is what we are trying to predict for the east-west displacement._
+* __OBDY__ : north-south difference [km] of the observed storm position minus that of the track model consensus. _This is what we are trying to predict for the north-south displacement._
 * __AVDY__ : GFS Global Forecast System (FV3-GFS) [km]
     * Finite Volume Cube Sphere (~13km)
 * __EMDY__ : ECMWF European Centre for Medium-Range Weather Forecasts [km]
