@@ -40,12 +40,12 @@ def compute_NLL(y_true, param):
     -----
 
     """
-    ev_u = param[:, 0]
-    ev_v = param[:, 1]
+    mu_u = param[:, 0]
+    mu_v = param[:, 1]
 
-    cov_uu = param[:, 2]
-    cov_vv = param[:, 3]
-    cov_uv = param[:, 4]
+    sigma_u = param[:, 2]
+    sigma_v = param[:, 3]
+    rho = param[:, 4]
 
     dist = shash_tfp.Shash(mu, sigma, gamma, tau)
     loss = -dist.log_prob(y_true[:, 0])

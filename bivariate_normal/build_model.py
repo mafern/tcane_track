@@ -17,21 +17,33 @@ from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
-from custom_loss import compute_shash_NLL, compute_NLL
-from custom_metrics import CustomMAE, InterquartileCapture, SignTest
+from custom_loss import compute_NLL
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "01 August 2022"
+__version__ = "03 August 2022"
 
 
-class Exponentiate(keras.layers.Layer):
-    """Custom layer to exp the sigma and tau estimates inline."""
+class Softplus(keras.layers.Layer):
+    """Custom layer to softplus the alpha -> sigma_U and beta -> sigma_V 
+    estimates inline."""
 
     def __init__(self, **kwargs):
-        super(Exponentiate, self).__init__(**kwargs)
+        super(Softplus, self).__init__(**kwargs)
+        self.softplus = tfp.bijectors.Softplus()
 
     def call(self, inputs):
-        return tf.math.exp(inputs)
+        return self.softplus.forward(inputs)
+
+    
+class Sigmoid(keras.layers.Layer):
+    """Custom layer to sigmoid the gamma -> rho estimates inline."""
+
+    def __init__(self, **kwargs):
+        super(Sigmoid, self).__init__(**kwargs)
+        self.sigmoid = tfp.bijectors.Sigmoid(low=-1.0, high=1.0)
+
+    def call(self, inputs):
+        return self.sigmoid.forward(inputs)
 
 
 def make_model(settings, x_train, onehot_train, model_compile=False):
@@ -39,7 +51,6 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
         x_train,
         onehot_train,
         hiddens=settings["hiddens"],
-        output_shape=onehot_train.shape[1],
         ridge_penalty=settings["ridge_param"],
         act_fun=settings["act_fun"],
         rng_seed=settings["rng_seed"],
@@ -50,12 +61,7 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
             optimizer=optimizers.Adam(
                 learning_rate=settings["learning_rate"],
             ),
-            loss=compute_shash_NLL,
-            metrics=[
-                CustomMAE(name="custom_mae"),
-                InterquartileCapture(name="interquartile_capture"),
-                SignTest(name="sign_test"),
-            ],
+            loss=compute_NLL,
         )
 
     return model
@@ -101,42 +107,113 @@ def build_bivariate_normal_model(
 
     Notes
     -----
+    * We have two target variates in this model: OBDX and OBDY. To simplfy
+        this discussion, we introduce the following notation.
+        
+            u = OBDX
+            v = OBDY
+            
+        We model u and v as realizations of bivariate normal random variates.
+    
+    * The conditional bivariate normal distribution is most commonly defined
+        by five parameters: two means, two standard deviations, and a 
+        correlation. We denote these by
+    
+            mu_u, mu_v, sigma_u, sigma_v, and rho,
+
+        where mu_u and mu_v are unconstrained, but sigma_u > 0, sigma_v > 0, 
+        and -1 < rho < 1. 
+        
+        The conditional mean vector is given by
+        
+            [ mu_u ]
+            [ mu_v ]
+
+        and the conditional variance/covariance matrix is given by
+    
+            [ sigma_u^2,           rho*sigma_u*sigma_v ]
+            [ rho*sigma_u*sigma_v, sigma_v^2           ]
+    
     * The first layer of the network model normalizes the x input
-        values automatically. We must normalize the y target values
-        manually.
+        values automatically using a TensorFlow adaptive normalizer
         
-    * We have two target variates in this model: OBDX and OBDY. There
-        are too many x's and y's wandering through our notation to keep
-        everything straight.  To clarify this mess, we define 
+             tf.keras.layers.Normalization()
+             
+        This means that the network inputs are the physical dimensioned
+        values, and the internal normalizing constants travel with
+        the model.
         
-            u = OBDX, with statistics u_avg and u_std
-            v = OBDY, with statistics v_avg and v_std
+    * We do not explicitly normalize the two target variates. Rather,
+        we implicitly normalize the target variates by scaling the
+        network output as follows. 
         
-        Then we define the normalized versions as
+        We compute the averages and standard deviations for u and v 
+        of the training data. We denote these
+    
+            u => u_avg and u_std
+            v => v_avg and v_std
+        
+        Then we define, but do not explicitly compute, the normalized 
+        versions of u and v as
         
             U = (u - u_avg)/u_std
             V = (v - v_avg)/v_std
         
-    * The conditional bivariate normal distribution has five parameters:
+        Since U and V are simple affine (linear) transformations of u 
+        and v, U and V also follow a bivariate normal distribution.
+        
+        Internally, the network predicts the five parameters of the 
+        conditional bivariate normal distribution of U and V:
+        
+            mu_U, mu_V, sigma_U, sigma_V, and rho.
+            
+        We then rescale these parameters in the output layer using
+        tf.keras.layers.Rescaling layers; that is
+        
+            mu_u = mu_U * u_std + u_avg
+            mu_v = mu_V * v_std + v_avg
+        
+            sigma_u = sigma_U * u_std
+            sigma_v = sigma_V * v_std
+            
+        and rho is dimensionlees, so it does not need to be rescaled.
+        
+        The scaling parameters u_avg, u_std, v_avg, and v_std travel 
+        with the model as part of the output layer.
     
-            ev_u, ev_v, cov_uu, cov_vv, and cov_uv.
+    * The parameters of the conditional bivariate normal distribution
+        for U and V must also satisfy sigma_U > 0, sigma_V > 0, and 
+        -1 < rho < 1. We use standard TensorFLow tricks to guarantee 
+        that we meet these constraints.
         
-    * The network predicts the parameters of the normalized variates:
-    
-            ev_U, ev_V, log(cov_UU), log(cov_VV), and cov_UV.
+        We have the network predict five unconstrained outputs:
         
-        The "log" terms are necessary to guarantee positive variances.
+            mu_U, mu_V, alpha, beta, and gamma.
+            
+        We then compute sigma_U and sigma_V using 
         
-    * To recover the parameters of the conditional bivariate normal 
-        distribution we use:
+            tfp.bijectors.Softplus()
+            
+        that is
         
-            ev_u = ev_U * u_std + u_avg
-            ev_v = ev_V * v_std + v_avg
+            sigma_U = log(1 + exp(alpha))
+            sigma_V = log(1 + exp(beta))
+            
+        The Softplus maps {-infinity : infinity} onto {0 : infinity}.
+            
+        We compute rho using 
         
-            cov_uu = exp(log(cov_UU)) * u_std * u_std
-            cov_vv = exp(log(cov_VV)) * v_std * v_std
-            cov_uv = cov_UV * u_std * v_std
-    
+            tfp.bijectors.Sigmoid() 
+            
+        with high = 1 and low = -1; that is
+        
+            rho = 1 / (1 + exp(-gamma)) - 1 / (1 + exp(gamma))
+        
+        The Sigmoid maps {-infinity : infinity} onto {-1 : 1}.
+        
+        Note, we do not need to transform mu_U and mu_V since they are
+        unconstrained.
+        
     """
     # set inputs
     if len(hiddens) != len(ridge_penalty):
@@ -169,105 +246,103 @@ def build_bivariate_normal_model(
         )(x)
 
     # Compute the mean and standard deviation of the training target 
-    # data. These are used to normalize the data and then to rescale
-    # the parameters.
+    # data. These are used to implicitly normalize the target variates
+    # by rescaling the parameters. (See the notes above.)
     u_avg = np.mean(onehot_train[:, 0])
     u_std = np.std(onehot_train[:, 0])
 
     v_avg = np.mean(onehot_train[:, 1])
     v_std = np.std(onehot_train[:, 1])
-
+   
     # Units to predict the conditional expect value of u.
-    ev_U_unit = tf.keras.layers.Dense(
+    mu_U_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="ev_U_unit",
+        name="mu_U_unit",
     )(x)
 
-    ev_u_unit = tf.keras.layers.Rescaling(
+    mu_u_unit = tf.keras.layers.Rescaling(
         scale=u_std,
         offset=u_avg,
-        name="ev_u_unit",
-    )(ev_U_unit)
+        name="mu_u_unit",
+    )(mu_U_unit)
 
     # Units to predict the conditional expect value of v.    
-    ev_V_unit = tf.keras.layers.Dense(
+    mu_V_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="ev_V_unit",
+        name="mu_V_unit",
     )(x)
 
-    ev_v_unit = tf.keras.layers.Rescaling(
+    mu_v_unit = tf.keras.layers.Rescaling(
         scale=v_std,
         offset=v_avg,
-        name="ev_v_unit",
-    )(ev_V_unit)
+        name="mu_v_unit",
+    )(mu_V_unit)
     
-    # Units to predict the conditional variance of u.
-    log_cov_UU_unit = tf.keras.layers.Dense(
+    # Units to predict the conditional standard deviation of u.
+    alpha_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="log_cov_UU_unit",
+        name="alpha_unit",
     )(x)
 
-    cov_UU_unit = Exponentiate(
-        name="cov_UU_unit",
-    )(log_cov_UU_unit)
+    sigma_U_unit = Softplus(
+        name="sigma_U_unit",
+    )(alpha_unit)
     
-    cov_uu_unit = tf.keras.layers.Rescaling(
-        scale=std_u*std_u,
+    sigma_u_unit = tf.keras.layers.Rescaling(
+        scale=u_std,
         offset=0.0,
-        name="cov_uu_unit",
-    )(cov_UU_unit)
-
-    # Units to predict the conditional variance of v.
-    log_cov_VV_unit = tf.keras.layers.Dense(
+        name="sigma_u_unit",
+    )(sigma_U_unit)
+    
+    # Units to predict the conditional standard deviation of v.
+    beta_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="log_cov_VV_unit",
+        name="beta_unit",
     )(x)
 
-    cov_VV_unit = Exponentiate(
-        name="cov_VV_unit",
-    )(log_cov_VV_unit)
+    sigma_V_unit = Softplus(
+        name="sigma_V_unit",
+    )(beta_unit)
     
-    cov_vv_unit = tf.keras.layers.Rescaling(
-        scale=std_v*std_v,
+    sigma_v_unit = tf.keras.layers.Rescaling(
+        scale=v_std,
         offset=0.0,
-        name="cov_vv_unit",
-    )(cov_VV_unit)
+        name="sigma_v_unit",
+    )(sigma_V_unit)
     
-    # Units to predict the conditional covariance of u and v.
-    cov_UV_unit = tf.keras.layers.Dense(
+    # Units to predict the conditional correlation of u and v.
+    gamma_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="cov_UV_unit",
+        name="gamma_unit",
     )(x)
    
-    cov_uv_unit = tf.keras.layers.Rescaling(
-        scale=std_u*std_v,
-        offset=0.0,
-        name="cov_uv_unit",
-    )(cov_UV_unit)
+    rho_unit = Sigmoid(
+        name="rho_unit",
+    )(gamma_unit)
 
-    
+    # Stitch everythnig togeter.
     output_layer = tf.keras.layers.concatenate(
-        [ev_u_unit, ev_v_unit, cov_uu_unit, cov_vv_unit, cov_uv_unit], axis=1
+        [mu_u_unit, mu_v_unit, sigma_u_unit, sigma_v_unit, rho_unit], axis=1
     )
 
     model = tf.keras.models.Model(inputs=inputs, outputs=output_layer)
