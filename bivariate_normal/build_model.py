@@ -17,15 +17,15 @@ from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
-from custom_loss import compute_NLL
+from custom_loss import compute_bivariate_normal_NLL
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "03 August 2022"
+__version__ = "04 August 2022"
 
 
 class Softplus(keras.layers.Layer):
-    """Custom layer to softplus the alpha -> sigma_U and beta -> sigma_V 
-    estimates inline."""
+    """Custom layer to map the alpha {-inf : +inf} onto sigma_U {0 : +inf} 
+    and beta {-inf : inf} onto sigma_V {0 : +inf} inline."""
 
     def __init__(self, **kwargs):
         super(Softplus, self).__init__(**kwargs)
@@ -35,15 +35,15 @@ class Softplus(keras.layers.Layer):
         return self.softplus.forward(inputs)
 
     
-class Sigmoid(keras.layers.Layer):
-    """Custom layer to sigmoid the gamma -> rho estimates inline."""
+class Tanh(keras.layers.Layer):
+    """Custom layer to map the gamma {-inf : +inf} onto rho {-1 : +1} inline."""
 
     def __init__(self, **kwargs):
-        super(Sigmoid, self).__init__(**kwargs)
-        self.sigmoid = tfp.bijectors.Sigmoid(low=-1.0, high=1.0)
+        super(Tanh, self).__init__(**kwargs)
+        self.tanh = tfp.bijectors.Tanh()
 
     def call(self, inputs):
-        return self.sigmoid.forward(inputs)
+        return self.tanh.forward(inputs)
 
 
 def make_model(settings, x_train, onehot_train, model_compile=False):
@@ -61,7 +61,7 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
             optimizer=optimizers.Adam(
                 learning_rate=settings["learning_rate"],
             ),
-            loss=compute_NLL,
+            loss=compute_bivariate_normal_NLL,
         )
 
     return model
@@ -203,16 +203,12 @@ def build_bivariate_normal_model(
             
         We compute rho using 
         
-            tfp.bijectors.Sigmoid() 
+            tfp.bijectors.Tanh() 
             
-        with high = 1 and low = -1; that is
+        The Tanh bijector maps {-infinity : infinity} onto {-1 : 1}.
         
-            rho = 1 / (1 + exp(-gamma)) - 1 / (1 + exp(gamma))
-        
-        The Sigmoid maps {-infinity : infinity} onto {-1 : 1}.
-        
-        Note, we do not need to transform mu_U and mu_V since they are
-        unconstrained.
+        Note, mu_U and mu_V are unconstrained, so they do not require
+        special treatment.
         
     """
     # set inputs
@@ -336,11 +332,11 @@ def build_bivariate_normal_model(
         name="gamma_unit",
     )(x)
    
-    rho_unit = Sigmoid(
+    rho_unit = Tanh(
         name="rho_unit",
     )(gamma_unit)
 
-    # Stitch everythnig togeter.
+    # Stitch everything together.
     output_layer = tf.keras.layers.concatenate(
         [mu_u_unit, mu_v_unit, sigma_u_unit, sigma_v_unit, rho_unit], axis=1
     )
