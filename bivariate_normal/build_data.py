@@ -144,10 +144,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
         "SHDC",
         "SSTN",
         "DTL",
-        "DSDV",
-        "LGDV",
-        "HWDV",
-        "AVDV",
+        # "DSDV",
+        # "LGDV",
+        # "HWDV",
+        # "AVDV",
     ]
     y_names = ["OBDX", "OBDY"]
     missing = -9999
