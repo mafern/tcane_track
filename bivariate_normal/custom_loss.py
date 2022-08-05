@@ -9,7 +9,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "04 August 2022"
+__version__ = "05 August 2022"
 
 
 def compute_bivariate_normal_NLL(y_true, param):
@@ -72,21 +72,21 @@ def compute_bivariate_normal_NLL(y_true, param):
     * Since we are working with a bivariate normal distribution, the
         covariance matrix is only (2 x 2), and the analytic expressions
         are relatively simple.
-        
-        Let the lower triangular Cholesky decompsition matrix L be 
+
+        Let the lower triangular Cholesky decompsition matrix L be
         given by
-        
+
             [ c, 0 ]
             [ b, a ]
-            
+
         This naming convention is in keeping with the clockwise spiral
-        approach used by tfp.bijectors.FillTriangular.  The Cholesky 
-        decomposition is defined by 
-        
+        approach used by tfp.bijectors.FillTriangular.  The Cholesky
+        decomposition is defined by
+
             L * L' = covariance matrix
-            
+
         so we write
-        
+
             [ c, 0 ] [ c, b ] = [ c^2, cb        ]
             [ b, a ] [ 0, a ]   [ cb,  b^2 + a^2 ]
 
@@ -108,11 +108,14 @@ def compute_bivariate_normal_NLL(y_true, param):
     mvn = tfp.distributions.MultivariateNormalTriL(
         loc=param[:, 0:2],
         scale_tril=b.forward(
-            [
-                param[:, 3] * tf.math.sqrt(1.0 - tf.math.square(param[:, 4])),
-                param[:, 3] * param[:, 4],
-                param[:, 2],
-            ]
+            tf.stack(
+                (
+                    param[:, 3] * tf.math.sqrt(1.0 - tf.math.square(param[:, 4])),
+                    param[:, 3] * param[:, 4],
+                    param[:, 2],
+                ),
+                axis=1,
+            )
         ),
     )
 

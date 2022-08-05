@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from IPython.display import clear_output
-import shash_tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "30 October 2021"
+__version__ = "05 August 2022"
 
 
 class TrainingInstrumentation(tf.keras.callbacks.Callback):
@@ -17,8 +16,8 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
     includes only the real-time plot of the training and validation loss.
 
     If the x_data and onehot_data are given, the instrumentation panel also
-    includes the PIT histogram plot, and histogram plots for each of the
-    local conditional distribution parameters, updated in real time.
+    includes histogram plots for each of the local conditional distribution 
+    parameters, updated in real time.
 
     Parameters
     ----------
@@ -54,8 +53,9 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     Notes
     -----
-    * This Class is explcitly designed for the SHASH distribution, with
-        parameter names 'mu', 'sigma', 'gamma', and 'tau'.
+    * This Class is explcitly designed for the bivariate normal 
+        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u', 
+        'sigma_v', and 'rho'.
 
     """
 
@@ -101,49 +101,29 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
             if (self.x_data is not None) and (self.onehot_data is not None):
                 preds = self.model.predict(self.x_data)
 
-                if preds.shape[1] >= 1:
-                    mu = preds[:, 0]
-                    plt.subplot(3, 2, 3)
-                    plt.hist(mu, bins=30, color="#7fc97f", edgecolor="k")
-                    plt.legend(["mu"])
+                mu_u = preds[:, 0]
+                plt.subplot(3, 2, 3)
+                plt.hist(mu_u, bins=30, color="#7fc97f", edgecolor="k")
+                plt.legend(["mu_u"])
 
-                if preds.shape[1] >= 2:
-                    # sigma = tf.math.exp(preds[:, 1])
-                    sigma = preds[:, 1]
-                    plt.subplot(3, 2, 4)
-                    plt.hist(sigma, bins=30, color="#beaed4", edgecolor="k")
-                    plt.legend(["sigma"])
-                else:
-                    sigma = tf.zeros_like(mu)
+                mu_v = preds[:, 1]
+                plt.subplot(3, 2, 4)
+                plt.hist(mu_v, bins=30, color="#beaed4", edgecolor="k")
+                plt.legend(["mu_v"])
 
-                if preds.shape[1] >= 3:
-                    gamma = preds[:, 2]
-                    plt.subplot(3, 2, 5)
-                    plt.hist(gamma, bins=30, color="#fdc086", edgecolor="k")
-                    plt.legend(["gamma"])
-                else:
-                    gamma = tf.zeros_like(mu)
+                sigma_u = preds[:, 2]
+                plt.subplot(3, 2, 5)
+                plt.hist(sigma_u, bins=30, color="#fdc086", edgecolor="k")
+                plt.legend(["sigma_u"])
 
-                if preds.shape[1] >= 4:
-                    # tau = tf.math.exp(preds[:, 3])
-                    tau = preds[:, 3]
-                    plt.subplot(3, 2, 6)
-                    plt.hist(tau, bins=30, color="#ffff99", edgecolor="k")
-                    plt.legend(["tau"])
-                else:
-                    tau = tf.ones_like(mu)
-
-                dist = shash_tfp.Shash(mu, sigma, gamma, tau)
-                F = dist.cdf(self.onehot_data[:, 0])
+                sigma_v = preds[:, 3]
+                plt.subplot(3, 2, 6)
+                plt.hist(sigma_v, bins=30, color="#fdc086", edgecolor="k")
+                plt.legend(["sigma_v"])
                 
+                rho = preds[:, 4]
                 plt.subplot(3, 2, 2)
-                plt.hist(
-                    F.numpy(),
-                    bins=np.linspace(0, 1, 21),
-                    color="#386cb0",
-                    edgecolor="k",
-                )
-                plt.legend(["PIT"])
-                plt.axhline(y=F.shape[0] / 20, color="b", linestyle="--")
+                plt.hist(rho, bins=30, color="#ffff99", edgecolor="k")
+                plt.legend(["rho"])
 
             plt.show()

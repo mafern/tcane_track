@@ -9,12 +9,11 @@ import pprint
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import copy
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "01 August 2022"
+__version__ = "05 August 2022"
 
 
 def build_hurricane_data(data_path, settings, verbose=0):
@@ -270,17 +269,17 @@ def build_hurricane_data(data_path, settings, verbose=0):
     if verbose >= 2:
         toolbox.print_summary_statistics(
             {
-                "y_train (delta X [km])": onehot_train[:, 0],
-                "y_val   (delta X [km])": onehot_val[:, 0],
-                "y_test  (delta X [km])": onehot_test[:, 0],
+                "y_train (OBDX [km])": onehot_train[:, 0],
+                "y_val   (OBDX [km])": onehot_val[:, 0],
+                "y_test  (OBDX [km])": onehot_test[:, 0],
             },
             sigfigs=1,
         )
         toolbox.print_summary_statistics(
             {
-                "y_train (delta Y [km])": onehot_train[:, 1],
-                "y_val   (delta Y [km])": onehot_val[:, 1],
-                "y_test  (delta Y [km])": onehot_test[:, 1],
+                "y_train (OBDY [km])": onehot_train[:, 1],
+                "y_val   (OBDY [km])": onehot_val[:, 1],
+                "y_test  (OBDY [km])": onehot_test[:, 1],
             },
             sigfigs=1,
         )

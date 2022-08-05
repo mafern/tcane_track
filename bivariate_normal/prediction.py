@@ -10,11 +10,12 @@ import numpy as np
 import shash_tfp
 
 __author__ = "Elizabeth Barnes and Randal J Barnes"
-__version__ = "30 May 2022"
+__version__ = "05 August 2022"
 
 
 def params(x_inputs, model):
-    """Funtion to make shash parameter predictions for shash2, shash3, shash4
+    """Funtion to make parameter predictions for the bivariate 
+    normal distribution.
 
     Arguments
     ---------
@@ -30,17 +31,10 @@ def params(x_inputs, model):
 
     """
     y_pred = model.predict(x_inputs)
-    mu_pred = y_pred[:, 0]
+    y_pred[:, 0]
     sigma_pred = y_pred[:, 1]
 
-    gamma_pred = np.zeros(np.shape(y_pred[:, 0]),dtype='float32')
-    if np.shape(y_pred)[1] >= 3:
-        gamma_pred = y_pred[:, 2]
-
-    tau_pred = np.ones(np.shape(y_pred[:, 0]),dtype='float32')
-    if np.shape(y_pred)[1] >=4 :
-        tau_pred = y_pred[:, 3]
-
+    
     return mu_pred, sigma_pred, gamma_pred, tau_pred
 
 
