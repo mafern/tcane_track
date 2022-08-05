@@ -74,7 +74,7 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho):
         r = np.sqrt(-2.0*(np.log(1-p)))
         x = r*sigma_u * np.cos(THETA) + mu_u
         y = r*sigma_v*(rho*np.cos(THETA) + np.sqrt(1 - rho*rho)*np.sin(THETA)) + mu_v
-        plt.fill(x, y, COLOR[i]);
+        plt.fill(x, y, COLOR[i])
     plt.axis('equal')
 
     
