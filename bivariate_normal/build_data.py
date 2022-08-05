@@ -121,6 +121,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
     * No scaling or normalization is applied during data extraction.
 
     """
+    if settings["uncertainty_type"] != 'bivariate_normal':
+        raise NotImplementedError
+    
     # Setup for the selected target.
     x_names = [
         "NCT",
