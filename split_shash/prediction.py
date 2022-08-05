@@ -4,6 +4,7 @@ Functions
 ---------
 params
 percentile_value
+mean
 
 """
 import numpy as np
@@ -50,3 +51,10 @@ def percentile_value(mu_pred, sigma_pred, gamma_pred, tau_pred, percentile_frac=
     dist = shash_tfp.Shash(mu_pred, sigma_pred, gamma_pred, tau_pred)
     
     return dist.quantile(percentile_frac).numpy()
+
+def mean(mu_pred, sigma_pred, gamma_pred, tau_pred):
+    """Function to obtain percentile value of the shash distribution."""
+    
+    dist = shash_tfp.Shash(mu_pred, sigma_pred, gamma_pred, tau_pred)
+    
+    return dist.mean().numpy()
