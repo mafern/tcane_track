@@ -32,7 +32,7 @@ import numpy as np
 import palettable
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "06 August 2022"
 
 
 COLOR = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
