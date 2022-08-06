@@ -82,12 +82,14 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, label_u=0, label_v=0):
         plt.fill(x, y, color=COLOR[i])
     
     # plot consensus and true label
-    plt.plot(0,0,'.k',markersize=10)
+    plt.plot(0,0,'ok',markersize=5,markerfacecolor='None',label='Consensus')
     plt.plot(label_u,
              label_v,
              's',
              color='k',
-             markersize=12)
+             markersize=6,
+             label='BestTrack',
+            )
     
     plt.axis('equal')
     
