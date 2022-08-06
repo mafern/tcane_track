@@ -35,7 +35,7 @@ def get_settings(experiment_name):
             "val_condition": "random",
             "n_val": 200,
             "n_train": "max",
-            "input_variables": None,            
+            "x_names": None,            
         },
         "bivariate_normal_102_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
@@ -60,7 +60,7 @@ def get_settings(experiment_name):
             "val_condition": "random",
             "n_val": 200,
             "n_train": "max",
-            "input_variables": None,            
+            "x_names": None,            
         }, 
         "bivariate_normal_103_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
