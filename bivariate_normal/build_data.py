@@ -125,30 +125,34 @@ def build_hurricane_data(data_path, settings, verbose=0):
         raise NotImplementedError
     
     # Setup for the selected target.
-    x_names = [
-        "NCT",
-        "VMAX0",
-        "AVDX",
-        "EMDX",
-        "EGDX",
-        "HWDX",
-        "AVDY",
-        "EMDY",
-        "EGDY",
-        "HWDY",
-        "LONC",
-        "LATC",
-        "VMXC",
-        "DV12",
-        "SLAT",
-        "SHDC",
-        "SSTN",
-        "DTL",
-        # "DSDV",
-        # "LGDV",
-        # "HWDV",
-        # "AVDV",
-    ]
+    if settings["x_names"] is None:
+        x_names = [
+            "NCT",
+            "VMAX0",
+            "AVDX",
+            "EMDX",
+            "EGDX",
+            "HWDX",
+            "AVDY",
+            "EMDY",
+            "EGDY",
+            "HWDY",
+            "LONC",
+            "LATC",
+            "VMXC",
+            "DV12",
+            "SLAT",
+            "SHDC",
+            "SSTN",
+            "DTL",
+            # "DSDV",
+            # "LGDV",
+            # "HWDV",
+            # "AVDV",
+        ]        
+    else:
+        x_names = settings["x_names"]
+        
     y_names = ["OBDX", "OBDY"]
     missing = -9999
 
