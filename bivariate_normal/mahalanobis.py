@@ -101,17 +101,17 @@ def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
 
     Notes
     -----
-    * The equations for the Mahalanobis distance, d_sqr, comes from
+    * The equations for the Mahalanobis distance, r_sqr, comes from
         the bottom of Page 2 in [3].
 
-    * The Mahalanobis distance, d_sqr, follows the chi-squared distribution 
+    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution 
         with 2 degrees of freedom.
 
-    * The equation for the returned cdf comes for the "Normal 
-        Distribution" section of [2].         
+    * The equation for the returned cdf comes for the "Normal Distribution"
+        section of [2], and the middle of Page 4 of [3].
 
     """
     U = (u - mu_u)/sigma_u
     V = (v - mu_v)/sigma_v
-    d_sqr = 1.0/(1.0 - rho*rho) * (U*U - 2*U*V + V*V)
-    return 1.0 - np.exp(-d_sqr/2.0)
+    r_sqr = 1.0/(1.0 - rho*rho) * (U*U - 2*rho*U*V + V*V)
+    return 1.0 - np.exp(-r_sqr/2.0)
