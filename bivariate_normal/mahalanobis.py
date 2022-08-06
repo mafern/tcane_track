@@ -29,16 +29,21 @@ References
 """
 import matplotlib.pyplot as plt
 import numpy as np
+import palettable
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
 __version__ = "05 August 2022"
 
 
-COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
+COLOR = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
+# COLOR = palettable.matplotlib.Plasma_9_r.mpl_colors
+# COLOR = palettable.colorbrewer.sequential.RdPu_9.mpl_colors
+# COLOR = palettable.lightbartlein.diverging.RedYellowBlue_9.mpl_colors
+# COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
 THETA = np.linspace(0, 2*np.pi, 1000);
 
 
-def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho):
+def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, label_u=0, label_v=0):
     """Plot the eliptical contours of the Mahalanobis cdf.
     
     Arguments
@@ -74,8 +79,18 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho):
         r = np.sqrt(-2.0*(np.log(1-p)))
         x = r*sigma_u * np.cos(THETA) + mu_u
         y = r*sigma_v*(rho*np.cos(THETA) + np.sqrt(1 - rho*rho)*np.sin(THETA)) + mu_v
-        plt.fill(x, y, COLOR[i])
+        plt.fill(x, y, color=COLOR[i])
+    
+    # plot consensus and true label
+    plt.plot(0,0,'.k',markersize=10)
+    plt.plot(label_u,
+             label_v,
+             's',
+             color='k',
+             markersize=12)
+    
     plt.axis('equal')
+    
 
     
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
