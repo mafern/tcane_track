@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "06 August 2022"
 
 
 COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
