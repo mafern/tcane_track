@@ -16,7 +16,7 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
     includes only the real-time plot of the training and validation loss.
 
     If the x_data and onehot_data are given, the instrumentation panel also
-    includes histogram plots for each of the local conditional distribution 
+    includes histogram plots for each of the local conditional distribution
     parameters, updated in real time.
 
     Parameters
@@ -53,8 +53,8 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     Notes
     -----
-    * This Class is explcitly designed for the bivariate normal 
-        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u', 
+    * This Class is explcitly designed for the bivariate normal
+        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u',
         'sigma_v', and 'rho'.
 
     """
@@ -120,7 +120,7 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
                 plt.subplot(3, 2, 6)
                 plt.hist(sigma_v, bins=30, color="#fdc086", edgecolor="k")
                 plt.legend(["sigma_v"])
-                
+
                 rho = preds[:, 4]
                 plt.subplot(3, 2, 2)
                 plt.hist(rho, bins=30, color="#ffff99", edgecolor="k")

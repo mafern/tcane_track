@@ -6,7 +6,7 @@ val_condition   : "random", "years"
 """
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__date__   = "29 July 2022"
+__date__   = "06 August 2022"
 
 
 def get_settings(experiment_name):

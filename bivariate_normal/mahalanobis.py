@@ -40,79 +40,94 @@ COLOR = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 # COLOR = palettable.colorbrewer.sequential.RdPu_9.mpl_colors
 # COLOR = palettable.lightbartlein.diverging.RedYellowBlue_9.mpl_colors
 # COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
-THETA = np.linspace(0, 2*np.pi, 1000);
+THETA = np.linspace(0, 2 * np.pi, 1000)
 
 
-def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, label_u=0, label_v=0):
-    """Plot the eliptical contours of the Mahalanobis cdf.
-    
+def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
+    """Plot the Mahalanobis cdf.
+
+    Plot the eliptical contours of the Mahalanobis cdf for a bivariate
+    normal distribution. The nine contour levels are the distribution's
+    deciles: probability of capture = {0.10, 0.20, ..., 0.90}.
+
+    Plot the Consensus track as a circle at (0, 0). If given, plot the
+    Besttrack as a square.
+
     Arguments
     ---------
     mu_u : float
         mean of u.
-    
+
     mu_v : float
         mean of v.
-    
+
     sigma_u : float, u > 0.
         standard deviation of u.
-    
+
     sigma_v : float, v > 0.
         standard deviation of v.
-    
+
     rho : float, -1 < rho < 1.
         correlation between u and v.
-    
+
+    besttrack_u : float or None
+        the u-coordinate of the truth.
+
+    besttrack_v : float or None
+        the v-coordinate of the truth.
+
     Returns
     -------
     None
-    
+
     Notes
     -----
-    * This function plots nine concentric elipses assoicated with 
-        probabilities of capture of {0.1, 0.2, ..., 0.9}.
-    
     * The equations for x and y come from the bottom of Page 2 in [3].
-    
-    """
-    for i, p in enumerate(np.arange(9, 0, -1)/10.0):
-        r = np.sqrt(-2.0*(np.log(1-p)))
-        x = r*sigma_u * np.cos(THETA) + mu_u
-        y = r*sigma_v*(rho*np.cos(THETA) + np.sqrt(1 - rho*rho)*np.sin(THETA)) + mu_v
-        plt.fill(x, y, color=COLOR[i])
-    
-    # plot consensus and true label
-    plt.plot(0,0,'ok',markersize=5,markerfacecolor='None',label='Consensus')
-    plt.plot(label_u,
-             label_v,
-             's',
-             color='k',
-             markersize=6,
-             label='BestTrack',
-            )
-    
-    plt.axis('equal')
-    
 
-    
+    """
+    for i, p in enumerate(np.arange(9, 0, -1) / 10.0):
+        r = np.sqrt(-2.0 * (np.log(1 - p)))
+        x = r * sigma_u * np.cos(THETA) + mu_u
+        y = (
+            r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
+            + mu_v
+        )
+        plt.fill(x, y, color=COLOR[i])
+
+    # plot consensus and true label
+    plt.plot(0, 0, "ok", markersize=5, markerfacecolor="None", label="Consensus")
+
+    if besttrack_u is not None and besttrack_v is not None:
+        plt.plot(
+            besttrack_u,
+            besttrack_v,
+            "s",
+            color="k",
+            markersize=6,
+            label="BestTrack",
+        )
+
+    plt.axis("equal")
+
+
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
     distribution.
-    
+
     Arguments
     ---------
     mu_u : float
         mean of u.
-    
+
     mu_v : float
         mean of v.
-    
+
     sigma_u : float, u > 0.
         standard deviation of u.
-    
+
     sigma_v : float, v > 0.
         standard deviation of v.
-    
+
     rho : float, -1 < rho < 1.
         correlation between u and v.
 
@@ -121,14 +136,14 @@ def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     * The equations for the Mahalanobis distance, r_sqr, comes from
         the bottom of Page 2 in [3].
 
-    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution 
+    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution
         with 2 degrees of freedom.
 
     * The equation for the returned cdf comes for the "Normal Distribution"
         section of [2], and the middle of Page 4 of [3].
 
     """
-    U = (u - mu_u)/sigma_u
-    V = (v - mu_v)/sigma_v
-    r_sqr = 1.0/(1.0 - rho*rho) * (U*U - 2*rho*U*V + V*V)
-    return 1.0 - np.exp(-r_sqr/2.0)
+    U = (u - mu_u) / sigma_u
+    V = (v - mu_v) / sigma_v
+    r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
+    return 1.0 - np.exp(-r_sqr / 2.0)
