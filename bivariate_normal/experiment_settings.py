@@ -247,7 +247,7 @@ def get_settings(experiment_name):
             "x_names": None,
         },     
         
-        "bivariate_normal_105_AL120": {
+        "bivariate_normal_205_AL120": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": 'bivariate_normal',  
             "leadtime": 120,
