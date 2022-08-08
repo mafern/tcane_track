@@ -145,10 +145,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
             "SHDC",
             "SSTN",
             "DTL",
-            # "DSDV",
-            # "LGDV",
-            # "HWDV",
-            # "AVDV",
+            "DSDV",
+            "LGDV",
+            "HWDV",
+            "AVDV",
         ]
     else:
         x_names = settings["x_names"]
