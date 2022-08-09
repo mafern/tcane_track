@@ -1,10 +1,9 @@
-"""Tools for the Mahalanobis cdf using a centered bivariate 
-normal model.
+"""Tools for the Mahalanobis cdf using a bivariate normal.
 
 Functions
 ---------
-plot_cdf(sigma_u, sigma_v, rho)
-compute_cdf(sigma_u, sigma_v, rho, y)
+plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho)
+compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, y)
 
 Notes
 -----
@@ -36,15 +35,12 @@ __author__ = "Randal J Barnes and Elizabeth A. Barnes"
 __version__ = "06 August 2022"
 
 
-COLOR = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
-# COLOR = palettable.matplotlib.Plasma_9_r.mpl_colors
-# COLOR = palettable.colorbrewer.sequential.RdPu_9.mpl_colors
-# COLOR = palettable.lightbartlein.diverging.RedYellowBlue_9.mpl_colors
-# COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
+
+COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
 
 
-def plot_cdf(sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
+def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None, colors=COLOR_DEFAULT):
     """Plot the Mahalanobis cdf.
 
     Plot the eliptical contours of the Mahalanobis cdf for a bivariate
@@ -56,6 +52,12 @@ def plot_cdf(sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
 
     Arguments
     ---------
+    mu_u : float
+        mean of u.
+
+    mu_v : float
+        mean of v.
+
     sigma_u : float, u > 0.
         standard deviation of u.
 
@@ -82,11 +84,12 @@ def plot_cdf(sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
     """
     for i, p in enumerate(np.arange(9, 0, -1) / 10.0):
         r = np.sqrt(-2.0 * (np.log(1 - p)))
-        x = r * sigma_u * np.cos(THETA)
+        x = r * sigma_u * np.cos(THETA) + mu_u
         y = (
             r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
+            + mu_v
         )
-        plt.fill(x, y, color=COLOR[i])
+        plt.fill(x, y, color=colors[i])
 
     # plot consensus and true label
     plt.plot(0, 0, "ok", markersize=5, markerfacecolor="None", label="Consensus")
@@ -104,12 +107,18 @@ def plot_cdf(sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
     plt.axis("equal")
 
 
-def compute_cdf(sigma_u, sigma_v, rho, u, v):
-    """Compute the Mahalanobis cdf for [u, v] using a centered 
-    bivariate normal distribution model.
+def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
+    """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
+    distribution.
 
     Arguments
     ---------
+    mu_u : float
+        mean of u.
+
+    mu_v : float
+        mean of v.
+
     sigma_u : float, u > 0.
         standard deviation of u.
 
@@ -131,7 +140,7 @@ def compute_cdf(sigma_u, sigma_v, rho, u, v):
         section of [2], and the middle of Page 4 of [3].
 
     """
-    U = u / sigma_u
-    V = v / sigma_v
+    U = (u - mu_u) / sigma_u
+    V = (v - mu_v) / sigma_v
     r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
     return 1.0 - np.exp(-r_sqr / 2.0)

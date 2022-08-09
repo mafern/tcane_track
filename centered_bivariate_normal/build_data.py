@@ -55,9 +55,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_val : numpy.ndarray
         The validation split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining column are
+        the second column holds ODBY. The remaining columns are
         filled with zeros.
-        shape = [n_val, 3].
+        shape = [n_val, 5].
 
     x_test : numpy.ndarray
         The test split of the x data.
@@ -65,9 +65,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_test : numpy.ndarray
         The test split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining column is
+        the second column holds ODBY. The remaining columns are
         filled with zeros.
-        shape = [n_val, 3].
+        shape = [n_val, 5].
 
     x_valtest : numpy.ndarray
         The union of the test and validation splits of the x data.
@@ -76,8 +76,8 @@ def build_hurricane_data(data_path, settings, verbose=0):
     onehot_valtest : numpy.ndarray
         The union of the test and validation splits of the y data.
         The first column holds ODBX, the second column holds ODBY.
-        The remaining column is filled with zeros.
-        shape = [n_val+n_test, 3].
+        The remaining columns are filled with zeros.
+        shape = [n_val+n_test, 5].
 
     df_train : pandas dataframe
         A pandas dataframe containing training records.  The
@@ -157,7 +157,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     y_names = ["OBDX", "OBDY"]
     missing = -9999
 
-    n_parameters = 3     # sigma_u, sigma_v, rho (no mu_u or mu_v).
+    n_parameters = 5     # mu_u, mu_v, sigma_u, sigma_v, rho (but mu_u and mu_v = 0).
 
     # Get the data from the specified file and filter out the unwanted rows.
     datafile_path = data_path + settings["filename"]
