@@ -92,7 +92,7 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=No
         plt.fill(x, y, color=colors[i])
 
     # plot consensus and true label
-    plt.plot(0, 0, "ok", markersize=5, markerfacecolor="None", label="Consensus")
+    plt.plot(0, 0, "o", color="k", markersize=5, markerfacecolor="None", label="Consensus")
 
     if besttrack_u is not None and besttrack_v is not None:
         plt.plot(
