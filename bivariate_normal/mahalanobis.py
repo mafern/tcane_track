@@ -35,15 +35,12 @@ __author__ = "Randal J Barnes and Elizabeth A. Barnes"
 __version__ = "06 August 2022"
 
 
-COLOR = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
-# COLOR = palettable.matplotlib.Plasma_9_r.mpl_colors
-# COLOR = palettable.colorbrewer.sequential.RdPu_9.mpl_colors
-# COLOR = palettable.lightbartlein.diverging.RedYellowBlue_9.mpl_colors
-# COLOR = ('#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9')
+
+COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
 
 
-def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None):
+def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None, colors=COLOR_DEFAULT):
     """Plot the Mahalanobis cdf.
 
     Plot the eliptical contours of the Mahalanobis cdf for a bivariate
@@ -92,7 +89,7 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=No
             r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
             + mu_v
         )
-        plt.fill(x, y, color=COLOR[i])
+        plt.fill(x, y, color=colors[i])
 
     # plot consensus and true label
     plt.plot(0, 0, "ok", markersize=5, markerfacecolor="None", label="Consensus")
