@@ -6,15 +6,15 @@ val_condition   : "random", "years"
 """
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__date__   = "06 August 2022"
+__date__   = "09 August 2022"
 
 
 def get_settings(experiment_name):
     experiments = {   
         #--------------------------------------------------
-        "bivariate_normal_101_EPCP48": {
+        "centered_bivariate_normal_101_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
@@ -37,9 +37,9 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,            
         },
-        "bivariate_normal_102_EPCP48": {
+        "centered_bivariate_normal_102_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
@@ -62,9 +62,9 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,            
         }, 
-        "bivariate_normal_103_EPCP48": {
+        "centered_bivariate_normal_103_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
@@ -87,9 +87,9 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,            
         },         
-        "bivariate_normal_104_EPCP48": {
+        "centered_bivariate_normal_104_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
@@ -112,9 +112,9 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         }, 
-        "bivariate_normal_105_EPCP48": {
+        "centered_bivariate_normal_105_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
@@ -137,9 +137,9 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names":["NCT", "VMAX0", "AVDX", "EMDX", "EGDX", "HWDX", "AVDY", "EMDY", "EGDY", "HWDY", "LONC", "LATC", "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL", "DSDV", "LGDV", "HWDV", "AVDV",]
         },   
-        "bivariate_normal_106_EPCP48": {
+        "centered_bivariate_normal_106_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,

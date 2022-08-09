@@ -1,4 +1,5 @@
-"""Build the fully-connected network architecture.
+"""Build the fully-connected network architecture for the centered 
+bivariate normal model.
 
 Classes
 ---------
@@ -20,7 +21,7 @@ import tensorflow_probability as tfp
 from custom_loss import compute_bivariate_normal_NLL
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "04 August 2022"
+__version__ = "09 August 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -87,10 +88,10 @@ def build_bivariate_normal_model(
         shape = [n_train, n_features].
 
     onehot_train : numpy.ndarray
-        The training split of the scaled y data is in the first column.
-        The remaining columns are filled with zeros. The number of columns
-        equal the number of distribution parameters.
-        shape = [n_train, n_parameters].
+        The test split of the y data. The first column holds ODBX,
+        the second column holds ODBY. The remaining column is
+        filled with zeros.
+        shape = [n_train, 3].
 
     hiddens : list (integers)
         Numeric list containing the number of neurons for each layer.
@@ -117,19 +118,17 @@ def build_bivariate_normal_model(
 
     * The conditional bivariate normal distribution is most commonly defined
         by five parameters: two means, two standard deviations, and a
-        correlation. We denote these by
+        correlation. In this, the centered bivariate normal model, we DO NOT
+        fut the means.  The means are fixed at (0, 0), i.e. the consensus
+        track.
+        
+        We denote the three fitter parameters by
 
-            mu_u, mu_v, sigma_u, sigma_v, and rho,
+            sigma_u, sigma_v, and rho,
 
-        where mu_u and mu_v are unconstrained, but sigma_u > 0, sigma_v > 0,
-        and -1 < rho < 1.
-
-        The conditional mean vector is given by
-
-            [ mu_u ]
-            [ mu_v ]
-
-        and the conditional variance/covariance matrix is given by
+        where sigma_u > 0, sigma_v > 0, and -1 < rho < 1.
+        
+        The conditional variance/covariance matrix is given by
 
             [ sigma_u^2,           rho*sigma_u*sigma_v ]
             [ rho*sigma_u*sigma_v, sigma_v^2           ]
@@ -147,48 +146,45 @@ def build_bivariate_normal_model(
         we implicitly normalize the target variates by scaling the
         network output as follows.
 
-        We compute the averages and standard deviations for u and v
-        of the training data. We denote these
+        We compute the standard deviations for u and v of the training 
+        data. We denote these
 
-            u => u_avg and u_std
-            v => v_avg and v_std
+            u => u_std
+            v => v_std
 
         Then we define, but do not explicitly compute, the normalized
         versions of u and v as
 
-            U = (u - u_avg)/u_std
-            V = (v - v_avg)/v_std
+            U = u/u_std
+            V = v/v_std
 
-        Since U and V are simple affine (linear) transformations of u
-        and v, U and V also follow a bivariate normal distribution.
+        Since U and V are simple scaling transformations of u and v, 
+        U and V also follow a bivariate normal distribution.
 
-        Internally, the network predicts the five parameters of the
+        Internally, the network predicts the three parameters of the
         conditional bivariate normal distribution of U and V:
 
-            mu_U, mu_V, sigma_U, sigma_V, and rho.
+            sigma_U, sigma_V, and rho.
 
         We then rescale these parameters in the output layer using
         tf.keras.layers.Rescaling layers; that is
-
-            mu_u = mu_U * u_std + u_avg
-            mu_v = mu_V * v_std + v_avg
 
             sigma_u = sigma_U * u_std
             sigma_v = sigma_V * v_std
 
         and rho is dimensionlees, so it does not need to be rescaled.
 
-        The scaling parameters u_avg, u_std, v_avg, and v_std travel
-        with the model as part of the output layer.
+        The scaling parameters u_std, and v_std travel with the model
+        as part of the output layer.
 
     * The parameters of the conditional bivariate normal distribution
         for U and V must also satisfy sigma_U > 0, sigma_V > 0, and
         -1 < rho < 1. We use standard TensorFLow tricks to guarantee
         that we meet these constraints.
 
-        We have the network predict five unconstrained outputs:
+        We have the network predict three unconstrained outputs:
 
-            mu_U, mu_V, alpha, beta, and gamma.
+            alpha, beta, and gamma.
 
         We then compute sigma_U and sigma_V using
 
@@ -237,46 +233,11 @@ def build_bivariate_normal_model(
             ),
         )(x)
 
-    # Compute the mean and standard deviation of the training target
-    # data. These are used to implicitly normalize the target variates
+    # Compute the standard deviation of the training target data. 
+    # These are used to implicitly normalize the target variates
     # by rescaling the parameters. (See the notes above.)
-    u_avg = np.mean(onehot_train[:, 0])
     u_std = np.std(onehot_train[:, 0])
-
-    v_avg = np.mean(onehot_train[:, 1])
     v_std = np.std(onehot_train[:, 1])
-
-    # Units to predict the conditional expect value of u.
-    mu_U_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_U_unit",
-    )(x)
-
-    mu_u_unit = tf.keras.layers.Rescaling(
-        scale=u_std,
-        offset=u_avg,
-        name="mu_u_unit",
-    )(mu_U_unit)
-
-    # Units to predict the conditional expect value of v.
-    mu_V_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_V_unit",
-    )(x)
-
-    mu_v_unit = tf.keras.layers.Rescaling(
-        scale=v_std,
-        offset=v_avg,
-        name="mu_v_unit",
-    )(mu_V_unit)
 
     # Units to predict the conditional standard deviation of u.
     alpha_unit = tf.keras.layers.Dense(
@@ -334,7 +295,7 @@ def build_bivariate_normal_model(
 
     # Stitch everything together.
     output_layer = tf.keras.layers.concatenate(
-        [mu_u_unit, mu_v_unit, sigma_u_unit, sigma_v_unit, rho_unit], axis=1
+        [sigma_u_unit, sigma_v_unit, rho_unit], axis=1
     )
 
     model = tf.keras.models.Model(inputs=inputs, outputs=output_layer)

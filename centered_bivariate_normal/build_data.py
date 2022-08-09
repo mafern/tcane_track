@@ -1,4 +1,5 @@
-"""Build the split and scaled training and validation hurricane data arrays.
+"""Build the split and scaled training and validation hurricane 
+data arrays for the center bivariate normal model.
 
 Functions
 ---------
@@ -13,12 +14,12 @@ import copy
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "05 August 2022"
+__version__ = "09 August 2022"
 
 
 def build_hurricane_data(data_path, settings, verbose=0):
     """Build the training, validation, and testing tensors
-    for the bivariate normal model.
+    for the centered bivariate normal model.
 
     Arguments
     ---------
@@ -44,9 +45,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_train : numpy.ndarray
         The training split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
+        the second column holds ODBY. The remaining column is
         filled with zeros.
-        shape = [n_train, 5].
+        shape = [n_train, 3].
 
     x_val : numpy.ndarray
         The validation split of the x data.
@@ -54,9 +55,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_val : numpy.ndarray
         The validation split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
+        the second column holds ODBY. The remaining column are
         filled with zeros.
-        shape = [n_val, 5].
+        shape = [n_val, 3].
 
     x_test : numpy.ndarray
         The test split of the x data.
@@ -64,9 +65,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_test : numpy.ndarray
         The test split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
+        the second column holds ODBY. The remaining column is
         filled with zeros.
-        shape = [n_val, 5].
+        shape = [n_val, 3].
 
     x_valtest : numpy.ndarray
         The union of the test and validation splits of the x data.
@@ -75,8 +76,8 @@ def build_hurricane_data(data_path, settings, verbose=0):
     onehot_valtest : numpy.ndarray
         The union of the test and validation splits of the y data.
         The first column holds ODBX, the second column holds ODBY.
-        The remaining three columns are filled with zeros.
-        shape = [n_val+n_test, 5].
+        The remaining column is filled with zeros.
+        shape = [n_val+n_test, 3].
 
     df_train : pandas dataframe
         A pandas dataframe containing training records.  The
@@ -121,7 +122,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     * No scaling or normalization is applied during data extraction.
 
     """
-    if settings["uncertainty_type"] != "bivariate_normal":
+    if settings["uncertainty_type"] != "centered_bivariate_normal":
         raise NotImplementedError
 
     # Setup for the selected target.
@@ -156,7 +157,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     y_names = ["OBDX", "OBDY"]
     missing = -9999
 
-    n_parameters = 5
+    n_parameters = 3     # sigma_u, sigma_v, rho (no mu_u or mu_v).
 
     # Get the data from the specified file and filter out the unwanted rows.
     datafile_path = data_path + settings["filename"]

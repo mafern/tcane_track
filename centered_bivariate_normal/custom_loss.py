@@ -9,7 +9,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "09 August 2022"
 
 
 def compute_bivariate_normal_NLL(y_true, param):
@@ -26,9 +26,9 @@ def compute_bivariate_normal_NLL(y_true, param):
     param :
         The predicted local conditional distribution parameters:
 
-            [ mu_u, mu_v, sigma_u, sigma_v, rho ]
+            [ sigma_u, sigma_v, rho ]
 
-        where u = OBDX, and v = OBDY.
+        where u = OBDX, and v = OBDY. Note, mu_u and mu_v = 0.
         shape = [batch_size, 5]
 
     Returns
@@ -39,12 +39,7 @@ def compute_bivariate_normal_NLL(y_true, param):
 
     Notes
     -----
-    * The conditional mean vector is given by
-
-            [ mu_u ]
-            [ mu_v ]
-
-        and the conditional variance/covariance matrix is given by
+    * The conditional variance/covariance matrix is given by
 
             [ sigma_u^2,           rho*sigma_u*sigma_v ]
             [ rho*sigma_u*sigma_v, sigma_v^2           ]
@@ -106,13 +101,13 @@ def compute_bivariate_normal_NLL(y_true, param):
     """
     b = tfp.bijectors.FillTriangular(upper=False)
     mvn = tfp.distributions.MultivariateNormalTriL(
-        loc=param[:, 0:2],
+        loc=tf.zeros_like(param[:, 0:2]),
         scale_tril=b.forward(
             tf.stack(
                 (
-                    param[:, 3] * tf.math.sqrt(1.0 - tf.math.square(param[:, 4])),
-                    param[:, 3] * param[:, 4],
-                    param[:, 2],
+                    param[:, 1] * tf.math.sqrt(1.0 - tf.math.square(param[:, 2])),
+                    param[:, 1] * param[:, 2],
+                    param[:, 0],
                 ),
                 axis=1,
             )

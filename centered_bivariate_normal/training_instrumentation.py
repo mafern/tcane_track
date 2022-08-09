@@ -1,4 +1,5 @@
-"""Custom real-time training instrumentation."""
+"""Custom real-time training instrumentation for the centered
+bivariate normal model."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,7 +7,7 @@ import tensorflow as tf
 from IPython.display import clear_output
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "09 August 2022"
 
 
 class TrainingInstrumentation(tf.keras.callbacks.Callback):
@@ -53,9 +54,8 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     Notes
     -----
-    * This Class is explcitly designed for the bivariate normal
-        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u',
-        'sigma_v', and 'rho'.
+    * This Class is explcitly designed for the centered bivariate normal
+        distribution, with parameter names 'sigma_u', 'sigma_v', and 'rho'.
 
     """
 
@@ -101,28 +101,18 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
             if (self.x_data is not None) and (self.onehot_data is not None):
                 preds = self.model.predict(self.x_data)
 
-                mu_u = preds[:, 0]
-                plt.subplot(3, 2, 3)
-                plt.hist(mu_u, bins=30, color="#7fc97f", edgecolor="k")
-                plt.legend(["mu_u"])
-
-                mu_v = preds[:, 1]
-                plt.subplot(3, 2, 4)
-                plt.hist(mu_v, bins=30, color="#beaed4", edgecolor="k")
-                plt.legend(["mu_v"])
-
-                sigma_u = preds[:, 2]
-                plt.subplot(3, 2, 5)
+                sigma_u = preds[:, 0]
+                plt.subplot(2, 2, 3)
                 plt.hist(sigma_u, bins=30, color="#fdc086", edgecolor="k")
                 plt.legend(["sigma_u"])
 
-                sigma_v = preds[:, 3]
-                plt.subplot(3, 2, 6)
+                sigma_v = preds[:, 1]
+                plt.subplot(2, 2, 4)
                 plt.hist(sigma_v, bins=30, color="#fdc086", edgecolor="k")
                 plt.legend(["sigma_v"])
 
-                rho = preds[:, 4]
-                plt.subplot(3, 2, 2)
+                rho = preds[:, 2]
+                plt.subplot(2, 2, 2)
                 plt.hist(rho, bins=30, color="#ffff99", edgecolor="k")
                 plt.legend(["rho"])
 
