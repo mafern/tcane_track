@@ -81,25 +81,32 @@ def build_hurricane_data(data_path, settings, verbose=0):
     * No scaling or normalization is applied during data preparation.
 
     """
-    # Setup for the selected target.
-
+    # Setup for the selected target. 
     if settings["target"] == "longitude":
-        x_names = [
-            "NCT","VMAX0",
-            "AVDX", "EMDX", "EGDX", "HWDX",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
-        ]
+        if settings["x_names"] is None:
+            x_names = [
+                "NCT","VMAX0",
+                "AVDX", "EMDX", "EGDX", "HWDX",
+                "LONC", "LATC",
+                "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
+            ]
+        else:
+            x_names = settings["x_names"]
+            
         y_name = ["OBDX"]
         missing = -9999
 
     elif settings["target"] == "latitude":
-        x_names = [
-            "NCT", "VMAX0",
-            "AVDY", "EMDY", "EGDY", "HWDY",
-            "LONC", "LATC",
-            "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
-        ]
+        if settings["x_names"] is None:
+            x_names = [
+                "NCT", "VMAX0",
+                "AVDY", "EMDY", "EGDY", "HWDY",
+                "LONC", "LATC",
+                "VMXC", "DV12", "SLAT", "SHDC", "SSTN", "DTL",
+            ]
+        else:
+            x_names = settings["x_names"]
+            
         y_name = ["OBDY"]
         missing = -9999
 

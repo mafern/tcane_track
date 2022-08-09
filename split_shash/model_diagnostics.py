@@ -244,7 +244,7 @@ def compute_nll(uncertainty_type, onehot_data, bnn_cpd=None, model_shash=None, x
         # tau = shash_pred[:,3]
         
         dist = shash_tfp.Shash(mu, sigma, gamma, tau)
-        nloglike = -shash_tfpdist.log_prob(onehot_data[:,0])    
+        nloglike = -dist.log_prob(onehot_data[:,0])    
         
     else:
         # bnn NLL
