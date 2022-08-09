@@ -1,5 +1,8 @@
 """Build the fully-connected network architecture.
 
+This is for the centered bivariate normal model.  The mu_x and mu_v 
+are not trained, even though they are present in the parameters.
+
 Classes
 ---------
 Exponentiate(keras.layers.Layer)
@@ -20,7 +23,7 @@ import tensorflow_probability as tfp
 from custom_loss import compute_bivariate_normal_NLL
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "04 August 2022"
+__version__ = "09 August 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -254,11 +257,12 @@ def build_bivariate_normal_model(
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         name="mu_U_unit",
+        trainable=False,
     )(x)
 
     mu_u_unit = tf.keras.layers.Rescaling(
-        scale=u_std,
-        offset=u_avg,
+        scale=0.0,
+        offset=0.0,
         name="mu_u_unit",
     )(mu_U_unit)
 
@@ -270,11 +274,12 @@ def build_bivariate_normal_model(
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         name="mu_V_unit",
+        trainable=False,        
     )(x)
 
     mu_v_unit = tf.keras.layers.Rescaling(
-        scale=v_std,
-        offset=v_avg,
+        scale=0.0,
+        offset=0.0,
         name="mu_v_unit",
     )(mu_V_unit)
 

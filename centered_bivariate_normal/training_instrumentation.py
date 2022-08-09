@@ -101,17 +101,17 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
             if (self.x_data is not None) and (self.onehot_data is not None):
                 preds = self.model.predict(self.x_data)
 
-                sigma_u = preds[:, 0]
+                sigma_u = preds[:, 2]
                 plt.subplot(2, 2, 3)
                 plt.hist(sigma_u, bins=30, color="#fdc086", edgecolor="k")
                 plt.legend(["sigma_u"])
 
-                sigma_v = preds[:, 1]
+                sigma_v = preds[:, 3]
                 plt.subplot(2, 2, 4)
                 plt.hist(sigma_v, bins=30, color="#fdc086", edgecolor="k")
                 plt.legend(["sigma_v"])
 
-                rho = preds[:, 2]
+                rho = preds[:, 4]
                 plt.subplot(2, 2, 2)
                 plt.hist(rho, bins=30, color="#ffff99", edgecolor="k")
                 plt.legend(["rho"])

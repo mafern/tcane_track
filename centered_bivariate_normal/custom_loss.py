@@ -9,7 +9,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "09 August 2022"
 
 
 def compute_bivariate_normal_NLL(y_true, param):
@@ -106,7 +106,7 @@ def compute_bivariate_normal_NLL(y_true, param):
     """
     b = tfp.bijectors.FillTriangular(upper=False)
     mvn = tfp.distributions.MultivariateNormalTriL(
-        loc=param[:, 0:2],
+        loc=tf.zeros_like(param[:, 0:2]),    # IGNORE THE MEAN
         scale_tril=b.forward(
             tf.stack(
                 (

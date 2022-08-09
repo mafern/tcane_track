@@ -1,5 +1,4 @@
-"""Build the split and scaled training and validation hurricane 
-data arrays for the center bivariate normal model.
+"""Build the split and scaled training and validation hurricane data arrays.
 
 Functions
 ---------
@@ -19,7 +18,7 @@ __version__ = "09 August 2022"
 
 def build_hurricane_data(data_path, settings, verbose=0):
     """Build the training, validation, and testing tensors
-    for the centered bivariate normal model.
+    for the bivariate normal model.
 
     Arguments
     ---------
@@ -45,9 +44,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_train : numpy.ndarray
         The training split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining column is
+        the second column holds ODBY. The remaining three columns are
         filled with zeros.
-        shape = [n_train, 3].
+        shape = [n_train, 5].
 
     x_val : numpy.ndarray
         The validation split of the x data.
@@ -55,7 +54,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_val : numpy.ndarray
         The validation split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining columns are
+        the second column holds ODBY. The remaining three columns are
         filled with zeros.
         shape = [n_val, 5].
 
@@ -65,7 +64,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     onehot_test : numpy.ndarray
         The test split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining columns are
+        the second column holds ODBY. The remaining three columns are
         filled with zeros.
         shape = [n_val, 5].
 
@@ -76,7 +75,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     onehot_valtest : numpy.ndarray
         The union of the test and validation splits of the y data.
         The first column holds ODBX, the second column holds ODBY.
-        The remaining columns are filled with zeros.
+        The remaining three columns are filled with zeros.
         shape = [n_val+n_test, 5].
 
     df_train : pandas dataframe
@@ -146,10 +145,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
             "SHDC",
             "SSTN",
             "DTL",
-            # "DSDV",
-            # "LGDV",
-            # "HWDV",
-            # "AVDV",
+            "DSDV",
+            "LGDV",
+            "HWDV",
+            "AVDV",
         ]
     else:
         x_names = settings["x_names"]
@@ -157,7 +156,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     y_names = ["OBDX", "OBDY"]
     missing = -9999
 
-    n_parameters = 5     # mu_u, mu_v, sigma_u, sigma_v, rho (but mu_u and mu_v = 0).
+    n_parameters = 5
 
     # Get the data from the specified file and filter out the unwanted rows.
     datafile_path = data_path + settings["filename"]

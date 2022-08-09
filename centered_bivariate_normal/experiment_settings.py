@@ -14,7 +14,7 @@ def get_settings(experiment_name):
         #--------------------------------------------------
         "centered_bivariate_normal_101_EPCP48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
-            "uncertainty_type": 'centered_centered_bivariate_normal',  
+            "uncertainty_type": 'centered_bivariate_normal',  
             "leadtime": 48,
             "basin": "EP|CP",
             "undersample": False,
