@@ -6,7 +6,7 @@ import tensorflow as tf
 from IPython.display import clear_output
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "05 August 2022"
+__version__ = "10 August 2022"
 
 
 class TrainingInstrumentation(tf.keras.callbacks.Callback):

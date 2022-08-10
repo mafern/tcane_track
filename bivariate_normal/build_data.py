@@ -1,4 +1,5 @@
-"""Build the split and scaled training and validation hurricane data arrays.
+"""Build the split and scaled training and validation hurricane data
+arrays for the bivariate normal model.
 
 Functions
 ---------
@@ -13,12 +14,12 @@ import copy
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "05 August 2022"
+__version__ = "10 August 2022"
 
 
 def build_hurricane_data(data_path, settings, verbose=0):
-    """Build the training, validation, and testing tensors
-    for the bivariate normal model.
+    """Build the training, validation, and testing tensors for the
+    bivariate normal and centered bivariate normal models.
 
     Arguments
     ---------
@@ -121,7 +122,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
     * No scaling or normalization is applied during data extraction.
 
     """
-    if settings["uncertainty_type"] != "bivariate_normal":
+    if settings["uncertainty_type"] not in [
+        "bivariate_normal",
+        "centered_bivariate_normal",
+    ]:
         raise NotImplementedError
 
     # Setup for the selected target.
@@ -156,6 +160,8 @@ def build_hurricane_data(data_path, settings, verbose=0):
     y_names = ["OBDX", "OBDY"]
     missing = -9999
 
+    # The predicted local conditional distribution parameters are:
+    # [ mu_u, mu_v, sigma_u, sigma_v, rho ].
     n_parameters = 5
 
     # Get the data from the specified file and filter out the unwanted rows.

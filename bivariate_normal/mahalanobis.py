@@ -32,15 +32,23 @@ import numpy as np
 import palettable
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "06 August 2022"
-
+__version__ = "10 August 2022"
 
 
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
 
 
-def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=None, colors=COLOR_DEFAULT):
+def plot_cdf(
+    mu_u,
+    mu_v,
+    sigma_u,
+    sigma_v,
+    rho,
+    besttrack_u=None,
+    besttrack_v=None,
+    colors=COLOR_DEFAULT,
+):
     """Plot the Mahalanobis cdf.
 
     Plot the eliptical contours of the Mahalanobis cdf for a bivariate
@@ -92,7 +100,9 @@ def plot_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, besttrack_u=None, besttrack_v=No
         plt.fill(x, y, color=colors[i])
 
     # plot consensus and true label
-    plt.plot(0, 0, "o", color="k", markersize=5, markerfacecolor="None", label="Consensus")
+    plt.plot(
+        0, 0, "o", color="k", markersize=5, markerfacecolor="None", label="Consensus"
+    )
 
     if besttrack_u is not None and besttrack_v is not None:
         plt.plot(
