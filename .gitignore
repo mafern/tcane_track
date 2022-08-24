@@ -36,3 +36,6 @@ __pycache__/
 
 # Google docs
 *.gslides
+
+# Pycharm
+.idea
