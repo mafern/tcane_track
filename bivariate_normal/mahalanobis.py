@@ -9,14 +9,14 @@ Notes
 -----
 * The Mahalanobis cdf is defined in the "Cumulative distribution
     function" section of [1].
-    
+
 * The Mahalanobis cdf is the probability that a sample lies inside
     the ellipse determined by its Mahalanobis distance.
 
 References
 ----------
-[1] Wikipedia contributors. (2022, July 20). Multivariate normal 
-    distribution. In Wikipedia, The Free Encyclopedia. Retrieved 
+[1] Wikipedia contributors. (2022, July 20). Multivariate normal
+    distribution. In Wikipedia, The Free Encyclopedia. Retrieved
     19:53, August 5, 2022.
 
 [2] Wikipedia contributors. (2022, June 21). Mahalanobis distance.
@@ -32,7 +32,7 @@ import numpy as np
 import palettable
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "10 August 2022"
+__version__ = "24 August 2022"
 
 
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
@@ -51,7 +51,7 @@ def plot_cdf(
 ):
     """Plot the Mahalanobis cdf.
 
-    Plot the eliptical contours of the Mahalanobis cdf for a bivariate
+    Plot the elliptical contours of the Mahalanobis cdf for a bivariate
     normal distribution. The nine contour levels are the distribution's
     deciles: probability of capture = {0.10, 0.20, ..., 0.90}.
 
@@ -80,6 +80,9 @@ def plot_cdf(
 
     besttrack_v : float or None
         the v-coordinate of the truth.
+
+    colors: list of matplotlib color codes
+        color palette.
 
     Returns
     -------
@@ -137,6 +140,12 @@ def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
 
     rho : float, -1 < rho < 1.
         correlation between u and v.
+
+    u : float
+        u value for evaluation of pdf.
+
+    v : float
+        v value for evaluation of pdf.
 
     Notes
     -----

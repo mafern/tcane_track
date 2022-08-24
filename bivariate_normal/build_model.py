@@ -2,7 +2,8 @@
 
 Classes
 ---------
-Exponentiate(keras.layers.Layer)
+class Softplus(keras.layers.Layer)
+class Tanh(keras.layers.Layer)
 
 Functions
 ---------
@@ -10,8 +11,8 @@ make_model(settings, x_train, onehot_train, model_compile)
 
 build_bivariate_normal_model(hiddens, input_shape, output_shape,
     ridge_penalty, act_fun, rng_seed)
-    
-build_centered_bivariate_normal_model(hiddens, input_shape, 
+
+build_centered_bivariate_normal_model(hiddens, input_shape,
     output_shape, ridge_penalty, act_fun, rng_seed)
 
 """
@@ -22,11 +23,11 @@ from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
-from custom_loss import compute_bivariate_normal_NLL 
-from custom_loss import compute_centered_bivariate_normal_NLL
+from custom_loss import compute_bivariate_normal_nll
+from custom_loss import compute_centered_bivariate_normal_nll
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "10 August 2022"
+__version__ = "24 August 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -62,15 +63,15 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
             act_fun=settings["act_fun"],
             rng_seed=settings["rng_seed"],
         )
-        
-        if model_compile == True:
+
+        if model_compile:
             model.compile(
                 optimizer=optimizers.Adam(
                     learning_rate=settings["learning_rate"],
                 ),
-                loss=compute_bivariate_normal_NLL,
+                loss=compute_bivariate_normal_nll,
             )
-        
+
     elif settings["uncertainty_type"] == "centered_bivariate_normal":
         model = build_centered_bivariate_normal_model(
             x_train,
@@ -81,14 +82,14 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
             rng_seed=settings["rng_seed"],
         )
 
-        if model_compile == True:
+        if model_compile:
             model.compile(
                 optimizer=optimizers.Adam(
                     learning_rate=settings["learning_rate"],
                 ),
-                loss=compute_centered_bivariate_normal_NLL,
+                loss=compute_centered_bivariate_normal_nll,
             )
-        
+
     else:
         raise NotImplementedError
 
@@ -96,14 +97,12 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
 
 
 def build_bivariate_normal_model(
-    x_train,
-    onehot_train,
-    hiddens,
-    ridge_penalty=[
-        0.0,
-    ],
-    act_fun="relu",
-    rng_seed=999,
+        x_train,
+        onehot_train,
+        hiddens,
+        ridge_penalty=0.0,
+        act_fun="relu",
+        rng_seed=999,
 ):
     """Build the fully-connected bivariate normal network architecture with
     internal scaling.
@@ -129,13 +128,16 @@ def build_bivariate_normal_model(
     act_fun : function, default="relu"
         The activation function to use on the deep hidden layers.
 
+    rng_seed : int
+        Base random number seed for keras.
+
     Returns
     -------
     model : tensorflow.keras.models.Model
 
     Notes
     -----
-    * We have two target variates in this model: OBDX and OBDY. To simplfy
+    * We have two target variates in this model: OBDX and OBDY. To simplify
         this discussion, we introduce the following notation.
 
             u = OBDX
@@ -204,7 +206,7 @@ def build_bivariate_normal_model(
             sigma_u = sigma_U * u_std
             sigma_v = sigma_V * v_std
 
-        and rho is dimensionlees, so it does not need to be rescaled.
+        and rho is dimensionless, so it does not need to be rescaled.
 
         The scaling parameters u_avg, u_std, v_avg, and v_std travel
         with the model as part of the output layer.
@@ -370,14 +372,12 @@ def build_bivariate_normal_model(
 
 
 def build_centered_bivariate_normal_model(
-    x_train,
-    onehot_train,
-    hiddens,
-    ridge_penalty=[
-        0.0,
-    ],
-    act_fun="relu",
-    rng_seed=999,
+        x_train,
+        onehot_train,
+        hiddens,
+        ridge_penalty=0.0,
+        act_fun="relu",
+        rng_seed=999,
 ):
     """Build the fully-connected centered (mu_u = mu_v = 0) bivariate
     normal network architecture with internal scaling.
@@ -402,6 +402,9 @@ def build_centered_bivariate_normal_model(
 
     act_fun : function, default="relu"
         The activation function to use on the deep hidden layers.
+
+    rng_seed : int
+        Base random number seed for keras.
 
     Returns
     -------

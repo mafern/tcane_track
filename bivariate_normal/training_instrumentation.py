@@ -6,7 +6,7 @@ import tensorflow as tf
 from IPython.display import clear_output
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "10 August 2022"
+__version__ = "24 August 2022"
 
 
 class TrainingInstrumentation(tf.keras.callbacks.Callback):
@@ -23,12 +23,12 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
     ----------
     x_data : tensor, default=None
         The x_train (or x_valid) tensor.  If either x_data or onehot_data
-        is specifed, then both must be specified and they must have the
+        is specified, then both must be specified, and they must have the
         same number of rows.
 
     onehot_data : tensor, default=None
         The onehot_train (or onehot_valid) tensor. If either x_data or
-        onehot_data is specifed, then both must be specified and they must
+        onehot_data is specifed, then both must be specified, and they must
         have the same number of rows.
 
     figsize: (float, float), default=(13, 7)
@@ -36,12 +36,15 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     interval: int, default=1
         Number of epochs (steps) between refreshing the instruments.  By
-        default, interval=1, and the intruments are updated ever epoch.
+        default, interval=1, and the instruments are updated ever epoch.
 
-    Usage
+    Notes
     -----
-    * Include TrainingInstrumentation() as a callback in model.fit; e.g.
+    * This Class is explicitly designed for the bivariate normal
+        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u',
+        'sigma_v', and 'rho'.
 
+    * Usage: include TrainingInstrumentation() as a callback in model.fit; e.g.
         training_callback = TrainingInstrumentation(
             x_train_std, onehot_train, interval=10
         )
@@ -51,34 +54,32 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
             callbacks=[training_callback],
         )
 
-    Notes
-    -----
-    * This Class is explcitly designed for the bivariate normal
-        distribution, with parameter names 'mu_u', 'mu_v', 'sigma_u',
-        'sigma_v', and 'rho'.
-
     """
 
     def __init__(
-        self,
-        x_data=None,
-        onehot_data=None,
-        figsize=(13, 7),
-        interval=1,
+            self,
+            x_data=None,
+            onehot_data=None,
+            figsize=(13, 7),
+            interval=1,
     ):
         super().__init__()
         self.x_data = x_data
         self.onehot_data = onehot_data
         self.figsize = figsize
         self.interval = interval
-
-    def on_train_begin(self, logs={}):
         self.loss = []
         self.val_loss = []
 
-    def on_epoch_end(self, epoch, logs={}):
+    def on_train_begin(self, logs=None):
+        self.loss = []
+        self.val_loss = []
+
+    def on_epoch_end(self, epoch, logs=None):
         self.loss.append(logs.get("loss"))
         self.val_loss.append(logs.get("val_loss"))
+        if logs is None:
+            logs = {}
 
         if epoch % self.interval == 0:
             clear_output(wait=True)

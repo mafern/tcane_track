@@ -2,18 +2,18 @@
 
 Functions
 ---------
-compute_bivariate_normal_NLL(y_true, param)
-compute_centered_bivariate_normal_NLL(y_true, param)
+compute_bivariate_normal_nll(y_true, param)
+compute_centered_bivariate_normal_nll(y_true, param)
 
 """
 import tensorflow as tf
 import tensorflow_probability as tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "10 August 2022"
+__version__ = "24 August 2022"
 
 
-def compute_bivariate_normal_NLL(y_true, param):
+def compute_bivariate_normal_nll(y_true, param):
     """Negative log-likelihood loss using the bivariate normal distribution.
 
     Arguments
@@ -124,7 +124,7 @@ def compute_bivariate_normal_NLL(y_true, param):
     return tf.reduce_mean(loss, axis=-1)
 
 
-def compute_centered_bivariate_normal_NLL(y_true, param):
+def compute_centered_bivariate_normal_nll(y_true, param):
     """Negative log-likelihood loss using the centered (mu_u = mu_v = 0)
     bivariate normal distribution.
 
@@ -156,7 +156,7 @@ def compute_centered_bivariate_normal_NLL(y_true, param):
         of the param tensor, [mu_u, mu_v], are ignored.
 
     * For an explanation of how this code workswith the covariance matrix,
-        see the notes for the compute_bivariate_normal_NLL above.
+        see the notes for the compute_bivariate_normal_nll above.
 
     """
     b = tfp.bijectors.FillTriangular(upper=False)

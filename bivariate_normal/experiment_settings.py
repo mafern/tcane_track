@@ -2,13 +2,13 @@
 normal model.
 
 uncertainty_type : "bivariate_normal", "centered_bivariate_normal"
-    
-val_condition : "random", "years"  
+
+val_condition : "random", "years"
 
 """
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__date__ = "10 August 2022"
+__date__ = "24 August 2022"
 
 
 def get_settings(experiment_name):
@@ -264,7 +264,7 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-        
+
         # ---------------------------------------------
         # Tests
         "bivariate_normal_1202_AL48": {
@@ -367,7 +367,7 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-        
+
         # --------------------------------------------------
         # Centered (mu_u = mu_v = 0) bivariate normal
         "centered_bivariate_normal_101_EPCP24": {

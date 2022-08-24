@@ -14,7 +14,7 @@ import copy
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "10 August 2022"
+__version__ = "24 August 2022"
 
 
 def build_hurricane_data(data_path, settings, verbose=0):
@@ -172,7 +172,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
         & (df_raw["ftime(hr)"] == settings["leadtime"])
-    ]
+        ]
 
     if missing is not None:
         df = df.drop(df.index[df[y_names[0]] == missing])
@@ -188,7 +188,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
 
     # Split out the validation data
     if settings["test_condition"] is None:
-        pass
+        # These will be reset below.
+        x_test = None
+        y_test = None
+        df_test = None
     else:
         years = settings["years_test"]
         if verbose != 0:
@@ -207,11 +210,12 @@ def build_hurricane_data(data_path, settings, verbose=0):
         index = np.arange(0, settings["n_val"])
         if len(index) < 100:
             raise Warning("Are you sure you want n_val < 100?")
-
     elif settings["val_condition"] == "years":
         if verbose != 0:
             print("years" + str(settings["n_val"]) + " withheld for testing")
         index = df.index[df["year"].isin(settings["n_val"])]
+    else:
+        raise NotImplementedError
 
     df_val = df.iloc[index]
     x_val = df_val[x_names].to_numpy()
@@ -222,9 +226,9 @@ def build_hurricane_data(data_path, settings, verbose=0):
     df = df.reset_index(drop=True)
 
     if settings["test_condition"] is None:
-        df_test = df_val.copy()
         x_test = copy.deepcopy(x_val)
         y_test = copy.deepcopy(y_val)
+        df_test = df_val.copy()
 
     # Subsample training if desired
     if settings["n_train"] == "max":
