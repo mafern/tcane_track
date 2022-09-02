@@ -3,8 +3,6 @@
 # date: September 2, 2022
 
 import numpy as np
-import pytest
-
 import prediction_metrics
 
 
@@ -26,6 +24,12 @@ def test_get_errors():
 
     assert np.all(rmse != 0.0), "should get nonzero errors for wrong predictions"
 
+def test_compute_nll():
 
-if __name__ == "__main__":
-    test_get_errors()
+    # test that the negative log likelihood is very small when the prediction has near zero uncertainty
+    y_data = np.zeros((100, 5))
+    y_data[:, 2:4] = .00001
+    onehot_data = np.zeros((100, 2))
+    nll_vec = prediction_metrics.compute_nll(y_data, onehot_data)
+
+    assert np.all(nll_vec < 1.e-5)
