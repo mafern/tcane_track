@@ -1,8 +1,10 @@
 import pytest
-
-import matplotlib.pyplot as plt
 import numpy as np
 import mahalanobis
+
+__author__ = "Randal J Barnes and Elizabeth A. Barnes"
+__version__ = "02 September 2022"
+
 
 def test_compute_cdf():
     """Test the theoretical mahalanobi cdf.
