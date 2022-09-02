@@ -1,4 +1,6 @@
 # Unit testing test
+# authors: Randal J. Barnes and Elizabeth A. Barnes
+# date: September 2, 2022
 
 import numpy as np
 import prediction_metrics 
