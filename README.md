@@ -27,7 +27,7 @@ conda activate env-hurr-tfp
 pip install tensorflow==2.7.0
 pip install tensorflow-probability==0.15.0
 pip install --upgrade numpy scipy pandas statsmodels matplotlib seaborn 
-pip install --upgrade palettable progressbar2 tabulate icecream flake8
+pip install --upgrade palettable progressbar2 tabulate icecream flake8 pytest
 pip install --upgrade keras-tuner sklearn
 pip install --upgrade jupyterlab black isort jupyterlab_code_formatter
 pip install silence-tensorflow
