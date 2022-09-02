@@ -28,7 +28,7 @@ def test_compute_cdf():
     mu_v = 1.0
     sigma_u = 2.0
     sigma_v = 1.0
-    rho = -0.5
+    rho = -0.25
 
     mean = np.array([mu_u, mu_v])
     cov = np.array([[sigma_u**2, rho*sigma_v*sigma_u], [rho*sigma_v*sigma_u, sigma_v**2]])
