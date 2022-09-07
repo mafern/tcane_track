@@ -145,12 +145,12 @@ def plot_ring(
             besttrack_v,
             "s",
             color="k",
-            markersize=6,
+            markersize=5,
             label="BestTrack",
         )
 
     # plt.axis("equal")
-    plt.grid(visible=None)
+    # plt.grid(visible=None)
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
