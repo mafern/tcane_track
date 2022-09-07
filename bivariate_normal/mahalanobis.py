@@ -119,6 +119,38 @@ def plot_cdf(
 
     plt.axis("equal")
 
+def plot_ring(
+    mu_u,
+    mu_v,
+    sigma_u,
+    sigma_v,
+    rho,
+    besttrack_u=None,
+    besttrack_v=None,
+    colors=COLOR_DEFAULT,
+):
+    for i, p in enumerate(np.arange(9, 0, -1) / 10.0):
+        r = np.sqrt(-2.0 * (np.log(1 - p)))
+        x = r * sigma_u * np.cos(THETA) + mu_u
+        y = (
+            r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
+            + mu_v
+        )
+        plt.fill(x, y, color=colors[i], alpha=.2)
+
+
+    if besttrack_u is not None and besttrack_v is not None:
+        plt.plot(
+            besttrack_u,
+            besttrack_v,
+            "s",
+            color="k",
+            markersize=6,
+            label="BestTrack",
+        )
+
+    # plt.axis("equal")
+    plt.grid(visible=None)
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
