@@ -100,12 +100,7 @@ def plot_cdf(
             r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
             + mu_v
         )
-        plt.fill(x, y, color=colors[i])
-
-    # plot consensus and true label
-    plt.plot(
-        0, 0, "o", color="k", markersize=5, markerfacecolor="None", label="Consensus"
-    )
+        plt.fill(x, y, color=colors[i], alpha=.2, label=None)
 
     if besttrack_u is not None and besttrack_v is not None:
         plt.plot(
@@ -113,12 +108,11 @@ def plot_cdf(
             besttrack_v,
             "s",
             color="k",
-            markersize=6,
+            markersize=5,
             label="BestTrack",
         )
 
     plt.axis("equal")
-
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
