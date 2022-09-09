@@ -34,20 +34,20 @@ import palettable
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
 __version__ = "24 August 2022"
 
-
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
 
 
 def plot_cdf(
-    mu_u,
-    mu_v,
-    sigma_u,
-    sigma_v,
-    rho,
-    besttrack_u=None,
-    besttrack_v=None,
-    colors=COLOR_DEFAULT,
+        mu_u,
+        mu_v,
+        sigma_u,
+        sigma_v,
+        rho,
+        besttrack_u=None,
+        besttrack_v=None,
+        colors=COLOR_DEFAULT,
+        contours=np.arange(9, 0, -1) / 10.0,
 ):
     """Plot the Mahalanobis cdf.
 
@@ -93,12 +93,15 @@ def plot_cdf(
     * The equations for x and y come from the bottom of Page 2 in [3].
 
     """
-    for i, p in enumerate(np.arange(9, 0, -1) / 10.0):
+
+    contours = np.sort(contours)[::-1]
+
+    for i, p in enumerate(contours):
         r = np.sqrt(-2.0 * (np.log(1 - p)))
         x = r * sigma_u * np.cos(THETA) + mu_u
         y = (
-            r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
-            + mu_v
+                r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
+                + mu_v
         )
         plt.fill(x, y, color=colors[i], alpha=.2, label=None)
 
@@ -106,13 +109,14 @@ def plot_cdf(
         plt.plot(
             besttrack_u,
             besttrack_v,
-            "s",
+            "x",
             color="k",
             markersize=5,
             label="BestTrack",
         )
 
     plt.axis("equal")
+
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
