@@ -26,7 +26,7 @@ conda create --name env-hurr-tfp python=3.9
 conda activate env-hurr-tfp
 pip install tensorflow==2.7.0
 pip install tensorflow-probability==0.15.0
-pip install --upgrade numpy scipy pandas statsmodels matplotlib seaborn 
+pip install --upgrade numpy scipy pandas statsmodels matplotlib seaborn cmasher cmocean
 pip install --upgrade palettable progressbar2 tabulate icecream flake8 pytest
 pip install --upgrade keras-tuner sklearn
 pip install --upgrade jupyterlab black isort jupyterlab_code_formatter
@@ -37,10 +37,12 @@ pip install tqdm
 ### Credits
 This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu) and [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes) and Dr. Mark DeMaria. 
 
-#### Funding sources
+[//]: # (#### Funding sources)
 
 ### References
-[1] Elizabeth A. Barnes and Randal J. Barnes and Nicolas Gordillo, 2021, Adding Uncertainty to Neural Network Regression Tasks in the Geosciences, arXiv 2109.07250.
+[1] Barnes, Elizabeth A., Randal J. Barnes and Nicolas Gordillo, 2021: Adding Uncertainty to Neural Network Regression Tasks in the Geosciences, arXiv 2109.07250.
+
+[2] Barnes, Elizabeth A., Randal J. Barnes and Mark DeMaria, 2022: Sinh-arcsinh-normal distributions to add uncertainty to neural network regression tasks: applications to tropical cyclone intensity forecasts, preprint available at https://doi.org/10.31223/X51649.
 
 ### License
 This project is licensed under an MIT license.
