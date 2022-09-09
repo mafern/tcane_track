@@ -131,16 +131,17 @@ def plot_leadtime_predictions(df,
 
     # format plot
     format_spines(ax)
-    ax.grid(False)
 
-    # set the axes and ticks
-    plt.xlabel('longitude (deg.)')
-    plt.ylabel('latitude (deg.)')
+    # set grid lines
+    gl = ax.gridlines(crs=ct.crs.PlateCarree(), draw_labels=True,
+                      linewidth=.5, color='gray', alpha=0.5, linestyle='--')
+    gl.top_labels = False
+    gl.left_labels = False
 
     # setup legend
     plt.legend()
     handles, labels = plt.gca().get_legend_handles_labels()
-    plt.gca().legend(handles[:1], labels[:1])
+    plt.gca().legend(handles[:1], labels[:1], loc=2)
 
     # set storm title
     details = data_info.get_storm_details(df, 0)
