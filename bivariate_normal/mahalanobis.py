@@ -37,7 +37,6 @@ __version__ = "24 August 2022"
 
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
-DATA_CRS = ct.crs.PlateCarree()
 
 def plot_cdf(
         mu_u,
@@ -49,6 +48,7 @@ def plot_cdf(
         besttrack_v=None,
         colors=COLOR_DEFAULT,
         contours=np.arange(9, 0, -1) / 10.0,
+        data_crs=ct.crs.PlateCarree(),
 ):
     """Plot the Mahalanobis cdf.
 
@@ -104,7 +104,7 @@ def plot_cdf(
                 r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
                 + mu_v
         )
-        plt.fill(x, y, color=colors[i], alpha=.4, label=None, transform=DATA_CRS)
+        plt.fill(x, y, color=colors[i], alpha=.4, label=None, transform=data_crs)
 
     if besttrack_u is not None and besttrack_v is not None:
         plt.plot(
@@ -114,7 +114,7 @@ def plot_cdf(
             color="k",
             markersize=5,
             label="BestTrack",
-            transform=DATA_CRS,
+            transform=data_crs,
         )
 
     plt.axis("equal")
