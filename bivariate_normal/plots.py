@@ -7,7 +7,6 @@ import data_info
 
 import numpy as np
 
-MAP_PROJ = ct.crs.EqualEarth(central_longitude=0.)
 DATA_CRS = ct.crs.PlateCarree()
 KM_TO_DEG = 1. / 111
 
@@ -81,12 +80,12 @@ def plot_leadtime_predictions(df,
             print(str(lead_time) + ' dataframe is empty')
             continue
 
-        besttrack_u = df_plot["LONC"].values - KM_TO_DEG * df_plot["OBDX"].values
-        besttrack_v = df_plot["LATC"].values - KM_TO_DEG * df_plot["OBDY"].values
+        besttrack_u = df_plot["LONC"].values + KM_TO_DEG * df_plot["OBDX"].values
+        besttrack_v = df_plot["LATC"].values + KM_TO_DEG * df_plot["OBDY"].values
 
         mahalanobis.plot_cdf(
-            df_plot["LONC"].values - KM_TO_DEG * df_plot["mu_u"].values,
-            df_plot["LATC"].values - KM_TO_DEG * df_plot["mu_v"].values,
+            df_plot["LONC"].values + KM_TO_DEG * df_plot["mu_u"].values,
+            df_plot["LATC"].values + KM_TO_DEG * df_plot["mu_v"].values,
             KM_TO_DEG * df_plot["sigma_u"].values,
             KM_TO_DEG * df_plot["sigma_v"].values,
             df_plot["rho"].values,
@@ -94,7 +93,9 @@ def plot_leadtime_predictions(df,
             besttrack_v=besttrack_v,
             colors=COLOR,
             contours=contours,
+            data_crs=DATA_CRS,
         )
+
 
         # plot consensus prediction
         plt.plot(df_plot["LONC"].values,
@@ -121,8 +122,8 @@ def plot_leadtime_predictions(df,
 
     # connect the besttrack predictions
     plt.plot(
-        df["LONC"].values - KM_TO_DEG * df["OBDX"].values,
-        df["LATC"].values - KM_TO_DEG * df["OBDY"].values,
+        df["LONC"].values + KM_TO_DEG * df["OBDX"].values,
+        df["LATC"].values + KM_TO_DEG * df["OBDY"].values,
         "-",
         linewidth=.25,
         color="k",

@@ -133,7 +133,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
         x_names = [
             "NCT",
             "VMAX0",
-            "AVDX",
+            "AVDX",  # AVDX = -50, then the GFS forecast was 50 km west of the consensus longitude.
             "EMDX",
             "EGDX",
             "HWDX",
@@ -141,7 +141,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
             "EMDY",
             "EGDY",
             "HWDY",
-            "LONC",
+            "LONC",  # in degrees WEST
             "LATC",
             "VMXC",
             "DV12",
@@ -157,7 +157,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     else:
         x_names = settings["x_names"]
 
-    y_names = ["OBDX", "OBDY"]
+    y_names = ["OBDX", "OBDY"]  # OBDX<0 means that besttrack was 50 km west of the consensus.
     missing = -9999
 
     # The predicted local conditional distribution parameters are:
