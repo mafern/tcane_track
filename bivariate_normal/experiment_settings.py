@@ -1,5 +1,4 @@
-"""Hurricane prediction experimental settings for the bivariate
-normal model.
+"""Hurricane prediction experimental settings for the bivariate normal model.
 
 uncertainty_type : "bivariate_normal", "centered_bivariate_normal"
 
@@ -8,7 +7,7 @@ val_condition : "random", "years"
 """
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__date__ = "24 August 2022"
+__date__ = "28 October 2022"
 
 
 def get_settings(experiment_name):
@@ -368,8 +367,9 @@ def get_settings(experiment_name):
             "x_names": None,
         },
 
-        # --------------------------------------------------
+        # -------------------------------------------------
         # Centered (mu_u = mu_v = 0) bivariate normal
+        # -------------------------------------------------
         "centered_bivariate_normal_101_EPCP24": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": "centered_bivariate_normal",

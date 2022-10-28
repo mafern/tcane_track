@@ -15,19 +15,27 @@ build_bivariate_normal_model(hiddens, input_shape, output_shape,
 build_centered_bivariate_normal_model(hiddens, input_shape,
     output_shape, ridge_penalty, act_fun, rng_seed)
 
+Notes
+-----
+* The two model building methods are almost identical.  The only
+    substantive difference is that the "centered" version rescales
+    the mu_u and mu_v to ALWAYS be 0.
+
+
 """
 import numpy as np
-
+import silence_tensorflow.auto
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
+
 from custom_loss import compute_bivariate_normal_nll
 from custom_loss import compute_centered_bivariate_normal_nll
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "24 August 2022"
+__version__ = "28 October 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -167,7 +175,7 @@ def build_bivariate_normal_model(
     * The first layer of the network model normalizes the x input
         values automatically using a TensorFlow adaptive normalizer
 
-             tf.keras.layers.Normalization()
+            tf.keras.layers.Normalization()
 
         This means that the network inputs are the physical dimensioned
         values, and the internal normalizing constants travel with
