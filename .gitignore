@@ -16,6 +16,7 @@ saved_metrics/
 saved_predictions/
 model_metrics/
 documents/
+archive/
 
 # Apple stuff
 .DS_Store
