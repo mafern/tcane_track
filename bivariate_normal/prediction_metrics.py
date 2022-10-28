@@ -7,6 +7,7 @@ from scipy.stats import multivariate_normal
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
 __version__ = "24 August 2022"
 
+
 def get_mv_normal(y_data):
     mu_u, mu_v, sigma_u, sigma_v, rho = (
         y_data[0],
@@ -16,7 +17,11 @@ def get_mv_normal(y_data):
         y_data[4],
     )
     cov = np.array(
-        [[sigma_u ** 2, rho * sigma_v * sigma_u], [rho * sigma_v * sigma_u, sigma_v ** 2]])
+        [
+            [sigma_u**2, rho * sigma_v * sigma_u],
+            [rho * sigma_v * sigma_u, sigma_v**2],
+        ]
+    )
     rv = multivariate_normal([mu_u, mu_v], cov)
 
     return rv
@@ -67,6 +72,6 @@ def compute_pit(y_data, onehot_data):
 
     B = len(pit_hist[0])
     D = np.sqrt(1 / B * np.sum((pit_hist[0] - 1 / B) ** 2))
-    EDp = np.sqrt((1. - 1 / B) / (onehot_data.shape[0] * B))
+    EDp = np.sqrt((1.0 - 1 / B) / (onehot_data.shape[0] * B))
 
     return bins, pit_hist, D, EDp

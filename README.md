@@ -7,6 +7,9 @@ Neural networks are used to estimate consensus hurricane track errors, as well a
 This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 0.15.0 and numpy 1.21.4. 
 
 ## Order of Operations
+
+TODO: Update this section.
+
 ***
 * Step 1: ```_train_model_randomseeds.ipynb```
 * Step 2: ```_compute_metrics.ipynb```
@@ -48,7 +51,3 @@ This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://ba
 This project is licensed under an MIT license.
 
 MIT © [Elizabeth A. Barnes](https://github.com/eabarnes1010)
-
-
-
-

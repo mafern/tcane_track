@@ -44,11 +44,12 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
         )
 
     """
+
     def __init__(
-            self,
-            verbose=1,
-            interval=None,
-            figsize=(13, 7),
+        self,
+        verbose=1,
+        interval=None,
+        figsize=(13, 7),
     ):
         super().__init__()
         self.interval = interval
@@ -65,9 +66,15 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
         self.loss.append(logs.get("loss"))
         self.val_loss.append(logs.get("val_loss"))
 
-        if (self.interval is not None) and (epoch != 0) and (epoch % self.interval == 0):
+        if (
+            (self.interval is not None)
+            and (epoch != 0)
+            and (epoch % self.interval == 0)
+        ):
             if self.verbose == 2:
-                print(f"{epoch = }, loss = {self.loss[-1]:.5f}, val_loss = {self.val_loss[-1]:.5f}")
+                print(
+                    f"{epoch = }, loss = {self.loss[-1]:.5f}, val_loss = {self.val_loss[-1]:.5f}"
+                )
 
             elif self.verbose > 2:
                 self.make_plot(epoch, logs)

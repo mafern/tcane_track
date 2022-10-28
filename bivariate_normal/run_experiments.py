@@ -19,13 +19,14 @@ from train_model import train_model
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
 __version__ = "28 October 2022"
 
+
 def run_experiments(
-        exp_name_list,
-        data_path,
-        model_path,
-        overwrite_model=False,
-        verbose=1,
-        interval=None
+    exp_name_list,
+    data_path,
+    model_path,
+    overwrite_model=False,
+    verbose=1,
+    interval=None,
 ):
 
     """Loop through the defined experiments."""
@@ -104,7 +105,7 @@ def run_experiments(
                     onehot_val,
                     settings,
                     verbose,
-                    interval
+                    interval,
                 )
                 pprint(fit_summary, width=80)
 

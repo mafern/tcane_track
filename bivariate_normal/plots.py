@@ -8,11 +8,11 @@ import data_info
 import numpy as np
 
 DATA_CRS = ct.crs.PlateCarree()
-KM_TO_DEG = 1. / 111
+KM_TO_DEG = 1.0 / 111
 
 
 def set_plot_rc():
-    ### for white background...
+    # for white background...
     plt.rc("text", usetex=True)
     plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Avant Garde"]})
     plt.rc("savefig", facecolor="white")
@@ -52,32 +52,36 @@ def format_spines(ax):
 
 #     ax.yaxis.grid(zorder=1,color='dimgrey',alpha=0.35)
 
+
 def draw_coastlines(ax):
     # ADD COASTLINES
     # ax.set_global()
     land_feature = cfeature.NaturalEarthFeature(
-        category='physical',
-        name='land',
-        scale='50m',
-        facecolor=(.95, .95, .95),
-        edgecolor='k',
-        linewidth=.5,
+        category="physical",
+        name="land",
+        scale="50m",
+        facecolor=(0.95, 0.95, 0.95),
+        edgecolor="k",
+        linewidth=0.5,
         zorder=0,
     )
     ax.add_feature(land_feature)
 
 
-def plot_leadtime_predictions(df,
-                              ax,
-                              leadtimes=(24, 48, 72, 96, 120),
-                              contours=np.arange(.1, 1., .1),
-                              ):
-    COLOR = cmr.take_cmap_colors("cmr.pride", len(contours), cmap_range=(0.2, 0.8), return_fmt="hex")
+def plot_leadtime_predictions(
+    df,
+    ax,
+    leadtimes=(24, 48, 72, 96, 120),
+    contours=np.arange(0.1, 1.0, 0.1),
+):
+    COLOR = cmr.take_cmap_colors(
+        "cmr.pride", len(contours), cmap_range=(0.2, 0.8), return_fmt="hex"
+    )
 
     for lead_time in leadtimes:
         df_plot = df.loc[(df["ftime(hr)"] == lead_time)]
         if df_plot.empty:
-            print(str(lead_time) + ' dataframe is empty')
+            print(str(lead_time) + " dataframe is empty")
             continue
 
         besttrack_u = df_plot["LONC"].values + KM_TO_DEG * df_plot["OBDX"].values
@@ -96,36 +100,37 @@ def plot_leadtime_predictions(df,
             data_crs=DATA_CRS,
         )
 
-
         # plot consensus prediction
-        plt.plot(df_plot["LONC"].values,
-                 df_plot["LATC"].values,
-                 marker='o',
-                 markerfacecolor='None',
-                 markeredgewidth=.25,
-                 linestyle='',
-                 markersize=3,
-                 color='k',
-                 label='Consensus',
-                 transform=DATA_CRS,
-                 )
+        plt.plot(
+            df_plot["LONC"].values,
+            df_plot["LATC"].values,
+            marker="o",
+            markerfacecolor="None",
+            markeredgewidth=0.25,
+            linestyle="",
+            markersize=3,
+            color="k",
+            label="Consensus",
+            transform=DATA_CRS,
+        )
 
-        plt.text(df_plot["LONC"].values,
-                 df_plot["LATC"].values,
-                 df_plot['ftime(hr)'].values[0],
-                 color="k",
-                 fontsize=8,
-                 horizontalalignment='left',
-                 verticalalignment='bottom',
-                 transform=DATA_CRS,
-                 )
+        plt.text(
+            df_plot["LONC"].values,
+            df_plot["LATC"].values,
+            df_plot["ftime(hr)"].values[0],
+            color="k",
+            fontsize=8,
+            horizontalalignment="left",
+            verticalalignment="bottom",
+            transform=DATA_CRS,
+        )
 
     # connect the besttrack predictions
     plt.plot(
         df["LONC"].values + KM_TO_DEG * df["OBDX"].values,
         df["LATC"].values + KM_TO_DEG * df["OBDY"].values,
         "-",
-        linewidth=.25,
+        linewidth=0.25,
         color="k",
         transform=DATA_CRS,
     )
@@ -134,8 +139,14 @@ def plot_leadtime_predictions(df,
     format_spines(ax)
 
     # set grid lines
-    gl = ax.gridlines(crs=ct.crs.PlateCarree(), draw_labels=True,
-                      linewidth=.5, color='gray', alpha=0.5, linestyle='--')
+    gl = ax.gridlines(
+        crs=ct.crs.PlateCarree(),
+        draw_labels=True,
+        linewidth=0.5,
+        color="gray",
+        alpha=0.5,
+        linestyle="--",
+    )
     gl.top_labels = False
     gl.left_labels = False
 
@@ -146,7 +157,7 @@ def plot_leadtime_predictions(df,
 
     # set storm title
     details = data_info.get_storm_details(df, 0)
-    details = details[:details.rfind(' @')]
+    details = details[: details.rfind(" @")]
     plt.title(details)
 
     draw_coastlines(ax)

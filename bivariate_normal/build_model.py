@@ -17,10 +17,10 @@ build_centered_bivariate_normal_model(hiddens, input_shape,
 
 Notes
 -----
-* The two model building methods are almost identical.  The only
+* TODO: The two model building methods are almost identical.  The only
     substantive difference is that the "centered" version rescales
-    the mu_u and mu_v to ALWAYS be 0.
-
+    the mu_u and mu_v to ALWAYS be 0. We should combine the routines
+    and include an "if" block to separate the two.
 
 """
 import numpy as np
@@ -105,12 +105,12 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
 
 
 def build_bivariate_normal_model(
-        x_train,
-        onehot_train,
-        hiddens,
-        ridge_penalty=0.0,
-        act_fun="relu",
-        rng_seed=999,
+    x_train,
+    onehot_train,
+    hiddens,
+    ridge_penalty=0.0,
+    act_fun="relu",
+    rng_seed=999,
 ):
     """Build the fully-connected bivariate normal network architecture with
     internal scaling.
@@ -380,12 +380,12 @@ def build_bivariate_normal_model(
 
 
 def build_centered_bivariate_normal_model(
-        x_train,
-        onehot_train,
-        hiddens,
-        ridge_penalty=0.0,
-        act_fun="relu",
-        rng_seed=999,
+    x_train,
+    onehot_train,
+    hiddens,
+    ridge_penalty=0.0,
+    act_fun="relu",
+    rng_seed=999,
 ):
     """Build the fully-connected centered (mu_u = mu_v = 0) bivariate
     normal network architecture with internal scaling.

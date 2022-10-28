@@ -15,7 +15,10 @@ from training_instrumentation import TrainingInstrumentation
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
 __version__ = "28 October 2022"
 
-def train_model(model, x_train, onehot_train, x_val, onehot_val, settings, verbose, interval):
+
+def train_model(
+    model, x_train, onehot_train, x_val, onehot_val, settings, verbose, interval
+):
     """Train the bivariate normal model.
 
     Arguments

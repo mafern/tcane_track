@@ -12,7 +12,6 @@ __date__ = "28 October 2022"
 
 def get_settings(experiment_name):
     experiments = {
-        # --------------------------------------------------
         "bivariate_normal_101_EPCP24": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": "bivariate_normal",
@@ -263,7 +262,6 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-
         # ---------------------------------------------
         # Tests
         "bivariate_normal_1202_AL48": {
@@ -366,7 +364,6 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-
         # -------------------------------------------------
         # Centered (mu_u = mu_v = 0) bivariate normal
         # -------------------------------------------------

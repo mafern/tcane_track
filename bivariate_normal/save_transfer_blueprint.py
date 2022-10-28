@@ -29,17 +29,17 @@ import json
 import toolbox
 
 __author__ = "Randal J. Barnes and Elizabeth A. Barnes"
-__date__ = "25 October 2022"
+__date__ = "28 October 2022"
 
 
 def save_transfer_blueprint(
-        data_summary,
-        fit_summary,
-        model,
-        model_path,
-        model_name,
-        settings,
-        version,
+    data_summary,
+    fit_summary,
+    model,
+    model_path,
+    model_name,
+    settings,
+    version,
 ):
     """Save the model, weights, history, and metadata.
 
@@ -86,9 +86,9 @@ def save_transfer_blueprint(
 
     # InputLayerTraits
     input_traits = {
-        "n_input" : model.get_layer("normalization").adapt_mean.shape[0],
-        "mean" : model.get_layer("normalization").adapt_mean.numpy(),
-        "std" : np.sqrt(model.get_layer("normalization").adapt_variance.numpy()),
+        "n_input": model.get_layer("normalization").adapt_mean.shape[0],
+        "mean": model.get_layer("normalization").adapt_mean.numpy(),
+        "std": np.sqrt(model.get_layer("normalization").adapt_variance.numpy()),
     }
     blueprint["input_traits"] = input_traits
 
@@ -96,7 +96,7 @@ def save_transfer_blueprint(
     hidden_traits = []
 
     for i in range(len(settings["hiddens"])):
-        if i==0:
+        if i == 0:
             layer_name = "dense"
         else:
             layer_name = "dense" + f"_{i}"
@@ -105,11 +105,11 @@ def save_transfer_blueprint(
         bias = model.get_layer(layer_name).get_weights()[1]
         hidden_traits.append(
             {
-                "n_input_connections" : weights.shape[0],
-                "n_output_connections" : weights.shape[1],
-                "weights" : weights,
-                "bias" : bias,
-                "activation" : settings["act_fun"].upper(),
+                "n_input_connections": weights.shape[0],
+                "n_output_connections": weights.shape[1],
+                "weights": weights,
+                "bias": bias,
+                "activation": settings["act_fun"].upper(),
             }
         )
     blueprint["hidden_traits"] = hidden_traits
@@ -130,7 +130,7 @@ def save_transfer_blueprint(
         bias = model.get_layer(traits[0]).get_weights()[1][0]
 
         if traits[2] is not None:
-            mean =  model.get_layer(traits[2]).offset
+            mean = model.get_layer(traits[2]).offset
             std = model.get_layer(traits[2]).scale
         else:
             mean = 0.0
@@ -138,12 +138,12 @@ def save_transfer_blueprint(
 
         output_traits.append(
             {
-                "n_input_connections" : weights.shape[0],
-                "weights" : weights,
-                "bias" : bias,
-                "transformation" : traits[1],
-                "mean" : mean,
-                "std" : std,
+                "n_input_connections": weights.shape[0],
+                "weights": weights,
+                "bias": bias,
+                "transformation": traits[1],
+                "mean": mean,
+                "std": std,
             }
         )
     blueprint["output_traits"] = output_traits
