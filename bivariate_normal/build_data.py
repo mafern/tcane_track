@@ -304,6 +304,11 @@ def build_data(data_path, settings, verbose=0):
             sigfigs=1,
         )
 
+    # create valtest set
+    x_valtest = np.concatenate((x_val, x_test), axis=0)
+    onehot_valtest = np.concatenate((onehot_val, onehot_test), axis=0)
+    df_valtest = pd.concat([df_val, df_test])
+
     return (
         data_summary,
         x_train,

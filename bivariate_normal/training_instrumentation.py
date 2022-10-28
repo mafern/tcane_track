@@ -18,15 +18,14 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     Parameters
     ----------
-    verbose: int, dafault=1
+    verbose: int, dafault=0
         0 = no output
         1 = plot at the end of training only (default)
         2 = update text each interval + plot at the end of training
         3 = plot each interval
 
-    interval: int, default=1
-        Number of epochs (steps) between refreshing the instruments.  By
-        default, interval=1 and the instruments are updated every epoch.
+    interval: int, default=None
+        Number of epochs (steps) between refreshing the instruments.
 
     figsize: (float, float), default=(13, 7)
         Size of the instrumentation panel.
@@ -47,7 +46,7 @@ class TrainingInstrumentation(tf.keras.callbacks.Callback):
 
     def __init__(
         self,
-        verbose=1,
+        verbose=0,
         interval=None,
         figsize=(13, 7),
     ):
