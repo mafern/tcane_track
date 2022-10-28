@@ -3,21 +3,21 @@ arrays for the bivariate normal model.
 
 Functions
 ---------
-build_hurricane_data(data_path, settings, verbose=0)
+build_data(data_path, settings, verbose=0)
 
 """
-import pprint
-
+import copy
 import numpy as np
 import pandas as pd
-import copy
+import pprint
+
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "24 August 2022"
+__version__ = "28 October 2022"
 
 
-def build_hurricane_data(data_path, settings, verbose=0):
+def build_data(data_path, settings, verbose=0):
     """Build the training, validation, and testing tensors for the
     bivariate normal and centered bivariate normal models.
 
@@ -157,7 +157,10 @@ def build_hurricane_data(data_path, settings, verbose=0):
     else:
         x_names = settings["x_names"]
 
-    y_names = ["OBDX", "OBDY"]  # OBDX<0 means that besttrack was 50 km west of the consensus.
+    y_names = [
+        "OBDX",
+        "OBDY",
+    ]  # OBDX<0 means that besttrack was 50 km west of the consensus.
     missing = -9999
 
     # The predicted local conditional distribution parameters are:
@@ -172,7 +175,7 @@ def build_hurricane_data(data_path, settings, verbose=0):
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
         & (df_raw["ftime(hr)"] == settings["leadtime"])
-        ]
+    ]
 
     if missing is not None:
         df = df.drop(df.index[df[y_names[0]] == missing])

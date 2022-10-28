@@ -9,7 +9,6 @@
 #*.h5
 #*.json
 
-archive/
 checkpoints/
 figures/
 saved_models/

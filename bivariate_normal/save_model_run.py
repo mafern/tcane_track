@@ -9,22 +9,22 @@ save_model_run(data_summary, fit_summary, model, model_path,
 import json
 import pickle
 
+import silence_tensorflow.auto
 import tensorflow as tf
-
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__date__ = "24 August 2022"
+__date__ = "28 October 2022"
 
 
 def save_model_run(
-        data_summary,
-        fit_summary,
-        model,
-        model_path,
-        model_name,
-        settings,
-        version,
+    data_summary,
+    fit_summary,
+    model,
+    model_path,
+    model_name,
+    settings,
+    version,
 ):
     """Save the model, weights, history, and metadata.
 
@@ -65,7 +65,7 @@ def save_model_run(
             model, model_path + model_name + "_model", overwrite=True
         )
     except Exception:
-        print('unable to save the model, skipping and saving the weights.')
+        print("unable to save the model, skipping and saving the weights.")
 
     model.save_weights(model_path + model_name + "_weights.h5")
 

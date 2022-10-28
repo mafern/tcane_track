@@ -15,19 +15,27 @@ build_bivariate_normal_model(hiddens, input_shape, output_shape,
 build_centered_bivariate_normal_model(hiddens, input_shape,
     output_shape, ridge_penalty, act_fun, rng_seed)
 
+Notes
+-----
+* TODO: The two model building methods are almost identical.  The only
+    substantive difference is that the "centered" version rescales
+    the mu_u and mu_v to ALWAYS be 0. We should combine the routines
+    and include an "if" block to separate the two.
+
 """
 import numpy as np
-
+import silence_tensorflow.auto
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
+
 from custom_loss import compute_bivariate_normal_nll
 from custom_loss import compute_centered_bivariate_normal_nll
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "24 August 2022"
+__version__ = "28 October 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -97,12 +105,12 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
 
 
 def build_bivariate_normal_model(
-        x_train,
-        onehot_train,
-        hiddens,
-        ridge_penalty=0.0,
-        act_fun="relu",
-        rng_seed=999,
+    x_train,
+    onehot_train,
+    hiddens,
+    ridge_penalty=0.0,
+    act_fun="relu",
+    rng_seed=999,
 ):
     """Build the fully-connected bivariate normal network architecture with
     internal scaling.
@@ -167,7 +175,7 @@ def build_bivariate_normal_model(
     * The first layer of the network model normalizes the x input
         values automatically using a TensorFlow adaptive normalizer
 
-             tf.keras.layers.Normalization()
+            tf.keras.layers.Normalization()
 
         This means that the network inputs are the physical dimensioned
         values, and the internal normalizing constants travel with
@@ -372,12 +380,12 @@ def build_bivariate_normal_model(
 
 
 def build_centered_bivariate_normal_model(
-        x_train,
-        onehot_train,
-        hiddens,
-        ridge_penalty=0.0,
-        act_fun="relu",
-        rng_seed=999,
+    x_train,
+    onehot_train,
+    hiddens,
+    ridge_penalty=0.0,
+    act_fun="relu",
+    rng_seed=999,
 ):
     """Build the fully-connected centered (mu_u = mu_v = 0) bivariate
     normal network architecture with internal scaling.

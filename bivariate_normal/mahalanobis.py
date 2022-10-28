@@ -38,6 +38,7 @@ __version__ = "24 August 2022"
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
 
+
 def plot_cdf(
         mu_u,
         mu_v,
