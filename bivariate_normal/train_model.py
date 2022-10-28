@@ -99,4 +99,4 @@ def train_model(
         "loss_valid": history.history["val_loss"][best_epoch],
     }
 
-    return model, fit_summary
+    return model, fit_summary, history

@@ -11,7 +11,10 @@ import tensorflow as tf
 
 from build_data import build_data
 import build_model
+import compute_metrics
+import compute_predictions
 import experiment_settings
+import model_diagnostics
 from save_model_run import save_model_run
 from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
@@ -20,12 +23,14 @@ __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
 __version__ = "28 October 2022"
 
 
-def run_experiments(
+def train_experiments(
     exp_name_list,
     data_path,
     model_path,
+    metrics_path,
+    predictions_path,
     overwrite_model=False,
-    verbose=1,
+    verbose=0,
     interval=None,
 ):
 
@@ -53,6 +58,7 @@ def run_experiments(
                 tf.random.set_seed(rng_seed)
 
                 # Build the track data tensors for a bivariate normal model.
+                # create valtest set
                 (
                     data_summary,
                     x_train,
@@ -62,7 +68,7 @@ def run_experiments(
                     x_test,
                     onehot_test,
                     x_valtest,
-                    y_valtest,
+                    onehot_valtest,
                     df_train,
                     df_val,
                     df_test,
@@ -97,7 +103,7 @@ def run_experiments(
                 else:
                     print(f"training {model_savename}")
 
-                model, fit_summary = train_model(
+                model, fit_summary, history = train_model(
                     model,
                     x_train,
                     onehot_train,
@@ -128,3 +134,19 @@ def run_experiments(
                     settings,
                     __version__,
                 )
+
+                # Additional plots and metrics
+                model_diagnostics.plot_history(history, model_name)
+
+                # save metrics
+                # metric_filename = metrics_path + model_name + '_metrics.pickle'
+                # __ = compute_metrics.save_metrics(
+                #     model, settings, exp_name, metric_filename, x_train, onehot_train, x_val, onehot_val, x_test, onehot_test, x_valtest,
+                #     onehot_valtest
+                #     )
+
+                # # save predictions
+                # predictions_filename = predictions_path + model_name + '_testing_predictions.csv'
+                # __ = compute_predictions.save_predictions(
+                #     model, settings, predictions_filename, df_test, x_test, onehot_test,
+                #     )
