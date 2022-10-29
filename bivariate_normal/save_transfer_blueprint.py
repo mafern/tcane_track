@@ -29,25 +29,22 @@ import json
 import toolbox
 
 __author__ = "Randal J. Barnes and Elizabeth A. Barnes"
-__date__ = "28 October 2022"
+__date__ = "29 October 2022"
 
 
 def save_transfer_blueprint(
     data_summary,
-    fit_summary,
     model,
     model_path,
     model_name,
     settings,
-    version,
+    x_test,
 ):
     """Save the model, weights, history, and metadata.
 
     Arguments
     ---------
     data_summary : dict
-
-    fit_summary : dict
 
     model : tensorflow.keras.models.Model
 
@@ -66,8 +63,9 @@ def save_transfer_blueprint(
     settings : dict
         Dictionary of experiment settings for the run.
 
-    version : str
-        Version of the train_intensity notebook.
+    x_test : numpy.ndarray
+        The test split of the x data.
+        shape = [n_val, n_features].
 
     Returns
     -------
@@ -118,11 +116,11 @@ def save_transfer_blueprint(
     output_traits = []
 
     OUTPUT_CHANNEL_TRAITS = [
-        ("mu_U_unit", "LINEAR", "mu_u_unit"),
-        ("mu_V_unit", "LINEAR", "mu_v_unit"),
-        ("alpha_unit", "SOFTPLUS", "sigma_u_unit"),
-        ("beta_unit", "SOFTPLUS", "sigma_v_unit"),
-        ("gamma_unit", "TANH", None),
+        ("mu_u_raw_unit",    "LINEAR",   "mu_u_unit"),
+        ("mu_v_raw_unit",    "LINEAR",   "mu_v_unit"),
+        ("sigma_u_raw_unit", "SOFTPLUS", "sigma_u_unit"),
+        ("sigma_v_raw_unit", "SOFTPLUS", "sigma_v_unit"),
+        ("rho_raw_unit",     "TANH",     None),
     ]
 
     for traits in OUTPUT_CHANNEL_TRAITS:
@@ -147,6 +145,12 @@ def save_transfer_blueprint(
             }
         )
     blueprint["output_traits"] = output_traits
+
+    # Append test cases.
+    blueprint["test_cases"] = {
+        "x_test": x_test[0:2],
+        "predictions": model.predict(x_test[0:2]),
+    }
 
     with open(model_path + model_name + "_blueprint.json", "w") as handle:
         json.dump(blueprint, handle, indent="   ", cls=toolbox.NumpyEncoder)

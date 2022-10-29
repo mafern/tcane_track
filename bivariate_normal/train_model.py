@@ -2,7 +2,7 @@
 
 Functions
 ---------
-train_model(model, x_train, onehot_train, x_val, onehot_val, settings, verbose, interval)
+train_model(model, x_train, onehot_train, x_val, onehot_val, settings)
 
 """
 import time
@@ -10,15 +10,11 @@ import numpy as np
 import silence_tensorflow.auto
 import tensorflow as tf
 
-from training_instrumentation import TrainingInstrumentation
-
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "28 October 2022"
+__version__ = "29 October 2022"
 
 
-def train_model(
-    model, x_train, onehot_train, x_val, onehot_val, settings, verbose, interval
-):
+def train_model(model, x_train, onehot_train, x_val, onehot_val, settings):
     """Train the bivariate normal model.
 
     Arguments
@@ -48,15 +44,6 @@ def train_model(
     settings : dict
         Dictionary of experiment settings for the run.
 
-    verbose: int, dafault=0
-        0 = no output
-        1 = plot at the end of training only
-        2 = update text each interval + plot at the end of training
-        3 = plot each interval
-
-    interval: int, default=1
-        Number of epochs (steps) between refreshing the instruments.  By
-        default, interval=1, and the instruments are updated ever epoch.
     """
     earlystoping_callback = tf.keras.callbacks.EarlyStopping(
         monitor="val_loss",
@@ -66,14 +53,8 @@ def train_model(
         verbose=1,
     )
 
-    training_callback = TrainingInstrumentation(
-        verbose=verbose,
-        interval=interval,
-    )
-
     callbacks = [
         earlystoping_callback,
-        training_callback,
     ]
 
     # train the network
