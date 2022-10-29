@@ -20,7 +20,7 @@ from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "28 October 2022"
+__version__ = "29 October 2022"
 
 
 def train_experiments(
@@ -30,8 +30,6 @@ def train_experiments(
     metrics_path,
     predictions_path,
     overwrite_model=False,
-    verbose=0,
-    interval=None,
 ):
 
     """Loop through the defined experiments."""
@@ -97,7 +95,7 @@ def train_experiments(
 
                 # Check if the model exists and overwirte is off.
                 model_savename = model_path + model_name + "_weights.h5"
-                if os.path.exists(model_savename) and overwrite_model == False:
+                if os.path.exists(model_savename) and overwrite_model is False:
                     print(f"{model_savename} already exists. Skipping...")
                     continue
                 else:
@@ -110,8 +108,6 @@ def train_experiments(
                     x_val,
                     onehot_val,
                     settings,
-                    verbose,
-                    interval,
                 )
                 pprint(fit_summary, width=80)
 
@@ -127,12 +123,11 @@ def train_experiments(
 
                 save_transfer_blueprint(
                     data_summary,
-                    fit_summary,
                     model,
                     model_path,
                     model_name,
                     settings,
-                    __version__,
+                    x_test,
                 )
 
                 # Additional plots and metrics

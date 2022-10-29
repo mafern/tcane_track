@@ -17,11 +17,11 @@ tf.config.set_visible_devices([], "GPU")  # turn-off tensorflow-metal if it is o
 np.warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "28 October 2022"
+__version__ = "29 October 2022"
 
 # List of experiments to run
 EXP_NAME_LIST = (
-    "bivariate_normal_101_EPCP24",
+    "bivariate_normal_000_EPCP24",          # small test case
 
 )
 
@@ -33,9 +33,7 @@ if __name__ == "__main__":
         MODEL_PATH,
         METRICS_PATH,
         PREDICTIONS_PATH,
-        overwrite_model=False,
-        verbose=2,
-        interval=200,
+        overwrite_model=True,
     )
     elapsed_time = time.time() - start_time
     print(f"Total elapsed time: {elapsed_time:.2f} seconds")

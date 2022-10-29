@@ -285,90 +285,90 @@ def build_bivariate_normal_model(
     v_std = np.std(onehot_train[:, 1])
 
     # Units to predict the conditional expect value of u.
-    mu_U_unit = tf.keras.layers.Dense(
+    mu_u_raw_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_U_unit",
+        name="mu_u_raw_unit",
     )(x)
 
     mu_u_unit = tf.keras.layers.Rescaling(
         scale=u_std,
         offset=u_avg,
         name="mu_u_unit",
-    )(mu_U_unit)
+    )(mu_u_raw_unit)
 
     # Units to predict the conditional expect value of v.
-    mu_V_unit = tf.keras.layers.Dense(
+    mu_v_raw_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_V_unit",
+        name="mu_v_raw_unit",
     )(x)
 
     mu_v_unit = tf.keras.layers.Rescaling(
         scale=v_std,
         offset=v_avg,
         name="mu_v_unit",
-    )(mu_V_unit)
+    )(mu_v_raw_unit)
 
     # Units to predict the conditional standard deviation of u.
-    alpha_unit = tf.keras.layers.Dense(
+    sigma_u_raw_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="alpha_unit",
+        name="sigma_u_raw_unit",
     )(x)
 
-    sigma_U_unit = Softplus(
-        name="sigma_U_unit",
-    )(alpha_unit)
+    sigma_u_prescale_unit = Softplus(
+        name="sigma_u_prescale_unit",
+    )(sigma_u_raw_unit)
 
     sigma_u_unit = tf.keras.layers.Rescaling(
         scale=u_std,
         offset=0.0,
         name="sigma_u_unit",
-    )(sigma_U_unit)
+    )(sigma_u_prescale_unit)
 
     # Units to predict the conditional standard deviation of v.
-    beta_unit = tf.keras.layers.Dense(
+    sigma_v_raw_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="beta_unit",
+        name="sigma_v_raw_unit",
     )(x)
 
-    sigma_V_unit = Softplus(
-        name="sigma_V_unit",
-    )(beta_unit)
+    sigma_v_prescale_unit = Softplus(
+        name="sigma_v_prescale_unit",
+    )(sigma_v_raw_unit)
 
     sigma_v_unit = tf.keras.layers.Rescaling(
         scale=v_std,
         offset=0.0,
         name="sigma_v_unit",
-    )(sigma_V_unit)
+    )(sigma_v_prescale_unit)
 
     # Units to predict the conditional correlation of u and v.
-    gamma_unit = tf.keras.layers.Dense(
+    rho_raw_unit = tf.keras.layers.Dense(
         units=1,
         activation="linear",
         use_bias=True,
         bias_initializer=tf.keras.initializers.Zeros(),
         kernel_initializer=tf.keras.initializers.Zeros(),
-        name="gamma_unit",
+        name="rho_raw_unit",
     )(x)
 
     rho_unit = Tanh(
         name="rho_unit",
-    )(gamma_unit)
+    )(rho_raw_unit)
 
     # Stitch everything together.
     output_layer = tf.keras.layers.concatenate(

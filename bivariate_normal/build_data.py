@@ -61,13 +61,13 @@ def build_data(data_path, settings, verbose=0):
 
     x_test : numpy.ndarray
         The test split of the x data.
-        shape = [n_val, n_features].
+        shape = [n_test, n_features].
 
     onehot_test : numpy.ndarray
         The test split of the y data. The first column holds ODBX,
         the second column holds ODBY. The remaining three columns are
         filled with zeros.
-        shape = [n_val, 5].
+        shape = [n_test, 5].
 
     x_valtest : numpy.ndarray
         The union of the test and validation splits of the x data.

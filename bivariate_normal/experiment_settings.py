@@ -12,6 +12,38 @@ __date__ = "28 October 2022"
 
 def get_settings(experiment_name):
     experiments = {
+        # -------------------------------------
+        # Small test case
+        # -------------------------------------
+        "bivariate_normal_000_EPCP24": {
+            "filename": "nnfit_vlist_02-Jun-2022.dat",
+            "uncertainty_type": "bivariate_normal",
+            "leadtime": 24,
+            "basin": "EP|CP",
+            "undersample": False,
+            "hiddens": [5, 5],
+            "dropout_rate": [0.0, 0.0, 0.0],
+            "ridge_param": [0.0, 0.0],
+            "learning_rate": 0.0001,
+            "momentum": 0.9,
+            "nesterov": True,
+            "batch_size": 64,
+            "rng_seed_list": [123],
+            "rng_seed": None,
+            "act_fun": "relu",
+            "n_epochs": 25_000,
+            "patience": 250,
+            "test_condition": "years",
+            "years_test": [2019, ],
+            "val_condition": "random",
+            "n_val": 200,
+            "n_train": "max",
+            "x_names": None,
+        },
+
+        # -------------------------------------
+        # Bivariate-normal experiments
+        # -------------------------------------
         "bivariate_normal_101_EPCP24": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": "bivariate_normal",
@@ -262,8 +294,10 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-        # ---------------------------------------------
+
+        # -------------------------------------
         # Tests
+        # -------------------------------------
         "bivariate_normal_1202_AL48": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": "bivariate_normal",
@@ -364,9 +398,10 @@ def get_settings(experiment_name):
             "n_train": "max",
             "x_names": None,
         },
-        # -------------------------------------------------
+
+        # -------------------------------------
         # Centered (mu_u = mu_v = 0) bivariate normal
-        # -------------------------------------------------
+        # -------------------------------------
         "centered_bivariate_normal_101_EPCP24": {
             "filename": "nnfit_vlist_02-Jun-2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
