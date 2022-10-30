@@ -20,7 +20,7 @@ from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "29 October 2022"
+__version__ = "30 October 2022"
 
 
 def train_experiments(
@@ -96,10 +96,10 @@ def train_experiments(
                 # Check if the model exists and overwirte is off.
                 model_savename = model_path + model_name + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
-                    print(f"{model_savename} already exists. Skipping...")
+                    print(f"Saved {model_name} already exists. Skipping...")
                     continue
                 else:
-                    print(f"training {model_savename}")
+                    print(f"Training {model_name}")
 
                 model, fit_summary, history = train_model(
                     model,
