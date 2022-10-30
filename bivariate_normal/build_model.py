@@ -12,16 +12,6 @@ make_model(settings, x_train, onehot_train, model_compile)
 build_bivariate_normal_model(hiddens, input_shape, output_shape,
     ridge_penalty, act_fun, rng_seed)
 
-build_centered_bivariate_normal_model(hiddens, input_shape,
-    output_shape, ridge_penalty, act_fun, rng_seed)
-
-Notes
------
-* TODO: The two model building methods are almost identical.  The only
-    substantive difference is that the "centered" version rescales
-    the mu_u and mu_v to ALWAYS be 0. We should combine the routines
-    and include an "if" block to separate the two.
-
 """
 import numpy as np
 import silence_tensorflow.auto
@@ -30,12 +20,10 @@ from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
-
 from custom_loss import compute_bivariate_normal_nll
-from custom_loss import compute_centered_bivariate_normal_nll
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "28 October 2022"
+__version__ = "30 October 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -63,43 +51,29 @@ class Tanh(keras.layers.Layer):
 
 def make_model(settings, x_train, onehot_train, model_compile=False):
     if settings["uncertainty_type"] == "bivariate_normal":
-        model = build_bivariate_normal_model(
-            x_train,
-            onehot_train,
-            hiddens=settings["hiddens"],
-            ridge_penalty=settings["ridge_param"],
-            act_fun=settings["act_fun"],
-            rng_seed=settings["rng_seed"],
-        )
-
-        if model_compile:
-            model.compile(
-                optimizer=optimizers.Adam(
-                    learning_rate=settings["learning_rate"],
-                ),
-                loss=compute_bivariate_normal_nll,
-            )
-
+        iscentered = False
     elif settings["uncertainty_type"] == "centered_bivariate_normal":
-        model = build_centered_bivariate_normal_model(
-            x_train,
-            onehot_train,
-            hiddens=settings["hiddens"],
-            ridge_penalty=settings["ridge_param"],
-            act_fun=settings["act_fun"],
-            rng_seed=settings["rng_seed"],
-        )
-
-        if model_compile:
-            model.compile(
-                optimizer=optimizers.Adam(
-                    learning_rate=settings["learning_rate"],
-                ),
-                loss=compute_centered_bivariate_normal_nll,
-            )
-
+        iscentered = True
     else:
         raise NotImplementedError
+
+    model = build_bivariate_normal_model(
+        x_train,
+        onehot_train,
+        hiddens=settings["hiddens"],
+        ridge_penalty=settings["ridge_param"],
+        act_fun=settings["act_fun"],
+        rng_seed=settings["rng_seed"],
+        iscentered=iscentered,
+    )
+
+    if model_compile:
+        model.compile(
+            optimizer=optimizers.Adam(
+                learning_rate=settings["learning_rate"],
+            ),
+            loss=compute_bivariate_normal_nll,
+        )
 
     return model
 
@@ -111,6 +85,7 @@ def build_bivariate_normal_model(
     ridge_penalty=0.0,
     act_fun="relu",
     rng_seed=999,
+    iscentered=False
 ):
     """Build the fully-connected bivariate normal network architecture with
     internal scaling.
@@ -138,6 +113,10 @@ def build_bivariate_normal_model(
 
     rng_seed : int
         Base random number seed for keras.
+
+    iscentered : boolean, default=False
+        If True, a centered bivariate normal distribution (mu_u = mu_v = 0) is
+        used, otherwise mu_u and mu_v are free to be trained.
 
     Returns
     -------
@@ -167,7 +146,9 @@ def build_bivariate_normal_model(
             [ mu_u ]
             [ mu_v ]
 
-        and the conditional variance/covariance matrix is given by
+        Note: if iscentered is True, mu_u and mu_v are fixed at 0.0 and
+        designated trainable = False. The conditional variance/covariance
+        matrix is given by
 
             [ sigma_u^2,           rho*sigma_u*sigma_v ]
             [ rho*sigma_u*sigma_v, sigma_v^2           ]
@@ -284,6 +265,20 @@ def build_bivariate_normal_model(
     v_avg = np.mean(onehot_train[:, 1])
     v_std = np.std(onehot_train[:, 1])
 
+    # Fix mu_u = mu_v = 0 if is iscentered.
+    if iscentered is True:
+        mu_trainable = False
+        u_scale = 0.0
+        u_offset = 0.0
+        v_scale = 0.0
+        v_offset = 0.0
+    else:
+        mu_trainable = True
+        u_scale = u_std
+        u_offset = u_avg
+        v_scale = v_std
+        v_offset = v_avg
+
     # Units to predict the conditional expect value of u.
     mu_u_raw_unit = tf.keras.layers.Dense(
         units=1,
@@ -292,11 +287,12 @@ def build_bivariate_normal_model(
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         name="mu_u_raw_unit",
+        trainable=mu_trainable,
     )(x)
 
     mu_u_unit = tf.keras.layers.Rescaling(
-        scale=u_std,
-        offset=u_avg,
+        scale=u_scale,
+        offset=u_offset,
         name="mu_u_unit",
     )(mu_u_raw_unit)
 
@@ -308,11 +304,12 @@ def build_bivariate_normal_model(
         bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
         name="mu_v_raw_unit",
+        trainable=mu_trainable,
     )(x)
 
     mu_v_unit = tf.keras.layers.Rescaling(
-        scale=v_std,
-        offset=v_avg,
+        scale=v_scale,
+        offset=v_offset,
         name="mu_v_unit",
     )(mu_v_raw_unit)
 
@@ -369,185 +366,6 @@ def build_bivariate_normal_model(
     rho_unit = Tanh(
         name="rho_unit",
     )(rho_raw_unit)
-
-    # Stitch everything together.
-    output_layer = tf.keras.layers.concatenate(
-        [mu_u_unit, mu_v_unit, sigma_u_unit, sigma_v_unit, rho_unit], axis=1
-    )
-
-    model = tf.keras.models.Model(inputs=inputs, outputs=output_layer)
-    return model
-
-
-def build_centered_bivariate_normal_model(
-    x_train,
-    onehot_train,
-    hiddens,
-    ridge_penalty=0.0,
-    act_fun="relu",
-    rng_seed=999,
-):
-    """Build the fully-connected centered (mu_u = mu_v = 0) bivariate
-    normal network architecture with internal scaling.
-
-    Arguments
-    ---------
-    x_train : numpy.ndarray
-        The training split of the x data.
-        shape = [n_train, n_features].
-
-    onehot_train : numpy.ndarray
-        The training split of the scaled y data is in the first column.
-        The remaining columns are filled with zeros. The number of columns
-        equal the number of distribution parameters.
-        shape = [n_train, n_parameters].
-
-    hiddens : list (integers)
-        Numeric list containing the number of neurons for each layer.
-
-    ridge_penalty : float, default=0.0
-        The L2 regularization penalty for the first layer.
-
-    act_fun : function, default="relu"
-        The activation function to use on the deep hidden layers.
-
-    rng_seed : int
-        Base random number seed for keras.
-
-    Returns
-    -------
-    model : tensorflow.keras.models.Model
-
-    Notes
-    -----
-    * The conditional mean parameters, [mu_u, mu_v], are fixed at 0.
-        This is accomplished by setting the Rescaling scale and offset
-        parameters to 0 for both the mu_u_unit and the mu_v_unit.
-
-    * See the notes for the build_bivariate_normal_model function for
-        more details. The two versions of this function are almost
-        identical.  The only differences are the details discussed in
-        the preceding note.
-    """
-    # set inputs
-    if len(hiddens) != len(ridge_penalty):
-        ridge_penalty = np.ones(np.shape(hiddens)) * ridge_penalty
-
-    # The avg and std for feature normalization are computed from x_train.
-    # Using the .adapt method, these are set once and do not change, but
-    # the constants travel with the model.
-    inputs = tf.keras.Input(shape=x_train.shape[1:])
-
-    normalizer = tf.keras.layers.Normalization()
-    normalizer.adapt(x_train)
-    x = normalizer(inputs)
-
-    # Initialize the hidden layers.
-    for ilayer, layer_size in enumerate(hiddens):
-        x = tf.keras.layers.Dense(
-            units=layer_size,
-            activation=act_fun,
-            use_bias=True,
-            kernel_regularizer=regularizers.l1_l2(l1=0.00, l2=ridge_penalty[ilayer]),
-            bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + ilayer),
-            kernel_initializer=tf.keras.initializers.RandomNormal(
-                seed=rng_seed + ilayer
-            ),
-        )(x)
-
-    # Compute the standard deviation of the training target data.
-    # These are used to implicitly normalize the target variates
-    # by rescaling the parameters. (See the notes above.)
-    u_std = np.std(onehot_train[:, 0])
-    v_std = np.std(onehot_train[:, 1])
-
-    # Units to fake-predict the conditional expect value of u.
-    mu_U_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_U_unit",
-        trainable=False,
-    )(x)
-
-    mu_u_unit = tf.keras.layers.Rescaling(
-        scale=0.0,
-        offset=0.0,
-        name="mu_u_unit",
-    )(mu_U_unit)
-
-    # Units to fake-predict the conditional expect value of v.
-    mu_V_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        kernel_initializer=tf.keras.initializers.RandomNormal(seed=rng_seed + 100),
-        name="mu_V_unit",
-        trainable=False,
-    )(x)
-
-    mu_v_unit = tf.keras.layers.Rescaling(
-        scale=0.0,
-        offset=0.0,
-        name="mu_v_unit",
-    )(mu_V_unit)
-
-    # Units to predict the conditional standard deviation of u.
-    alpha_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.Zeros(),
-        kernel_initializer=tf.keras.initializers.Zeros(),
-        name="alpha_unit",
-    )(x)
-
-    sigma_U_unit = Softplus(
-        name="sigma_U_unit",
-    )(alpha_unit)
-
-    sigma_u_unit = tf.keras.layers.Rescaling(
-        scale=u_std,
-        offset=0.0,
-        name="sigma_u_unit",
-    )(sigma_U_unit)
-
-    # Units to predict the conditional standard deviation of v.
-    beta_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.Zeros(),
-        kernel_initializer=tf.keras.initializers.Zeros(),
-        name="beta_unit",
-    )(x)
-
-    sigma_V_unit = Softplus(
-        name="sigma_V_unit",
-    )(beta_unit)
-
-    sigma_v_unit = tf.keras.layers.Rescaling(
-        scale=v_std,
-        offset=0.0,
-        name="sigma_v_unit",
-    )(sigma_V_unit)
-
-    # Units to predict the conditional correlation of u and v.
-    gamma_unit = tf.keras.layers.Dense(
-        units=1,
-        activation="linear",
-        use_bias=True,
-        bias_initializer=tf.keras.initializers.Zeros(),
-        kernel_initializer=tf.keras.initializers.Zeros(),
-        name="gamma_unit",
-    )(x)
-
-    rho_unit = Tanh(
-        name="rho_unit",
-    )(gamma_unit)
 
     # Stitch everything together.
     output_layer = tf.keras.layers.concatenate(
