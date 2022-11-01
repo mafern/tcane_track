@@ -2,11 +2,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import mahalanobis
+
 #import prediction
-#import shash_tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "28 October 2022"
+__version__ = "01 November 2022"
 
 
 def plot_history(history, model_name):
@@ -160,94 +161,50 @@ def plot_history(history, model_name):
     # plt.show()
 
 
-def compute_iqr(x_data=None, model_shash=None):
-    mu, sigma, gamma, tau = prediction.params(x_data, model_shash)
+def compute_interquartile_capture(onehot_data, x_data, model):
+    """Compute the interquartile capture using the Mahalanobis distance.
 
-    dist = shash_tfp.Shash(mu, sigma, gamma, tau)
-    lower = dist.quantile(0.25)
-    upper = dist.quantile(0.75)
+    Computes the fraction of onehot_data that fall between the Mahalanobis
+    ellipse that captures 25% of the bivariate probability and the Mahalanobis
+    ellispe that captures 75% of the bivariate probability.
+    """
+    y_pred = model.predict(x_data)
+    U = (onehot_data[:, 0] - y_pred[:, 0]) / y_pred[:, 2]
+    V = (onehot_data[:, 1] - y_pred[:, 1]) / y_pred[:, 3]
+    rho = y_pred[:, 4]
+    r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
 
-    return lower, upper
-
-
-def compute_interquartile_capture(onehot_data, x_data=None,
-        model_shash=None):
-    bins = np.linspace(0, 1, 11)
-    bins_inc = bins[1] - bins[0]
-
-    lower, upper = compute_iqr(
-        x_data=x_data,
-        model_shash=model_shash
-    )
-    iqr_capture = np.logical_and(onehot_data[:, 0] > lower, onehot_data[:, 0] < upper)
+    r_sqr_25 = -2.0 * np.log(1.0 - 0.25)
+    r_sqr_75 = -2.0 * np.log(1.0 - 0.75)
+    iqr_capture = np.logical_and(r_sqr > r_sqr_25, r_sqr < r_sqr_75)
 
     return np.sum(iqr_capture.astype(int)) / np.shape(iqr_capture)[0]
 
 
-def compute_pit(onehot_data, x_data=None, model_shash=None):
+def compute_pit(onehot_data, x_data, model):
+    """Compute the PIT histogram using the Mahalanobis distance."""
     bins = np.linspace(0, 1, 11)
-    bins_inc = bins[1] - bins[0]
 
-    mu, sigma, gamma, tau = prediction.params(x_data, model_shash)
-    dist = shash_tfp.Shash(mu, sigma, gamma, tau)
-    F = dist.cdf(onehot_data[:, 0])
-
+    y_pred = model.predict(x_data)
+    F = mahalanobis.compute_cdf(
+        y_pred[:, 0],
+        y_pred[:, 1],
+        y_pred[:, 2],
+        y_pred[:, 3],
+        y_pred[:, 4],
+        onehot_data[:, 0],
+        onehot_data[:, 1],
+    )
     pit_hist = np.histogram(
         F,
         bins,
         weights=np.ones_like(F) / float(len(F)),
     )
 
-    # pit metric from Bourdin et al. (2014) and Nipen and Stull (2011)
+    # Pit metric from Bourdin et al. (2014) and Nipen and Stull (2011)
     # compute expected deviation of PIT for a perfect forecast
     B = len(pit_hist[0])
     D = np.sqrt(1 / B * np.sum((pit_hist[0] - 1 / B) ** 2))
-    EDp = np.sqrt((1. - 1 / B) / (onehot_data.shape[0] * B))
+    EDp = np.sqrt((1.0 - 1 / B) / (onehot_data.shape[0] * B))
 
     return bins, pit_hist, D, EDp
-
-
-def compute_nll(onehot_data, model_shash=None, x_data=None):
-
-    mu, sigma, gamma, tau = prediction.params(x_data, model_shash)
-
-    dist = shash_tfp.Shash(mu, sigma, gamma, tau)
-    nloglike = -dist.log_prob(onehot_data[:, 0])
-
-    return nloglike
-
-
-def compute_errors(onehot_data, pred_mean, pred_median, pred_mode):
-    mean_error = np.mean(np.abs(pred_mean - onehot_data[:, 0]))
-    median_error = np.mean(np.abs(pred_median - onehot_data[:, 0]))
-    mode_error = np.mean(np.abs(pred_mode - onehot_data[:, 0]))
-
-    return mean_error, median_error, mode_error
-
-
-def compute_iqr_error_corr(onehot_data, pred_median=None,
-        x_data=None, model_shash=None):
-    from scipy import stats
-
-    # compute IQR
-    bins = np.linspace(0, 1, 11)
-    bins_inc = bins[1] - bins[0]
-
-    lower, upper = compute_iqr(
-        x_data=x_data,
-        model_shash=model_shash
-    )
-
-    iqr = upper - lower
-
-    # compute median_errors
-    median_errors = np.abs(pred_median - onehot_data[:, 0])
-
-    # compute correlation between median error and IQR
-    iqr_error_spearman = stats.spearmanr(iqr, median_errors)
-    try:
-        iqr_error_pearson = stats.pearsonr(iqr, median_errors)
-    except:
-        iqr_error_pearson = [np.nan, np.nan]
-
-    return iqr_error_spearman, iqr_error_pearson

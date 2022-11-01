@@ -50,28 +50,3 @@ def get_errors(y_data, onehot_data):
     rmse_cons = np.sqrt(onehot_data[:, 0] ** 2 + onehot_data[:, 1] ** 2)
 
     return rmse, rmse_cons
-
-
-def compute_pit(y_data, onehot_data):
-    bins = np.linspace(0, 1, 11)
-
-    F = mahalanobis.compute_cdf(
-        y_data[:, 0],
-        y_data[:, 1],
-        y_data[:, 2],
-        y_data[:, 3],
-        y_data[:, 4],
-        onehot_data[:, 0],
-        onehot_data[:, 1],
-    )
-    pit_hist = np.histogram(
-        F,
-        bins,
-        weights=np.ones_like(F) / float(len(F)),
-    )
-
-    B = len(pit_hist[0])
-    D = np.sqrt(1 / B * np.sum((pit_hist[0] - 1 / B) ** 2))
-    EDp = np.sqrt((1.0 - 1 / B) / (onehot_data.shape[0] * B))
-
-    return bins, pit_hist, D, EDp
