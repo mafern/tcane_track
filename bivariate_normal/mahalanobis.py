@@ -164,3 +164,25 @@ def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     V = (v - mu_v) / sigma_v
     r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
     return 1.0 - np.exp(-r_sqr / 2.0)
+
+
+def compute_cdfinv(pr):
+    """Compute the inverse Mahalanobis cdf for a bivariate normal distribution.
+    That is, determine the Mahalanoobis distance r, which defines the ellipse
+    that captures a probability pr.
+
+    Arguments
+    ---------
+    pr : float
+        probability value
+
+    Notes
+    -----
+    * The equations for the Mahalanobis distance, r, comes from
+        the bottom of Page 4 in [3].
+
+    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution
+        with 2 degrees of freedom.
+
+    """
+    return np.sqrt(-2.0 * np.log(1.0 - pr))
