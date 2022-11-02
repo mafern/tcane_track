@@ -17,6 +17,7 @@ saved_predictions/
 model_metrics/
 documents/
 archive/
+bivariate_normal/archive/
 
 # Apple stuff
 .DS_Store

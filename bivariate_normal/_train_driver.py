@@ -21,8 +21,16 @@ __version__ = "28 October 2022"
 
 # List of experiments to run
 EXP_NAME_LIST = (
-    "bivariate_normal_101_EPCP24",
-
+    "centered_bivariate_normal_100_EPCP12",
+    "centered_bivariate_normal_101_EPCP24",
+    "centered_bivariate_normal_102_EPCP36",
+    "centered_bivariate_normal_103_EPCP48",
+    # "centered_bivariate_normal_104_EPCP60",
+    # "centered_bivariate_normal_105_EPCP72",
+    # "centered_bivariate_normal_106_EPCP84",
+    # "centered_bivariate_normal_107_EPCP96",
+    # "centered_bivariate_normal_108_EPCP108",
+    # "centered_bivariate_normal_109_EPCP120",
 )
 
 if __name__ == "__main__":
@@ -34,7 +42,7 @@ if __name__ == "__main__":
         METRICS_PATH,
         PREDICTIONS_PATH,
         overwrite_model=False,
-        verbose=2,
+        verbose=0,
         interval=200,
     )
     elapsed_time = time.time() - start_time
