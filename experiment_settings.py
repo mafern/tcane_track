@@ -20,7 +20,7 @@ def get_settings(experiment_name):
         # Small test case
         # -------------------------------------
         "bivariate_normal_000_EPCP24": {
-            "filename": "nnfit_vlist_02-Jun-2022.dat",
+            "filename": "nnfit_vlist_OCT_27_2022.dat",
             "uncertainty_type": "bivariate_normal",
             "leadtime": 24,
             "basin": "EP|CP",
