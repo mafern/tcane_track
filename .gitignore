@@ -16,6 +16,7 @@ saved_metrics/
 saved_predictions/
 model_metrics/
 documents/
+archive/
 
 # Apple stuff
 .DS_Store
@@ -27,6 +28,9 @@ __pycache__/
 
 # Unit test / coverage reports
 .pytest_cache/
+
+# Editor stuff
+.vscode/
 
 # Jupyter Notebook
 .ipynb_checkpoints

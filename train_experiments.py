@@ -24,13 +24,13 @@ __version__ = "30 October 2022"
 
 
 def train_experiments(
-    exp_name_list,
-    data_path,
-    model_path,
-    metrics_path,
-    predictions_path,
-    overwrite_model=False,
-):
+        exp_name_list,
+        data_path,
+        model_path,
+        metrics_path,
+        predictions_path,
+        overwrite_model=False,
+        ):
 
     """Loop through the defined experiments."""
     for exp_name in exp_name_list:
@@ -71,17 +71,17 @@ def train_experiments(
                     df_val,
                     df_test,
                     df_valtest,
-                ) = build_data(data_path, settings, verbose=0)
+                    ) = build_data(data_path, settings, verbose=0)
 
                 # Create the model name.
                 model_name = (
-                    exp_name
-                    + "_"
-                    + str(testing_years)
-                    + "_"
-                    + settings["uncertainty_type"]
-                    + "_"
-                    + f"rng_seed_{settings['rng_seed']}"
+                        exp_name
+                        + "_"
+                        + str(testing_years)
+                        + "_"
+                        + settings["uncertainty_type"]
+                        + "_"
+                        + f"rng_seed_{settings['rng_seed']}"
                 )
 
                 # Make, compile, and train the model.
@@ -91,9 +91,9 @@ def train_experiments(
                     x_train,
                     onehot_train,
                     model_compile=True,
-                )
+                    )
 
-                # Check if the model exists and overwirte is off.
+                # Check if the model exists and overwrite is off.
                 model_savename = model_path + model_name + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
                     print(f"Saved {model_name} already exists. Skipping...")
@@ -108,7 +108,7 @@ def train_experiments(
                     x_val,
                     onehot_val,
                     settings,
-                )
+                    )
                 pprint(fit_summary, width=80)
 
                 save_model_run(
@@ -119,7 +119,7 @@ def train_experiments(
                     model_name,
                     settings,
                     __version__,
-                )
+                    )
 
                 save_transfer_blueprint(
                     data_summary,
@@ -128,7 +128,7 @@ def train_experiments(
                     model_name,
                     settings,
                     x_test,
-                )
+                    )
 
                 # Additional plots and metrics
                 model_diagnostics.plot_history(history, model_name)
@@ -136,7 +136,8 @@ def train_experiments(
                 # save metrics
                 # metric_filename = metrics_path + model_name + '_metrics.pickle'
                 # __ = compute_metrics.save_metrics(
-                #     model, settings, exp_name, metric_filename, x_train, onehot_train, x_val, onehot_val, x_test, onehot_test, x_valtest,
+                #     model, settings, exp_name, metric_filename, x_train, onehot_train, x_val, onehot_val, x_test,
+                #     onehot_test, x_valtest,
                 #     onehot_valtest
                 #     )
 

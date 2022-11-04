@@ -141,7 +141,7 @@ def build_data(data_path, settings, verbose=0):
             "EMDY",
             "EGDY",
             "HWDY",
-            "LONC",  # in degrees WEST
+            "LONC",  # in degrees EAST
             "LATC",
             "VMXC",
             "DV12",
@@ -153,14 +153,16 @@ def build_data(data_path, settings, verbose=0):
             "LGDV",
             "HWDV",
             "AVDV",
+            "SPDX",
+            "SPDY"
         ]
     else:
         x_names = settings["x_names"]
 
     y_names = [
-        "OBDX",
-        "OBDY",
-    ]  # OBDX<0 means that besttrack was 50 km west of the consensus.
+        "PREDICTAND_X",
+        "PREDICTAND_Y",
+    ]  # PREDICTAND_X < 0 means that besttrack was 50 km west of the consensus.
     missing = -9999
 
     # The predicted local conditional distribution parameters are:
@@ -172,14 +174,22 @@ def build_data(data_path, settings, verbose=0):
     df_raw = pd.read_table(datafile_path, sep="\s+")
     df_raw = df_raw.rename(columns={"Date": "year"})
 
+    df_raw["PREDICTAND_X"] = df_raw["OFDX"] - df_raw["OBDX"]
+    df_raw["PREDICTAND_Y"] = df_raw["OFDY"] - df_raw["OBDY"]
+
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
         & (df_raw["ftime(hr)"] == settings["leadtime"])
     ]
 
-    if missing is not None:
-        df = df.drop(df.index[df[y_names[0]] == missing])
-        df = df.drop(df.index[df[y_names[1]] == missing])
+    # replace missing values
+    df = df.replace(missing, np.nan)
+    df = df.dropna(axis=0)
+    df = df.reset_index(drop=True)
+
+    # if missing is not None:
+    #     df = df.drop(df.index[df[y_names[0]] == missing])
+    #     df = df.drop(df.index[df[y_names[1]] == missing])
 
     # Shuffle the rows in the df Dataframe, using the numpy rng.
     # rng = np.random.default_rng(settings['rng_seed'])

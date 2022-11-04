@@ -4,6 +4,7 @@ import cartopy.feature as cfeature
 import mahalanobis
 import cmasher as cmr
 import data_info
+import matplotlib as mpl
 
 import numpy as np
 
@@ -16,11 +17,14 @@ def set_plot_rc():
     plt.rc("text", usetex=True)
     plt.rc("font", **{"family": "sans-serif", "sans-serif": ["Avant Garde"]})
     plt.rc("savefig", facecolor="white")
+    plt.rc("figure", facecolor="white")
     plt.rc("axes", facecolor="white")
     plt.rc("axes", labelcolor="dimgrey")
     plt.rc("axes", labelcolor="dimgrey")
     plt.rc("xtick", color="dimgrey")
     plt.rc("ytick", color="dimgrey")
+    mpl.rcParams["figure.facecolor"] = "white"
+    mpl.rcParams["axes.facecolor"] = "white"
 
 
 def adjust_spines(ax, spines):
