@@ -14,7 +14,7 @@ import pprint
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "28 October 2022"
+__version__ = "4 November 2022"
 
 
 def build_data(data_path, settings, verbose=0):
@@ -174,13 +174,15 @@ def build_data(data_path, settings, verbose=0):
     df_raw = pd.read_table(datafile_path, sep="\s+")
     df_raw = df_raw.rename(columns={"Date": "year"})
 
-    df_raw["PREDICTAND_X"] = df_raw["OFDX"] - df_raw["OBDX"]
-    df_raw["PREDICTAND_Y"] = df_raw["OFDY"] - df_raw["OBDY"]
+    df_raw["PREDICTAND_X"] = df_raw[
+        "OFDX"]  # The distance east (km) of the best track position from the NHC or CPHC official track forecast (best track - official)
+    df_raw["PREDICTAND_Y"] = df_raw[
+        "OFDY"]  # The distance north (km) of the best track position from the NHC or CPHC official track forecast (best track - official)
 
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
         & (df_raw["ftime(hr)"] == settings["leadtime"])
-    ]
+        ]
 
     # replace missing values
     df = df.replace(missing, np.nan)
@@ -217,6 +219,24 @@ def build_data(data_path, settings, verbose=0):
 
         df = df.drop(index)
         df = df.reset_index(drop=True)
+
+    # check that there is data for training
+    if np.shape(df)[0] == 0:
+        return (
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+            np.empty((0, 1)),
+        )
 
     # Split out the validation data
     if settings["val_condition"] == "random":

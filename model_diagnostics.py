@@ -158,6 +158,7 @@ def plot_history(history, model_name):
     # Draw and save the plot.
     plt.tight_layout()
     plt.savefig("figures/model_diagnostics/" + model_name + ".png", dpi=DPIFIG)
+    plt.close()
     # plt.show()
 
 
