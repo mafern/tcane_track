@@ -6,6 +6,9 @@ import numpy as np
 import silence_tensorflow.auto
 import tensorflow as tf
 
+import sys
+sys.path.append("..")
+
 from train_experiments import train_experiments
 
 DATA_PATH = "../data/"
@@ -42,8 +45,6 @@ if __name__ == "__main__":
         METRICS_PATH,
         PREDICTIONS_PATH,
         overwrite_model=False,
-        verbose=0,
-        interval=200,
     )
     elapsed_time = time.time() - start_time
     print(f"Total elapsed time: {elapsed_time:.2f} seconds")
