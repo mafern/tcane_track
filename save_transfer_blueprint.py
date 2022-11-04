@@ -147,9 +147,11 @@ def save_transfer_blueprint(
     blueprint["output_traits"] = output_traits
 
     # Append test cases.
+    N_TEST = 2
     blueprint["test_cases"] = {
-        "x_test": x_test[0:2],
-        "predictions": model.predict(x_test[0:2]),
+        "n_test": N_TEST,
+        "x_test": x_test[0:N_TEST],
+        "predictions": model.predict(x_test[0:N_TEST]),
     }
 
     with open(model_path + model_name + "_blueprint.json", "w") as handle:
