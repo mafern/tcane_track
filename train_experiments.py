@@ -30,8 +30,7 @@ def train_experiments(
         metrics_path,
         predictions_path,
         overwrite_model=False,
-        ):
-
+):
     """Loop through the defined experiments."""
     for exp_name in exp_name_list:
         settings = experiment_settings.get_settings(exp_name)
@@ -71,7 +70,12 @@ def train_experiments(
                     df_val,
                     df_test,
                     df_valtest,
-                    ) = build_data(data_path, settings, verbose=0)
+                ) = build_data(data_path, settings, verbose=0)
+
+                # Check that x_train, x_val and x_test all have data
+                if x_train.shape[0] == 0 or x_val.shape[0] == 0 or x_test.shape[0] == 0:
+                    print("x_train, x_val, x_test cannot be empty. skipping...")
+                    continue
 
                 # Create the model name.
                 model_name = (
@@ -91,7 +95,7 @@ def train_experiments(
                     x_train,
                     onehot_train,
                     model_compile=True,
-                    )
+                )
 
                 # Check if the model exists and overwrite is off.
                 model_savename = model_path + model_name + "_weights.h5"
@@ -108,7 +112,7 @@ def train_experiments(
                     x_val,
                     onehot_val,
                     settings,
-                    )
+                )
                 pprint(fit_summary, width=80)
 
                 save_model_run(
@@ -119,7 +123,7 @@ def train_experiments(
                     model_name,
                     settings,
                     __version__,
-                    )
+                )
 
                 save_transfer_blueprint(
                     data_summary,
@@ -128,7 +132,7 @@ def train_experiments(
                     model_name,
                     settings,
                     x_test,
-                    )
+                )
 
                 # Additional plots and metrics
                 model_diagnostics.plot_history(history, model_name)
