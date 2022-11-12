@@ -31,7 +31,37 @@ def train_experiments(
     predictions_path,
     overwrite_model=False,
 ):
-    """Loop through the defined experiments."""
+    """Train the defined suite of experiments.
+
+    Arguments
+    ---------
+    exp_name_list : list of strings
+        List of experiment names, as defined in experiment_settings.py.
+
+    data_path : str
+        The input filepath, not including the file name.
+
+    model_path : str
+        Path to the folder for saved models, which is used to store the
+            *_model,
+            *_weights.h5,
+            *_history.pickle, and
+            *_metadata.json
+        files for a run.
+
+    metrics_path : str
+        Path to the folder for saved metrics.
+
+    predictions_path : str
+        Path to the folder for saved predictions.
+
+    overwrite_model : boolean, default=False,
+
+    Returns
+    -------
+    None
+
+    """
     for exp_name in exp_name_list:
         settings = experiment_settings.get_settings(exp_name)
 
