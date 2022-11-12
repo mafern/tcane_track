@@ -7,7 +7,7 @@ class Tanh(keras.layers.Layer)
 
 Functions
 ---------
-make_model(settings, x_train, onehot_train, model_compile)
+make_model(settings, x_train, label_train, model_compile)
 
 build_bivariate_normal_model(hiddens, input_shape, output_shape,
     ridge_penalty, act_fun, rng_seed)
@@ -20,10 +20,12 @@ from tensorflow import keras
 from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
+
+from custom_metrics import CustomMAE, InterquartileCapture, SignTest
 from custom_loss import compute_bivariate_normal_nll
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
-__version__ = "30 October 2022"
+__version__ = "12 November 2022"
 
 
 class Softplus(keras.layers.Layer):
@@ -49,7 +51,7 @@ class Tanh(keras.layers.Layer):
         return self.tanh.forward(inputs)
 
 
-def make_model(settings, x_train, onehot_train, model_compile=False):
+def make_model(settings, x_train, label_train, model_compile=False):
     if settings["uncertainty_type"] == "bivariate_normal":
         iscentered = False
     elif settings["uncertainty_type"] == "centered_bivariate_normal":
@@ -59,7 +61,7 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
 
     model = build_bivariate_normal_model(
         x_train,
-        onehot_train,
+        label_train,
         hiddens=settings["hiddens"],
         ridge_penalty=settings["ridge_param"],
         act_fun=settings["act_fun"],
@@ -73,6 +75,11 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
                 learning_rate=settings["learning_rate"],
             ),
             loss=compute_bivariate_normal_nll,
+            metrics=[
+                CustomMAE(name="custom_mae"),
+                InterquartileCapture(name="interquartile_capture"),
+                SignTest(name="sign_test"),
+            ],
         )
 
     return model
@@ -80,7 +87,7 @@ def make_model(settings, x_train, onehot_train, model_compile=False):
 
 def build_bivariate_normal_model(
     x_train,
-    onehot_train,
+    label_train,
     hiddens,
     ridge_penalty=0.0,
     act_fun="relu",
@@ -96,7 +103,7 @@ def build_bivariate_normal_model(
         The training split of the x data.
         shape = [n_train, n_features].
 
-    onehot_train : numpy.ndarray
+    label_train : numpy.ndarray
         The training split of the scaled y data is in the first column.
         The remaining columns are filled with zeros. The number of columns
         equal the number of distribution parameters.
@@ -259,11 +266,11 @@ def build_bivariate_normal_model(
     # Compute the mean and standard deviation of the training target
     # data. These are used to implicitly normalize the target variates
     # by rescaling the parameters. (See the notes above.)
-    u_avg = np.mean(onehot_train[:, 0])
-    u_std = np.std(onehot_train[:, 0])
+    u_avg = np.mean(label_train[:, 0])
+    u_std = np.std(label_train[:, 0])
 
-    v_avg = np.mean(onehot_train[:, 1])
-    v_std = np.std(onehot_train[:, 1])
+    v_avg = np.mean(label_train[:, 1])
+    v_std = np.std(label_train[:, 1])
 
     # Fix mu_u = mu_v = 0 if is iscentered.
     if iscentered is True:

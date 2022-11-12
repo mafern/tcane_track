@@ -3,14 +3,13 @@
 Functions
 ---------
 compute_bivariate_normal_nll(y_true, param)
-compute_centered_bivariate_normal_nll(y_true, param)
 
 """
 import tensorflow as tf
 import tensorflow_probability as tfp
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "30 October 2022"
+__version__ = "08 November 2022"
 
 
 def compute_bivariate_normal_nll(y_true, param):
@@ -104,9 +103,12 @@ def compute_bivariate_normal_nll(y_true, param):
             b^2 + a^2 = sigma_v^2
             --> a = sqrt(sigma_v^2 - b^2) = sigma_v * sqrt(1 - rho^2)
 
+    * The addition of epsilon was proposed by Chase to prevent HUGE
+    initial losses and thereby improve stability.
+
     """
     b = tfp.bijectors.FillTriangular(upper=False)
-    mvn = tfp.distributions.MultivariateNormalTriL(
+    dist = tfp.distributions.MultivariateNormalTriL(
         loc=param[:, 0:2],
         scale_tril=b.forward(
             tf.stack(
@@ -120,5 +122,5 @@ def compute_bivariate_normal_nll(y_true, param):
         ),
     )
 
-    loss = -mvn.log_prob(y_true[:, 0:2])
+    loss = -tf.math.log(dist.prob(y_true[:, 0:2]) + tf.keras.backend.epsilon())
     return tf.reduce_mean(loss, axis=-1)

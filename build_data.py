@@ -14,12 +14,12 @@ import pprint
 import toolbox
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "4 November 2022"
+__version__ = "12 November 2022"
 
 
 def build_data(data_path, settings, verbose=0):
-    """Build the training, validation, and testing tensors for the
-    bivariate normal and centered bivariate normal models.
+    """Build the training, validation, and testing tensors for the bivariate
+    normal model.
 
     Arguments
     ---------
@@ -43,41 +43,33 @@ def build_data(data_path, settings, verbose=0):
         The training split of the x data.
         shape = [n_train, n_features].
 
-    onehot_train : numpy.ndarray
-        The training split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
-        filled with zeros.
-        shape = [n_train, 5].
+    label_train : numpy.ndarray
+        The training split of the predictands.
+        shape = [n_train, 2].
 
     x_val : numpy.ndarray
         The validation split of the x data.
         shape = [n_val, n_features].
 
-    onehot_val : numpy.ndarray
-        The validation split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
-        filled with zeros.
-        shape = [n_val, 5].
+    label_val : numpy.ndarray
+        The validation split of the predictands.
+        shape = [n_val, 2].
 
     x_test : numpy.ndarray
         The test split of the x data.
         shape = [n_test, n_features].
 
-    onehot_test : numpy.ndarray
-        The test split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
-        filled with zeros.
-        shape = [n_test, 5].
+    label_test : numpy.ndarray
+        The test split of the predictands.
+        shape = [n_test, 2].
 
     x_valtest : numpy.ndarray
         The union of the test and validation splits of the x data.
         shape = [n_val+n_test, n_features].
 
-    onehot_valtest : numpy.ndarray
-        The union of the test and validation splits of the y data.
-        The first column holds ODBX, the second column holds ODBY.
-        The remaining three columns are filled with zeros.
-        shape = [n_val+n_test, 5].
+    label_valtest : numpy.ndarray
+        The union of the test and validation splits of the predictands.
+        shape = [n_val+n_test, 2].
 
     df_train : pandas dataframe
         A pandas dataframe containing training records.  The
@@ -87,7 +79,7 @@ def build_data(data_path, settings, verbose=0):
         requirements, and were not eliminated due to missing values.
         The dataframe has the shuffled order of the rows.  In
         particular, the rows of df_train align with the rows of x_train
-        and onehot_train.
+        and label_train.
 
     df_val : pandas dataframe
         A pandas dataframe containing validation records.  The
@@ -96,7 +88,7 @@ def build_data(data_path, settings, verbose=0):
         data set that satisfy the specified basin and leadtime
         requirements, and were not eliminated due to missing values.
         The dataframe has the shuffled order of the rows.  In particular,
-        the rows of df_val align with the rows of x_val and onehot_val.
+        the rows of df_val align with the rows of x_val and label_val.
 
     df_test : pandas dataframe
         A pandas dataframe containing testing records.  The
@@ -105,7 +97,7 @@ def build_data(data_path, settings, verbose=0):
         data set that satisfy the specified basin and leadtime
         requirements, and were not eliminated due to missing values.
         The dataframe has the shuffled order of the rows.  In particular,
-        the rows of df_test align with the rows of x_test and onehot_test.
+        the rows of df_test align with the rows of x_test and label_test.
 
     df_valtest : pandas dataframe
         A pandas dataframe containing union of the validation and testing
@@ -115,11 +107,7 @@ def build_data(data_path, settings, verbose=0):
         basin and leadtime requirements, and were not eliminated due to
         missing values. The dataframe has the shuffled order of the rows.
         In particular, the rows of df_valtest align with the rows of
-        x_valtest and onehot_valtest.
-
-    Notes
-    -----
-    * No scaling or normalization is applied during data extraction.
+        x_valtest and label_valtest.
 
     """
     if settings["uncertainty_type"] not in [
@@ -129,6 +117,14 @@ def build_data(data_path, settings, verbose=0):
         raise NotImplementedError
 
     # Setup for the selected target.
+    # PREDICTAND_X < 0 means that besttrack was 50 km west of the consensus.
+    y_names = [
+        "PREDICTAND_X",
+        "PREDICTAND_Y",
+    ]
+    missing = -9999
+
+    # Setup for the selected features
     if settings["x_names"] is None:
         x_names = [
             "NCT",
@@ -159,12 +155,6 @@ def build_data(data_path, settings, verbose=0):
     else:
         x_names = settings["x_names"]
 
-    y_names = [
-        "PREDICTAND_X",
-        "PREDICTAND_Y",
-    ]  # PREDICTAND_X < 0 means that besttrack was 50 km west of the consensus.
-    missing = -9999
-
     # The predicted local conditional distribution parameters are:
     # [ mu_u, mu_v, sigma_u, sigma_v, rho ].
     n_parameters = 5
@@ -174,17 +164,20 @@ def build_data(data_path, settings, verbose=0):
     df_raw = pd.read_table(datafile_path, sep="\s+")
     df_raw = df_raw.rename(columns={"Date": "year"})
 
-    df_raw["PREDICTAND_X"] = df_raw[
-        "OFDX"]  # The distance east (km) of the best track position from the NHC or CPHC official track forecast (best track - official)
-    df_raw["PREDICTAND_Y"] = df_raw[
-        "OFDY"]  # The distance north (km) of the best track position from the NHC or CPHC official track forecast (best track - official)
+    # PREDICTAND_X : The distance east (km) of the best track position from the
+    # NHC or CPHC official track forecast (best track - official).
+    df_raw["PREDICTAND_X"] = df_raw["OFDX"]
+
+    # PREDICTAND_Y : The distance north (km) of the best track position from the
+    # NHC or CPHC official track forecast (best track - official).
+    df_raw["PREDICTAND_Y"] = df_raw["OFDY"]
 
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
         & (df_raw["ftime(hr)"] == settings["leadtime"])
         ]
 
-    # replace missing values
+    # Replace missing values with nan.
     df = df.replace(missing, np.nan)
     df = df.dropna(axis=0)
     df = df.reset_index(drop=True)
@@ -198,10 +191,10 @@ def build_data(data_path, settings, verbose=0):
     df = df.sample(frac=1, random_state=settings["rng_seed"])
     df = df.reset_index(drop=True)
 
-    # ------------------------------------------------------
+    # ---------------------------------
     # Training/Validation/Testing Split
 
-    # Split out the validation data
+    # Split out the validation data.
     if settings["test_condition"] is None:
         # These will be reset below.
         x_test = None
@@ -220,7 +213,7 @@ def build_data(data_path, settings, verbose=0):
         df = df.drop(index)
         df = df.reset_index(drop=True)
 
-    # check that there is data for training
+    # Check that there is data for training.
     if np.shape(df)[0] == 0:
         return (
             np.empty((0, 1)),
@@ -238,7 +231,7 @@ def build_data(data_path, settings, verbose=0):
             np.empty((0, 1)),
         )
 
-    # Split out the validation data
+    # Split out the validation data.
     if settings["val_condition"] == "random":
         index = np.arange(0, settings["n_val"])
         if len(index) < 100:
@@ -263,7 +256,7 @@ def build_data(data_path, settings, verbose=0):
         y_test = copy.deepcopy(y_val)
         df_test = df_val.copy()
 
-    # Subsample training if desired
+    # Subsample training if desired.
     if settings["n_train"] == "max":
         df_train = df.copy()
     else:
@@ -274,27 +267,24 @@ def build_data(data_path, settings, verbose=0):
     df_train = df_train.reset_index(drop=True)
 
     # ------------------------------------------------------
-    # Create 'onehot' y arrays. The OBDX and OBDY values
-    # go in the first two column. The remaining columns
-    # are filled with zeros -- i.e. dummy columns.  These
-    # dummy columns are required by TensorFlow; the number
-    # of columns must equal the number of outputs.
-    onehot_train = np.zeros((len(y_train), n_parameters))
-    onehot_val = np.zeros((len(y_val), n_parameters))
-    onehot_test = np.zeros((len(y_test), n_parameters))
+    # Create 'label' y arrays.
 
-    onehot_train[:, 0:2] = y_train
-    onehot_val[:, 0:2] = y_val
-    onehot_test[:, 0:2] = y_test
+    label_train = np.zeros((len(y_train), 2))
+    label_val = np.zeros((len(y_val), 2))
+    label_test = np.zeros((len(y_test), 2))
 
-    # Set the dtype of onehot for consistency.
-    onehot_train = onehot_train.astype("float32")
-    onehot_val = onehot_val.astype("float32")
-    onehot_test = onehot_test.astype("float32")
+    label_train[:, 0:2] = y_train
+    label_val[:, 0:2] = y_val
+    label_test[:, 0:2] = y_test
 
-    # Create valtest set.
+    # Set the dtype of label for consistency.
+    label_train = label_train.astype("float32")
+    label_val = label_val.astype("float32")
+    label_test = label_test.astype("float32")
+
+    # Create combined valtest set.
     x_valtest = np.concatenate((x_val, x_test), axis=0)
-    onehot_valtest = np.concatenate((onehot_val, onehot_test), axis=0)
+    label_valtest = np.concatenate((label_val, label_test), axis=0)
     df_valtest = pd.concat([df_val, df_test])
 
     # Make a descriptive dictionary.
@@ -304,10 +294,10 @@ def build_data(data_path, settings, verbose=0):
         "x_val_shape": tuple(x_val.shape),
         "x_test_shape": tuple(x_test.shape),
         "x_valtest_shape": tuple(x_valtest.shape),
-        "onehot_train_shape": tuple(onehot_train.shape),
-        "onehot_val_shape": tuple(onehot_val.shape),
-        "onehot_test_shape": tuple(onehot_test.shape),
-        "onehot_valtest_shape": tuple(onehot_valtest.shape),
+        "label_train_shape": tuple(label_train.shape),
+        "label_val_shape": tuple(label_val.shape),
+        "label_test_shape": tuple(label_test.shape),
+        "label_valtest_shape": tuple(label_valtest.shape),
         "x_names": x_names,
         "y_names": y_names,
     }
@@ -319,36 +309,31 @@ def build_data(data_path, settings, verbose=0):
     if verbose >= 2:
         toolbox.print_summary_statistics(
             {
-                "y_train (OBDX [km])": onehot_train[:, 0],
-                "y_val   (OBDX [km])": onehot_val[:, 0],
-                "y_test  (OBDX [km])": onehot_test[:, 0],
+                "y_train (OBDX [km])": label_train[:, 0],
+                "y_val   (OBDX [km])": label_val[:, 0],
+                "y_test  (OBDX [km])": label_test[:, 0],
             },
             sigfigs=1,
         )
         toolbox.print_summary_statistics(
             {
-                "y_train (OBDY [km])": onehot_train[:, 1],
-                "y_val   (OBDY [km])": onehot_val[:, 1],
-                "y_test  (OBDY [km])": onehot_test[:, 1],
+                "y_train (OBDY [km])": label_train[:, 1],
+                "y_val   (OBDY [km])": label_val[:, 1],
+                "y_test  (OBDY [km])": label_test[:, 1],
             },
             sigfigs=1,
         )
 
-    # create valtest set
-    x_valtest = np.concatenate((x_val, x_test), axis=0)
-    onehot_valtest = np.concatenate((onehot_val, onehot_test), axis=0)
-    df_valtest = pd.concat([df_val, df_test])
-
     return (
         data_summary,
         x_train,
-        onehot_train,
+        label_train,
         x_val,
-        onehot_val,
+        label_val,
         x_test,
-        onehot_test,
+        label_test,
         x_valtest,
-        onehot_valtest,
+        label_valtest,
         df_train,
         df_val,
         df_test,

@@ -32,8 +32,12 @@ import numpy as np
 import palettable
 import cartopy as ct
 
+import silence_tensorflow.auto
+import tensorflow as tf
+
+
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "24 August 2022"
+__version__ = "12 November 2022"
 
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
 THETA = np.linspace(0, 2 * np.pi, 1000)
@@ -123,66 +127,110 @@ def plot_cdf(
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
     """Compute the Mahalanobis cdf for [u, v] using a bivariate normal
-    distribution.
+    distributions.
 
     Arguments
     ---------
-    mu_u : float
+    mu_u : numpy.ndarray
         mean of u.
+        shape = [n_data,]
 
-    mu_v : float
+    mu_v : numpy.ndarray
         mean of v.
+        shape = [n_data,]
 
-    sigma_u : float, u > 0.
+    sigma_u : numpy.ndarray, u > 0.
         standard deviation of u.
+        shape = [n_data,]
 
-    sigma_v : float, v > 0.
+    sigma_v : numpy.ndarray, v > 0.
         standard deviation of v.
+        shape = [n_data,]
 
-    rho : float, -1 < rho < 1.
+    rho : numpy.ndarray, -1 < rho < 1.
         correlation between u and v.
+        shape = [n_data,]
 
-    u : float
-        u value for evaluation of pdf.
+    u : numpy.ndarray
+        u values for evaluation of cdf.
+        shape = [n_data,]
 
-    v : float
-        v value for evaluation of pdf.
+    v : numpy.ndarray
+        v values for evaluation of cdf.
+        shape = [n_data,]
+
+    Returns
+    -------
+    rsqr : numpy.ndarray, dtype = float
+        Mahalanobis cdf values of (u, v).
+        shape = [n_data,]
 
     Notes
     -----
-    * The equations for the Mahalanobis distance, r_sqr, comes from
+    * The equations for the Mahalanobis distance, rsqr, comes from
         the bottom of Page 2 in [3].
 
-    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution
+    * The Mahalanobis distance, rsqr, follows the chi-squared distribution
         with 2 degrees of freedom.
 
     * The equation for the returned cdf comes for the "Normal Distribution"
         section of [2], and the middle of Page 4 of [3].
 
     """
-    U = (u - mu_u) / sigma_u
-    V = (v - mu_v) / sigma_v
-    r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
-    return 1.0 - np.exp(-r_sqr / 2.0)
+    rsqr = compute_rsqr(mu_u, mu_v, sigma_u, sigma_v, rho, u, v)
+    return 1.0 - tf.math.exp(-rsqr / 2.0)
 
 
-def compute_cdfinv(pr):
-    """Compute the inverse Mahalanobis cdf for a bivariate normal distribution.
-    That is, determine the Mahalanoobis distance r, which defines the ellipse
-    that captures a probability pr.
+def compute_rsqr(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
+    """Compute the Mahalanobis rsqr for [u, v] using a bivariate normal
+    distribution.
 
     Arguments
     ---------
-    pr : float
-        probability value
+    mu_u : numpy.ndarray, dtype = float
+        mean of u.
+        shape = [n_data,]
+
+    mu_v : numpy.ndarray, dtype = float
+        mean of v.
+        shape = [n_data,]
+
+    sigma_u : numpy.ndarray, dtype = float, u > 0.
+        standard deviation of u.
+        shape = [n_data,]
+
+    sigma_v : numpy.ndarray, dtype = float, v > 0.
+        standard deviation of v.
+        shape = [n_data,]
+
+    rho : numpy.ndarray, dtype = float, -1 < rho < 1.
+        correlation between u and v.
+        shape = [n_data,]
+
+    u : numpy.ndarray, dtype = float
+        u values for evaluation of cdf.
+        shape = [n_data,]
+
+    v : numpy.ndarray, dtype = float
+        v values for evaluation of cdf.
+        shape = [n_data,]
+
+    Returns
+    -------
+    rsqr : numpy.ndarray, dtype = float
+        Mahalanobis rsqr values of (u, v).
+        shape = [n_data,]
 
     Notes
     -----
-    * The equations for the Mahalanobis distance, r, comes from
-        the bottom of Page 4 in [3].
+    * The equations for the Mahalanobis distance, rsqr, comes from
+        the bottom of Page 2 in [3].
 
-    * The Mahalanobis distance, r_sqr, follows the chi-squared distribution
+    * The Mahalanobis distance, rsqr, follows the chi-squared distribution
         with 2 degrees of freedom.
 
     """
-    return np.sqrt(-2.0 * np.log(1.0 - pr))
+    U = (u - mu_u) / sigma_u
+    V = (v - mu_v) / sigma_v
+    rsqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
+    return rsqr
