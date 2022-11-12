@@ -1,73 +1,66 @@
-import numpy as np
-# import silence_tensorflow.auto
-# import tensorflow as tf
-# import prediction
+"""Collate and save model metrics."""
+
 import model_diagnostics
 import pandas as pd
 
-def compute_metrics(model, x_data, onehot_data):
-    # """Metrics for SHASH models."""
-    #
-    # mu_pred, sigma_pred, gamma_pred, tau_pred = prediction.params(x_data, model)
-    # dist = shash_tfp.Shash(mu_pred, sigma_pred, gamma_pred, tau_pred)
-    # shash_mean = dist.mean()
-    # shash_med = dist.median()
-    # shash_mode = dist.mode()
-    #
-    # mean_error, median_error, mode_error = model_diagnostics.compute_errors(
-    #     onehot_data,
-    #     shash_mean,
-    #     shash_med,
-    #     shash_mode
-    # )
-    # bins, hist_shash, pit_D, EDp_shash = model_diagnostics.compute_pit(
-    #     onehot_data,
-    #     x_data=x_data,
-    #     model_shash=model
-    # )
-    # iqr_capture = model_diagnostics.compute_interquartile_capture(
-    #     onehot_data,
-    #     x_data=x_data,
-    #     model_shash=model
-    # )
-    # iqr_error_spearman, iqr_error_pearson = model_diagnostics.compute_iqr_error_corr(
-    #     onehot_data=onehot_data,
-    #     pred_median=shash_med,
-    #     x_data=x_data,
-    #     model_shash=model,
-    # )
-    #
-    # # by definition Consensus is a correction of zero
-    # cons_error = np.mean(np.abs(0.0 - onehot_data[:, 0]))
-    #
-    # # write metrics dictionary and return
-    # metrics = {
-    #     'pit_D': pit_D,
-    #     'iqr_capture': iqr_capture,
-    #
-    #     'iqr_error_spearman': iqr_error_spearman[0],
-    #     'iqr_error_pearson': iqr_error_pearson[0],
-    #     'iqr_error_spearman_p': iqr_error_spearman[1],
-    #     'iqr_error_pearson_p': iqr_error_pearson[1],
-    #
-    #     'cons_error': cons_error,
-    #     'mean_error': mean_error,
-    #     'median_error': median_error,
-    #     'mode_error': mode_error,
-    #
-    #     'mean_error_reduction': cons_error - mean_error,
-    #     'median_error_reduction': cons_error - median_error,
-    #     'mode_error_reduction': cons_error - mode_error,
-    # }
-    metrics = {}
+__author__ = "Elizabeth A. Barnes and Randal J Barnes"
+__version__ = "12 November 2022"
+
+
+def compute_metrics(model, x_data, label_data):
+    """Compute model metrics.
+
+    Arguments
+    ---------
+    model : tensorflow model
+        trained neural network for predictions
+
+    x_data : numpy.ndarray
+        array of observed predictors
+        shape = [n_data, n_features].
+
+    label_data : numpy.ndarray
+        array of observed predictands
+        shape = [n_data, 2].
+
+    Return
+    ------
+    metric : dictionary
+
+    """
+    mean_error = model_diagnostics.compute_average_errors(model, x_data, label_data)
+    iqr_capture = model_diagnostics.compute_iqr_capture(model, x_data, label_data)
+    bins, hist_shash, pit_D, EDp_shash = model_diagnostics.compute_pit(model, x_data, label_data)
+
+    # Write metrics dictionary and return
+    metrics = {
+        'pit_D': pit_D,
+        'iqr_capture': iqr_capture,
+        'mean_error': mean_error,
+    }
+
     return metrics
 
-def save_metrics(model, settings, exp_name, metric_filename, x_train, onehot_train, x_val, onehot_val, x_test, onehot_test, x_valtest, onehot_valtest):
+
+def save_metrics(
+        model,
+        settings,
+        exp_name,
+        metric_filename,
+        x_train,
+        label_train,
+        x_val,
+        label_val,
+        x_test,
+        label_test,
+        x_valtest,
+        label_valtest
+):
     # compute the metrics
-    metrics_test = compute_metrics(model, x_test, onehot_test)
-    metrics_val = compute_metrics(model, x_val, onehot_val)
-    metrics_train = compute_metrics(model, x_train, onehot_train)
-    metrics_valtest = compute_metrics(model, x_valtest, onehot_valtest)
+    metrics_test = compute_metrics(model, x_test, label_test)
+    metrics_val = compute_metrics(model, x_val, label_val)
+    metrics_train = compute_metrics(model, x_train, label_train)
+    metrics_valtest = compute_metrics(model, x_valtest, label_valtest)
 
     # create the metrics dataframe
     d = {}

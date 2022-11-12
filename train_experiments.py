@@ -20,16 +20,16 @@ from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "30 October 2022"
+__version__ = "12 November 2022"
 
 
 def train_experiments(
-        exp_name_list,
-        data_path,
-        model_path,
-        metrics_path,
-        predictions_path,
-        overwrite_model=False,
+    exp_name_list,
+    data_path,
+    model_path,
+    metrics_path,
+    predictions_path,
+    overwrite_model=False,
 ):
     """Loop through the defined experiments."""
     for exp_name in exp_name_list:
@@ -55,17 +55,16 @@ def train_experiments(
                 tf.random.set_seed(rng_seed)
 
                 # Build the track data tensors for a bivariate normal model.
-                # create valtest set
                 (
                     data_summary,
                     x_train,
-                    onehot_train,
+                    label_train,
                     x_val,
-                    onehot_val,
+                    label_val,
                     x_test,
-                    onehot_test,
+                    label_test,
                     x_valtest,
-                    onehot_valtest,
+                    label_valtest,
                     df_train,
                     df_val,
                     df_test,
@@ -88,15 +87,6 @@ def train_experiments(
                         + f"rng_seed_{settings['rng_seed']}"
                 )
 
-                # Make, compile, and train the model.
-                tf.keras.backend.clear_session()
-                model = build_model.make_model(
-                    settings,
-                    x_train,
-                    onehot_train,
-                    model_compile=True,
-                )
-
                 # Check if the model exists and overwrite is off.
                 model_savename = model_path + model_name + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
@@ -105,12 +95,21 @@ def train_experiments(
                 else:
                     print(f"Training {model_name}")
 
+                # Make, compile, train, and save the model.
+                tf.keras.backend.clear_session()
+                model = build_model.make_model(
+                    settings,
+                    x_train,
+                    label_train,
+                    model_compile=True,
+                )
+
                 model, fit_summary, history = train_model(
                     model,
                     x_train,
-                    onehot_train,
+                    label_train,
                     x_val,
-                    onehot_val,
+                    label_val,
                     settings,
                 )
                 pprint(fit_summary, width=80)
@@ -137,16 +136,28 @@ def train_experiments(
                 # Additional plots and metrics
                 model_diagnostics.plot_history(history, model_name)
 
-                # save metrics
-                # metric_filename = metrics_path + model_name + '_metrics.pickle'
-                # __ = compute_metrics.save_metrics(
-                #     model, settings, exp_name, metric_filename, x_train, onehot_train, x_val, onehot_val, x_test,
-                #     onehot_test, x_valtest,
-                #     onehot_valtest
-                #     )
+                metric_filename = metrics_path + model_name + "_metrics.pickle"
+                compute_metrics.save_metrics(
+                    model,
+                    settings,
+                    exp_name,
+                    metric_filename,
+                    x_train,
+                    label_train,
+                    x_val,
+                    label_val,
+                    x_test,
+                    label_test,
+                    x_valtest,
+                    label_valtest,
+                )
 
-                # # save predictions
-                # predictions_filename = predictions_path + model_name + '_testing_predictions.csv'
-                # __ = compute_predictions.save_predictions(
-                #     model, settings, predictions_filename, df_test, x_test, onehot_test,
-                #     )
+                prediction_filename = predictions_path + model_name + "_testing_predictions.csv"
+                compute_predictions.save_predictions(
+                    model,
+                    settings,
+                    prediction_filename,
+                    df_test,
+                    x_test,
+                    label_test,
+                )

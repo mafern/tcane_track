@@ -1,13 +1,21 @@
-"""Plot the model.fit training history and other training and analysis metrics."""
+"""Produce various model diagnostics, including plots and metrics.
+
+Functions
+---------
+plot_history(history, model_name)
+compute_average_errors(model, x_data, label_data)
+compute_iqr_capture(model, x_data, label_data)
+compute_pit(model, x_data, label_data)
+compute_sign_test(model, x_data, label_data)
+
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 
 import mahalanobis
 
-#import prediction
-
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "01 November 2022"
+__version__ = "12 November 2022"
 
 
 def plot_history(history, model_name):
@@ -162,28 +170,87 @@ def plot_history(history, model_name):
     # plt.show()
 
 
-def compute_interquartile_capture(onehot_data, x_data, model):
-    """Compute the interquartile capture using the Mahalanobis distance.
+def compute_average_errors(model, x_data, label_data):
+    """Compute the average Euclidean distance between the conditional means
+    and the labels.
 
-    Computes the fraction of onehot_data that fall between the Mahalanobis
-    ellipse that captures 25% of the bivariate probability and the Mahalanobis
-    ellispe that captures 75% of the bivariate probability.
+    Arguments
+    ---------
+    model : tensorflow model
+        trained neural network for predictions
+
+    x_data : numpy.ndarray
+        array of observed predictors
+        shape = [n_data, n_features].
+
+    label_data : numpy.ndarray
+        array of observed predictands
+        shape = [n_data,].
+
+    Return
+    ------
+    mean_error : float
+        average Euclidean distance between the conditional means
+        and the labels.
+
+    Note
+    ----
+    * The Euclidean distance does not account for the elliptical
+    scaling of the x and y components. It is a crude measure.
     """
     y_pred = model.predict(x_data)
-    U = (onehot_data[:, 0] - y_pred[:, 0]) / y_pred[:, 2]
-    V = (onehot_data[:, 1] - y_pred[:, 1]) / y_pred[:, 3]
-    rho = y_pred[:, 4]
-    r_sqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
+    mean_error = np.mean(
+        np.hypot(
+            y_pred[:, 0] - label_data[:, 0],
+            y_pred[:, 1] - label_data[:, 1],
+        )
+    )
 
-    r_sqr_25 = -2.0 * np.log(1.0 - 0.25)
-    r_sqr_75 = -2.0 * np.log(1.0 - 0.75)
-    iqr_capture = np.logical_and(r_sqr > r_sqr_25, r_sqr < r_sqr_75)
-
-    return np.sum(iqr_capture.astype(int)) / np.shape(iqr_capture)[0]
+    return mean_error
 
 
-def compute_pit(onehot_data, x_data, model):
-    """Compute the PIT histogram using the Mahalanobis distance."""
+def compute_iqr_capture(model, x_data, label_data):
+    """Compute the interquartile capture using the Mahalanobis distance.
+
+    Computes the fraction of label_data that fall between the Mahalanobis
+    ellipse that captures 25% of the bivariate probability and the Mahalanobis
+    ellispe that captures 75% of the bivariate probability.
+
+    Arguments
+    ---------
+    model : tensorflow model
+        trained neural network for predictions
+
+    x_data : numpy.ndarray
+        array of observed predictors
+        shape = [n_data, n_features].
+
+    label_data : numpy.ndarray
+        array of observed predictands
+        shape = [n_data,].
+
+    Return
+    ------
+    iqr_capture : float
+
+    """
+    y_pred = model.predict(x_data)
+    cdf = mahalanobis.compute_cdf(
+        y_pred[:, 0],
+        y_pred[:, 1],
+        y_pred[:, 2],
+        y_pred[:, 3],
+        y_pred[:, 4],
+        label_data[:, 0],
+        label_data[:, 1],
+    )
+    iqr_capture = np.logical_and(cdf > 0.25, cdf < 0.75)
+
+    return np.mean(iqr_capture.astype(int))
+
+
+def compute_pit(model, x_data, label_data):
+    """Compute the PIT histogram using the Mahalanobis cdf."""
     bins = np.linspace(0, 1, 11)
 
     y_pred = model.predict(x_data)
@@ -193,8 +260,8 @@ def compute_pit(onehot_data, x_data, model):
         y_pred[:, 2],
         y_pred[:, 3],
         y_pred[:, 4],
-        onehot_data[:, 0],
-        onehot_data[:, 1],
+        label_data[:, 0],
+        label_data[:, 1],
     )
     pit_hist = np.histogram(
         F,
@@ -206,6 +273,26 @@ def compute_pit(onehot_data, x_data, model):
     # compute expected deviation of PIT for a perfect forecast
     B = len(pit_hist[0])
     D = np.sqrt(1 / B * np.sum((pit_hist[0] - 1 / B) ** 2))
-    EDp = np.sqrt((1.0 - 1 / B) / (onehot_data.shape[0] * B))
+    EDp = np.sqrt((1.0 - 1 / B) / (label_data.shape[0] * B))
 
     return bins, pit_hist, D, EDp
+
+
+def compute_sign_test(model, x_data, label_data):
+    """Compute the fraction of label values falling outside of
+    the 0.50 Mahalanobis ellipse.
+
+    """
+    y_pred = model.predict(x_data)
+    cdf = mahalanobis.compute_cdf(
+        y_pred[:, 0],
+        y_pred[:, 1],
+        y_pred[:, 2],
+        y_pred[:, 3],
+        y_pred[:, 4],
+        label_data[:, 0],
+        label_data[:, 1],
+    )
+    outside = (cdf > 0.50)
+
+    return np.mean(outside.astype(int))

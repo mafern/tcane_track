@@ -2,7 +2,7 @@
 
 Functions
 ---------
-train_model(model, x_train, onehot_train, x_val, onehot_val, settings)
+train_model(model, x_train, label_train, x_val, label_val, settings)
 
 """
 import time
@@ -11,35 +11,31 @@ import silence_tensorflow.auto
 import tensorflow as tf
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "29 October 2022"
+__version__ = "12 November 2022"
 
 
-def train_model(model, x_train, onehot_train, x_val, onehot_val, settings):
+def train_model(model, x_train, label_train, x_val, label_val, settings):
     """Train the bivariate normal model.
 
     Arguments
     ---------
     model : tensorflow.keras.models.Model
 
-    x_train : tensorflow.Tensor
+    x_train : numpy.ndarray
         The training split of the x data.
         shape = [n_train, n_features].
 
-    onehot_train : tensorflow.Tensor
-        The training split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
-        filled with zeros.
-        shape = [n_train, 5].
+    label_train : numpy.ndarray
+        The training split of the predictands.
+        shape = [n_train, 2].
 
-    x_val : tensorflow.Tensor
+    x_val : numpy.ndarray
         The validation split of the x data.
-        shape = [n_valid, n_features].
+        shape = [n_val, n_features].
 
-    onehot_val : tensorflow.Tensor
-        The training split of the y data. The first column holds ODBX,
-        the second column holds ODBY. The remaining three columns are
-        filled with zeros.
-        shape = [n_train, 5].
+    label_val : numpy.ndarray
+        The validation split of the predictands.
+        shape = [n_val, 2].
 
     settings : dict
         Dictionary of experiment settings for the run.
@@ -61,8 +57,8 @@ def train_model(model, x_train, onehot_train, x_val, onehot_val, settings):
     start_time = time.time()
     history = model.fit(
         x_train,
-        onehot_train,
-        validation_data=(x_val, onehot_val),
+        label_train,
+        validation_data=(x_val, label_val),
         batch_size=settings["batch_size"],
         epochs=settings["n_epochs"],
         shuffle=True,
