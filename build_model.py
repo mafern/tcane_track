@@ -52,6 +52,26 @@ class Tanh(keras.layers.Layer):
 
 
 def make_model(settings, x_train, label_train, model_compile=False):
+    """Make the specified tensorflow model.
+
+    Arguments
+    ---------
+    settings : dict
+        Dictionary of experiment settings for the run.
+
+    x_train : numpy.ndarray
+        The training split of the x data.
+        shape = [n_train, n_features].
+
+    label_train : numpy.ndarray
+        The training split of the scaled y data is in the first column.
+        The remaining columns are filled with zeros. The number of columns
+        equal the number of distribution parameters.
+        shape = [n_train, n_parameters].
+
+    model_compile : boolean, default = False
+
+    """
     if settings["uncertainty_type"] == "bivariate_normal":
         iscentered = False
     elif settings["uncertainty_type"] == "centered_bivariate_normal":
