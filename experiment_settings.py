@@ -32,21 +32,21 @@ def get_settings(experiment_name):
             "momentum": 0.9,
             "nesterov": True,
             "batch_size": 64,
-            "rng_seed_list": [123],
+            "rng_seed_list": [1, ],
             "rng_seed": None,
             "act_fun": "relu",
             "n_epochs": 25_000,
             "patience": 250,
             "test_condition": "years",
-            "years_test": [2019, ],
+            "years_test": [2018, ],
             "val_condition": "random",
             "n_val": 200,
             "n_train": "max",
             "x_names": None,
-        },
+            },
 
         # -------------------------------------
-        # Bivariate-normal experiments
+        # Centered bivariate-normal experiments
         # -------------------------------------
         "centered_bivariate_normal_100_EPCP12": {
             "filename": "nnfit_vlist_05dec2022.dat",
@@ -303,7 +303,7 @@ def get_settings(experiment_name):
 
 
         "centered_bivariate_normal_200_AL12": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 12,
             "basin": "AL",
@@ -328,7 +328,7 @@ def get_settings(experiment_name):
             "x_names": None,
             },
         "centered_bivariate_normal_201_AL24": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 24,
             "basin": "AL",
@@ -353,7 +353,7 @@ def get_settings(experiment_name):
             "x_names": None,
         },
         "centered_bivariate_normal_202_AL36": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 36,
             "basin": "AL",
@@ -378,7 +378,7 @@ def get_settings(experiment_name):
             "x_names": None,
             },
         "centered_bivariate_normal_203_AL48": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 48,
             "basin": "AL",
@@ -403,7 +403,7 @@ def get_settings(experiment_name):
             "x_names": None,
         },
         "centered_bivariate_normal_204_AL60": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 60,
             "basin": "AL",
@@ -428,7 +428,7 @@ def get_settings(experiment_name):
             "x_names": None,
             },
         "centered_bivariate_normal_205_AL72": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 72,
             "basin": "AL",
@@ -453,7 +453,7 @@ def get_settings(experiment_name):
             "x_names": None,
         },
         "centered_bivariate_normal_206_AL84": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 84,
             "basin": "AL",
@@ -478,7 +478,7 @@ def get_settings(experiment_name):
             "x_names": None,
             },
         "centered_bivariate_normal_207_AL96": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 96,
             "basin": "AL",
@@ -503,7 +503,7 @@ def get_settings(experiment_name):
             "x_names": None,
         },
         "centered_bivariate_normal_208_AL108": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 108,
             "basin": "AL",
@@ -528,7 +528,7 @@ def get_settings(experiment_name):
             "x_names": None,
             },
         "centered_bivariate_normal_209_AL120": {
-            "filename": "nnfit_vlist_31oct2022.dat",
+            "filename": "nnfit_vlist_05dec2022.dat",
             "uncertainty_type": "centered_bivariate_normal",
             "leadtime": 120,
             "basin": "AL",

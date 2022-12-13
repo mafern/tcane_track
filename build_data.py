@@ -309,18 +309,18 @@ def build_data(data_path, settings, verbose=0):
     if verbose >= 2:
         toolbox.print_summary_statistics(
             {
-                "y_train (OBDX [km])": label_train[:, 0],
-                "y_val   (OBDX [km])": label_val[:, 0],
-                "y_test  (OBDX [km])": label_test[:, 0],
-            },
+                "y_train (OFDX [km])": label_train[:, 0],
+                "y_val   (OFDX [km])": label_val[:, 0],
+                "y_test  (OFDX [km])": label_test[:, 0],
+                },
             sigfigs=1,
         )
         toolbox.print_summary_statistics(
             {
-                "y_train (OBDY [km])": label_train[:, 1],
-                "y_val   (OBDY [km])": label_val[:, 1],
-                "y_test  (OBDY [km])": label_test[:, 1],
-            },
+                "y_train (OFDY [km])": label_train[:, 1],
+                "y_val   (OFDY [km])": label_val[:, 1],
+                "y_test  (OFDY [km])": label_test[:, 1],
+                },
             sigfigs=1,
         )
 

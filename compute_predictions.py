@@ -3,7 +3,7 @@
 import numpy as np
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "12 November 2022"
+__version__ = "13 December 2022"
 
 
 def save_predictions(model, settings, predictions_filename, df_data, x_data, label_data):

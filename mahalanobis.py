@@ -54,7 +54,8 @@ def plot_cdf(
         colors=COLOR_DEFAULT,
         contours=np.arange(9, 0, -1) / 10.0,
         data_crs=ct.crs.PlateCarree(),
-):
+        annotate=False,
+        ):
     """Plot the Mahalanobis cdf.
 
     Plot the elliptical contours of the Mahalanobis cdf for a bivariate
@@ -111,6 +112,26 @@ def plot_cdf(
         )
         plt.fill(x, y, color=colors[i], alpha=.4, label=None, transform=data_crs)
 
+        if annotate:
+            if i == 0:
+                plt.text(
+                    x.mean(), y.max(), "Probability", fontsize=5,
+                    verticalalignment="bottom", horizontalalignment="center", transform=data_crs, )
+
+            if i != 0:
+                p_text = contours[i - 1]
+                plt.text(
+                    x.mean(), y.max(), str(int((p_text * 100).round())) + '\%', transform=data_crs,
+                    verticalalignment="bottom", fontsize=2
+                    )
+
+            if i == (len(contours) - 1):
+                p_text = contours[i]
+                plt.text(
+                    x.mean(), y.mean(), str(int((p_text * 100).round())) + '\%', transform=data_crs,
+                    horizontalalignment="center", verticalalignment="center", fontsize=2
+                    )
+
     if besttrack_u is not None and besttrack_v is not None:
         plt.plot(
             besttrack_u,
@@ -122,7 +143,7 @@ def plot_cdf(
             transform=data_crs,
         )
 
-    plt.axis("equal")
+    # plt.axis("equal")
 
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):

@@ -118,7 +118,7 @@ def train_experiments(
                 )
 
                 # Check if the model exists and overwrite is off.
-                model_savename = model_path + model_name + "_weights.h5"
+                model_savename = model_path + model_name + '/' + model_name + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
                     print(f"Saved {model_name} already exists. Skipping...")
                     continue

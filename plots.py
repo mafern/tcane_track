@@ -9,7 +9,7 @@ import matplotlib as mpl
 import numpy as np
 
 DATA_CRS = ct.crs.PlateCarree()
-KM_TO_DEG = 1.0 / 111
+KM_TO_DEG = 1.0 / 111.
 
 
 def set_plot_rc():
@@ -64,20 +64,21 @@ def draw_coastlines(ax):
         category="physical",
         name="land",
         scale="50m",
-        facecolor=(0.95, 0.95, 0.95),
-        edgecolor="k",
-        linewidth=0.5,
+        facecolor=(0.9, 0.9, 0.9),
+        edgecolor="gray",
+        linewidth=0.0,
         zorder=0,
-    )
+        )
     ax.add_feature(land_feature)
 
 
 def plot_leadtime_predictions(
-    df,
-    ax,
-    leadtimes=(24, 48, 72, 96, 120),
-    contours=np.arange(0.1, 1.0, 0.1),
-):
+        df,
+        ax,
+        leadtimes=(24, 48, 72, 96, 120),
+        contours=np.arange(0.1, 1.0, 0.1),
+        extent=[195, 358, 5, 35],
+        ):
     COLOR = cmr.take_cmap_colors(
         "cmr.pride", len(contours), cmap_range=(0.2, 0.8), return_fmt="hex"
     )
@@ -88,12 +89,27 @@ def plot_leadtime_predictions(
             print(str(lead_time) + " dataframe is empty")
             continue
 
-        besttrack_u = df_plot["LONC"].values + KM_TO_DEG * df_plot["OBDX"].values
-        besttrack_v = df_plot["LATC"].values + KM_TO_DEG * df_plot["OBDY"].values
+        besttrack_u = df_plot["LONN"].values + KM_TO_DEG * df_plot["OFDX"].values
+        besttrack_v = df_plot["LATN"].values + KM_TO_DEG * df_plot["OFDY"].values
 
+        # plot legend/guide
+        if lead_time == leadtimes[0]:
+            mahalanobis.plot_cdf(
+                extent[0] + (extent[1] - extent[0]) * .15,
+                extent[2] + (extent[3] - extent[2]) * .15,
+                KM_TO_DEG * 150.,
+                KM_TO_DEG * 150.,
+                0.,
+                colors=COLOR,
+                contours=contours,
+                data_crs=DATA_CRS,
+                annotate=True
+                )
+
+        # plot forecast
         mahalanobis.plot_cdf(
-            df_plot["LONC"].values + KM_TO_DEG * df_plot["mu_u"].values,
-            df_plot["LATC"].values + KM_TO_DEG * df_plot["mu_v"].values,
+            df_plot["LONN"].values + KM_TO_DEG * df_plot["mu_u"].values,
+            df_plot["LATN"].values + KM_TO_DEG * df_plot["mu_v"].values,
             KM_TO_DEG * df_plot["sigma_u"].values,
             KM_TO_DEG * df_plot["sigma_v"].values,
             df_plot["rho"].values,
@@ -102,42 +118,42 @@ def plot_leadtime_predictions(
             colors=COLOR,
             contours=contours,
             data_crs=DATA_CRS,
-        )
+            )
 
-        # plot consensus prediction
+        # plot official forecast
         plt.plot(
-            df_plot["LONC"].values,
-            df_plot["LATC"].values,
+            df_plot["LONN"].values,
+            df_plot["LATN"].values,
             marker="o",
             markerfacecolor="None",
             markeredgewidth=0.25,
             linestyle="",
             markersize=3,
             color="k",
-            label="Consensus",
+            label="Official Forecast",
             transform=DATA_CRS,
-        )
+            )
 
         plt.text(
-            df_plot["LONC"].values,
-            df_plot["LATC"].values,
+            df_plot["LONN"].values,
+            df_plot["LATN"].values,
             df_plot["ftime(hr)"].values[0],
             color="k",
             fontsize=8,
             horizontalalignment="left",
             verticalalignment="bottom",
             transform=DATA_CRS,
-        )
+            )
 
     # connect the besttrack predictions
     plt.plot(
-        df["LONC"].values + KM_TO_DEG * df["OBDX"].values,
-        df["LATC"].values + KM_TO_DEG * df["OBDY"].values,
+        df["LONN"].values + KM_TO_DEG * df["OFDX"].values,
+        df["LATN"].values + KM_TO_DEG * df["OFDY"].values,
         "-",
         linewidth=0.25,
         color="k",
         transform=DATA_CRS,
-    )
+        )
 
     # format plot
     format_spines(ax)

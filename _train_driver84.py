@@ -34,16 +34,16 @@ EXP_NAME_LIST = (
     # "centered_bivariate_normal_108_EPCP108",
     # "centered_bivariate_normal_109_EPCP120",
 
-    "centered_bivariate_normal_200_AL12",
-    "centered_bivariate_normal_201_AL24",
-    "centered_bivariate_normal_202_AL36",
-    "centered_bivariate_normal_203_AL48",
-    "centered_bivariate_normal_204_AL60",
-    # "centered_bivariate_normal_205_AL72",
-    # "centered_bivariate_normal_206_AL84",
-    # "centered_bivariate_normal_207_AL96",
-    # "centered_bivariate_normal_208_AL108",
-    # "centered_bivariate_normal_209_AL120",
+    # "centered_bivariate_normal_200_AL12",
+    # "centered_bivariate_normal_201_AL24",
+    # "centered_bivariate_normal_202_AL36",
+    # "centered_bivariate_normal_203_AL48",
+    # "centered_bivariate_normal_204_AL60",
+    "centered_bivariate_normal_205_AL72",
+    "centered_bivariate_normal_206_AL84",
+    "centered_bivariate_normal_207_AL96",
+    "centered_bivariate_normal_208_AL108",
+    "centered_bivariate_normal_209_AL120",
     )
 
 if __name__ == "__main__":
