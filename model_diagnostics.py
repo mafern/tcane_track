@@ -203,10 +203,19 @@ def compute_average_errors(model, x_data, label_data):
         np.hypot(
             y_pred[:, 0] - label_data[:, 0],
             y_pred[:, 1] - label_data[:, 1],
+            )
         )
-    )
 
-    return mean_error
+    mean_official_error = np.mean(
+        np.hypot(
+            label_data[:, 0],
+            label_data[:, 1],
+            )
+        )
+
+    mean_error_reduction = mean_official_error - mean_error
+
+    return mean_error, mean_error_reduction
 
 
 def compute_iqr_capture(model, x_data, label_data):
@@ -295,4 +304,4 @@ def compute_sign_test(model, x_data, label_data):
     )
     outside = (cdf > 0.50)
 
-    return np.mean(outside.astype(int))
+    return np.mean(outside.numpy().astype(int))

@@ -28,7 +28,7 @@ def compute_metrics(model, x_data, label_data):
     metric : dictionary
 
     """
-    mean_error = model_diagnostics.compute_average_errors(model, x_data, label_data)
+    mean_error, mean_error_reduction = model_diagnostics.compute_average_errors(model, x_data, label_data)
     iqr_capture = model_diagnostics.compute_iqr_capture(model, x_data, label_data)
     bins, hist_shash, pit_D, EDp_shash = model_diagnostics.compute_pit(model, x_data, label_data)
     sign_test = model_diagnostics.compute_sign_test(model, x_data, label_data)
@@ -39,7 +39,8 @@ def compute_metrics(model, x_data, label_data):
         'sign_test': sign_test,
         'iqr_capture': iqr_capture,
         'mean_error': mean_error,
-    }
+        'mean_error_reduction': mean_error_reduction,
+        }
 
     return metrics
 

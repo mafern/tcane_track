@@ -154,5 +154,5 @@ def save_transfer_blueprint(
         "predictions": model.predict(x_test[0:N_TEST]),
     }
 
-    with open(model_path + model_name + "_blueprint.json", "w") as handle:
+    with open(model_path + model_name + '/' + model_name + "_blueprint.json", "w") as handle:
         json.dump(blueprint, handle, indent="   ", cls=toolbox.NumpyEncoder)
