@@ -11,13 +11,10 @@ This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 
 TODO: Update this section.
 
 ***
-* Step 1: ```_train_model_randomseeds.ipynb```
-* Step 2: ```_compute_metrics.ipynb```
+* Step 0: ```setup.py``` (setups up the correct directory structure)
+* Step 1: ```_train_driver.py```
 * Step 3: ```_plot_metrics.ipynb```
-* Step 4: ```_compute_shashPredictions.ipynb```
-* Step 5: ```_plot_singleModel.ipynb```
-* Step 6: ```_plot_uqMetrics.ipynb```
-* Step 7: ```_plot_uqCurves.ipynb```
+* Step 4: ```_plot_multilead_forecasts.ipynb```
 
 ## General Notes
 ***

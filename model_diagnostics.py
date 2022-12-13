@@ -295,4 +295,4 @@ def compute_sign_test(model, x_data, label_data):
     )
     outside = (cdf > 0.50)
 
-    return np.mean(outside.astype(int))
+    return np.mean(outside.numpy().astype(int))
