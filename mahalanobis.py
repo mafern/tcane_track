@@ -121,9 +121,6 @@ def plot_cdf(
     rho : float, -1 < rho < 1.
         correlation between u and v.
 
-    colors: list of matplotlib color codes
-        color palette.
-
     Returns
     -------
     None
@@ -142,7 +139,7 @@ def plot_cdf(
                 r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
                 + mu_v
         )
-        plt.fill(x, y, color=colors[i], alpha=alpha, label=label, transform=data_crs,)
+        plt.fill(x, y, color=colors[i], alpha=alpha, label=label, transform=data_crs, )
 
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):

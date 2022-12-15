@@ -18,6 +18,7 @@ COLORMAP_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.get_mpl_colormap(
 
 DATA_CRS = ct.crs.PlateCarree()
 KM_TO_DEG = 1.0 / 111.
+NMI_TO_DEG = 1.0 / 60.
 
 
 def set_plot_rc():
@@ -84,7 +85,7 @@ def draw_coastlines(ax):
         scale="50m",
         facecolor='None',
         edgecolor="gray",
-        linewidth=0.5,
+        linewidth=0.25,
         zorder=100,
         alpha=1.,
     )
@@ -127,29 +128,30 @@ def plot_probability_ellipses(
     # plot NHC cone of uncertainty
     if plot_nhc_cone:
         for index, row in df.iterrows():
-            if index==0:
-                label="NHC Cone"
+            if index == 0:
+                label = "NHC Cone"
             else:
                 label = None
-            circle = plt.Circle((row["LONN"], row["LATN"]), KM_TO_DEG*row["nhc_cone_radius"],
-                                color="cornflowerblue", alpha=.25, label=label, transform=DATA_CRS)
+            circle = plt.Circle((row["LONN"], row["LATN"]), NMI_TO_DEG*row["nhc_cone_radius"],
+                                color=colors[1], alpha=.075, label=label, transform=DATA_CRS,)
             ax.add_patch(circle)
 
+    # get uninterpolated leadtimes
+    df_nonan = df.dropna(subset="OFDX").copy()
     # plot forecast center
     plt.plot(
-        df["LONN"].values,
-        df["LATN"].values,
+        df_nonan["LONN"].values,
+        df_nonan["LATN"].values,
         marker=".",
-        markersize=.5,
+        markersize=1,
         alpha=.5,
-        linestyle="",
+        linestyle="None",
         color="k",
         label="NHC Forecast",
         transform=DATA_CRS,
     )
 
     # plot bestrack centers
-    df_nonan = df.dropna(subset="OFDX").copy()
     besttrack_u = df_nonan["LONN"] + KM_TO_DEG * df_nonan["OFDX"]
     besttrack_v = df_nonan["LATN"] + KM_TO_DEG * df_nonan["OFDY"]
     plt.plot(
@@ -207,7 +209,7 @@ def plot_probability_ellipses_vector(
     for lead_time in leadtimes:
         df_plot = df.loc[(df["ftime(hr)"] == lead_time)]
         if df_plot.empty:
-            print(str(lead_time) + " dataframe is empty")
+            # print(str(lead_time) + " dataframe is empty")
             continue
 
         # plot forecast
@@ -215,6 +217,7 @@ def plot_probability_ellipses_vector(
             label = "TCAN"
         else:
             label = None
+
         mahalanobis.plot_cdf(
             df_plot["LONN"].values + KM_TO_DEG * df_plot["mu_u"].values,
             df_plot["LATN"].values + KM_TO_DEG * df_plot["mu_v"].values,
@@ -228,16 +231,19 @@ def plot_probability_ellipses_vector(
             label=label,
             )
         if annotate_leadtimes:
-            plt.text(
-                df_plot["LONN"].values,
-                df_plot["LATN"].values,
-                df_plot["ftime(hr)"].values[0],
-                color="k",
-                fontsize=8,
-                horizontalalignment="left",
-                verticalalignment="bottom",
-                transform=DATA_CRS,
-            )
+            df_nonan = df_plot.dropna(subset="OFDX").copy()
+            if(len(df_nonan) > 0):
+                plt.text(
+                    df_nonan["LONN"].values,
+                    df_nonan["LATN"].values,
+                    df_nonan["ftime(hr)"].values[0],
+                    color="k",
+                    fontsize=8,
+                    horizontalalignment="left",
+                    verticalalignment="bottom",
+                    transform=DATA_CRS,
+                    zorder=200,
+                )
 
     return None
 
@@ -266,6 +272,13 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
 
     nhc_cone_radius_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["nhc_cone_radius"].values, x_interp)
 
+    # clip rho to be between (-1,1)
+    rho_interp = np.clip(rho_interp, -1., 1.)
+
+    # clip sigmas to be postive
+    sigma_u_interp = np.clip(sigma_u_interp, 0., None)
+    sigma_v_interp = np.clip(sigma_v_interp, 0., None)
+
     d_interp = {
         "ftime(hr)": x_interp,
         "mu_u": mu_u_interp,
@@ -291,7 +304,7 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
         leadtimes=df_storm_interp["ftime(hr)"].unique(),
         contours=(.6667, ),
         extent=extent,
-        annotate_leadtimes=False,
+        annotate_leadtimes=True,
         alpha=alpha,
         colors=colors,
         vector=vector,
