@@ -1,11 +1,11 @@
 def get_storm_details(df, isample):
     storm = df.iloc[isample]
     storm_name = storm["Name"]
-    storm_ftime = storm["ftime(hr)"]
-    storm_month = str(storm["time"])[:-4]
-    storm_day = str(storm["time"])[-4:-2]
-    storm_hour = str(storm["time"])[-2:]
-    storm_year = storm["year"]
+    storm_ftime = int(storm["ftime(hr)"])
+    storm_month = str(int(storm["time"]))[:-4]
+    storm_day = str(int(storm["time"]))[-4:-2]
+    storm_hour = str(int(storm["time"]))[-2:]
+    storm_year = int(storm["year"])
 
     details = (
         storm_name

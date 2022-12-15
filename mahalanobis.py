@@ -37,10 +37,50 @@ import tensorflow as tf
 
 
 __author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "12 November 2022"
+__version__ = "14 December 2022"
 
 COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
+COLORMAP_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.get_mpl_colormap()
 THETA = np.linspace(0, 2 * np.pi, 1000)
+
+
+def get_pixel_array(
+        mu_u,
+        mu_v,
+        sigma_u,
+        sigma_v,
+        rho,
+        contours=np.arange(9, 0, -1) / 10.0,
+):
+    # Create the blank pixel array
+    umin = 150.
+    umax = 360.0
+
+    vmin = 0.0
+    vmax = 40.0
+
+    ncol = 2_500
+    nrow = 2_500
+
+    # Define the blank pixel array
+    u, v = np.meshgrid(np.linspace(umin, umax, ncol), np.linspace(vmin, vmax, nrow))
+    z_full = np.zeros((nrow, ncol), dtype=int)
+    for i, p in enumerate(contours):
+        # Define the blank pixel array
+        z = np.zeros((nrow, ncol), dtype=int)
+        # Define the threshold on the rsqr.
+        threshold = -2.0 * (np.log(1 - p))
+        # Identify the pixel array nodes that fall inside the ellipse.
+        U = (u - mu_u) / sigma_u
+        V = (v - mu_v) / sigma_v
+        rsqr = 1.0 / (1.0 - rho * rho) * (U * U - 2 * rho * U * V + V * V)
+
+        z[rsqr <= threshold] = 1.0
+        z_full = z_full + z
+    # z_full = z_full.astype("float")
+    # z_full[z_full == 0] = np.nan
+
+    return np.unique(u), np.unique(v), z_full
 
 
 def plot_cdf(
@@ -49,12 +89,11 @@ def plot_cdf(
         sigma_u,
         sigma_v,
         rho,
-        besttrack_u=None,
-        besttrack_v=None,
         colors=COLOR_DEFAULT,
         contours=np.arange(9, 0, -1) / 10.0,
         data_crs=ct.crs.PlateCarree(),
-        annotate=False,
+        alpha=0.4,
+        label=None
         ):
     """Plot the Mahalanobis cdf.
 
@@ -82,12 +121,6 @@ def plot_cdf(
     rho : float, -1 < rho < 1.
         correlation between u and v.
 
-    besttrack_u : float or None
-        the u-coordinate of the truth.
-
-    besttrack_v : float or None
-        the v-coordinate of the truth.
-
     colors: list of matplotlib color codes
         color palette.
 
@@ -102,7 +135,6 @@ def plot_cdf(
     """
 
     contours = np.sort(contours)[::-1]
-
     for i, p in enumerate(contours):
         r = np.sqrt(-2.0 * (np.log(1 - p)))
         x = r * sigma_u * np.cos(THETA) + mu_u
@@ -110,40 +142,7 @@ def plot_cdf(
                 r * sigma_v * (rho * np.cos(THETA) + np.sqrt(1 - rho * rho) * np.sin(THETA))
                 + mu_v
         )
-        plt.fill(x, y, color=colors[i], alpha=.4, label=None, transform=data_crs)
-
-        if annotate:
-            if i == 0:
-                plt.text(
-                    x.mean(), y.max(), "Probability", fontsize=5,
-                    verticalalignment="bottom", horizontalalignment="center", transform=data_crs, )
-
-            if i != 0:
-                p_text = contours[i - 1]
-                plt.text(
-                    x.mean(), y.max(), str(int((p_text * 100).round())) + '\%', transform=data_crs,
-                    verticalalignment="bottom", fontsize=2
-                    )
-
-            if i == (len(contours) - 1):
-                p_text = contours[i]
-                plt.text(
-                    x.mean(), y.mean(), str(int((p_text * 100).round())) + '\%', transform=data_crs,
-                    horizontalalignment="center", verticalalignment="center", fontsize=2
-                    )
-
-    if besttrack_u is not None and besttrack_v is not None:
-        plt.plot(
-            besttrack_u,
-            besttrack_v,
-            "x",
-            color="k",
-            markersize=5,
-            label="BestTrack",
-            transform=data_crs,
-        )
-
-    # plt.axis("equal")
+        plt.fill(x, y, color=colors[i], alpha=alpha, label=label, transform=data_crs,)
 
 
 def compute_cdf(mu_u, mu_v, sigma_u, sigma_v, rho, u, v):
