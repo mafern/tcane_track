@@ -5,8 +5,16 @@ import mahalanobis
 import cmasher as cmr
 import data_info
 import matplotlib as mpl
-
 import numpy as np
+import compute_predictions
+import pandas as pd
+import palettable
+
+import importlib as imp
+imp.reload(mahalanobis)
+
+COLOR_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.mpl_colors
+COLORMAP_DEFAULT = palettable.colorbrewer.diverging.RdYlBu_9_r.get_mpl_colormap()
 
 DATA_CRS = ct.crs.PlateCarree()
 KM_TO_DEG = 1.0 / 111.
@@ -65,95 +73,95 @@ def draw_coastlines(ax):
         name="land",
         scale="50m",
         facecolor=(0.9, 0.9, 0.9),
-        edgecolor="gray",
+        edgecolor="None",
         linewidth=0.0,
         zorder=0,
+        alpha=1.,
         )
+    land_feature_lines = cfeature.NaturalEarthFeature(
+        category="physical",
+        name="land",
+        scale="50m",
+        facecolor='None',
+        edgecolor="gray",
+        linewidth=0.5,
+        zorder=100,
+        alpha=1.,
+    )
     ax.add_feature(land_feature)
+    ax.add_feature(land_feature_lines)
 
 
-def plot_leadtime_predictions(
+def plot_probability_ellipses(
         df,
         ax,
-        leadtimes=(24, 48, 72, 96, 120),
-        contours=np.arange(0.1, 1.0, 0.1),
-        extent=[195, 358, 5, 35],
-        ):
-    COLOR = cmr.take_cmap_colors(
-        "cmr.pride", len(contours), cmap_range=(0.2, 0.8), return_fmt="hex"
+        leadtimes,
+        contours,
+        extent=None,
+        alpha=0.4,
+        annotate_leadtimes=True,
+        colors=None,
+        vector=True,
+        plot_nhc_cone=False,
+):
+
+    if extent is None:
+        extent = [195, 358, 5, 35]
+    if colors is None:
+        colors = cmr.take_cmap_colors(
+            "cmr.pride", len(contours), cmap_range=(0.2, 0.8), return_fmt="hex"
+        )
+
+    if vector:
+        plot_probability_ellipses_vector(
+            df,
+            leadtimes,
+            contours,
+            alpha=alpha,
+            annotate_leadtimes=annotate_leadtimes,
+            colors=colors,
+        )
+    else:
+        raise NotImplementedError("no such vector plotting code")
+
+    # plot NHC cone of uncertainty
+    if plot_nhc_cone:
+        for index, row in df.iterrows():
+            if index==0:
+                label="NHC Cone"
+            else:
+                label = None
+            circle = plt.Circle((row["LONN"], row["LATN"]), KM_TO_DEG*row["nhc_cone_radius"],
+                                color="cornflowerblue", alpha=.25, label=label, transform=DATA_CRS)
+            ax.add_patch(circle)
+
+    # plot forecast center
+    plt.plot(
+        df["LONN"].values,
+        df["LATN"].values,
+        marker=".",
+        markersize=.5,
+        alpha=.5,
+        linestyle="",
+        color="k",
+        label="NHC Forecast",
+        transform=DATA_CRS,
     )
 
-    for lead_time in leadtimes:
-        df_plot = df.loc[(df["ftime(hr)"] == lead_time)]
-        if df_plot.empty:
-            print(str(lead_time) + " dataframe is empty")
-            continue
-
-        besttrack_u = df_plot["LONN"].values + KM_TO_DEG * df_plot["OFDX"].values
-        besttrack_v = df_plot["LATN"].values + KM_TO_DEG * df_plot["OFDY"].values
-
-        # plot legend/guide
-        if lead_time == leadtimes[0]:
-            mahalanobis.plot_cdf(
-                extent[0] + (extent[1] - extent[0]) * .15,
-                extent[2] + (extent[3] - extent[2]) * .15,
-                KM_TO_DEG * 150.,
-                KM_TO_DEG * 150.,
-                0.,
-                colors=COLOR,
-                contours=contours,
-                data_crs=DATA_CRS,
-                annotate=True
-                )
-
-        # plot forecast
-        mahalanobis.plot_cdf(
-            df_plot["LONN"].values + KM_TO_DEG * df_plot["mu_u"].values,
-            df_plot["LATN"].values + KM_TO_DEG * df_plot["mu_v"].values,
-            KM_TO_DEG * df_plot["sigma_u"].values,
-            KM_TO_DEG * df_plot["sigma_v"].values,
-            df_plot["rho"].values,
-            besttrack_u=besttrack_u,
-            besttrack_v=besttrack_v,
-            colors=COLOR,
-            contours=contours,
-            data_crs=DATA_CRS,
-            )
-
-        # plot official forecast
-        plt.plot(
-            df_plot["LONN"].values,
-            df_plot["LATN"].values,
-            marker="o",
-            markerfacecolor="None",
-            markeredgewidth=0.25,
-            linestyle="",
-            markersize=3,
-            color="k",
-            label="Official Forecast",
-            transform=DATA_CRS,
-            )
-
-        plt.text(
-            df_plot["LONN"].values,
-            df_plot["LATN"].values,
-            df_plot["ftime(hr)"].values[0],
-            color="k",
-            fontsize=8,
-            horizontalalignment="left",
-            verticalalignment="bottom",
-            transform=DATA_CRS,
-            )
-
-    # connect the besttrack predictions
+    # plot bestrack centers
+    df_nonan = df.dropna(subset="OFDX").copy()
+    besttrack_u = df_nonan["LONN"] + KM_TO_DEG * df_nonan["OFDX"]
+    besttrack_v = df_nonan["LATN"] + KM_TO_DEG * df_nonan["OFDY"]
     plt.plot(
-        df["LONN"].values + KM_TO_DEG * df["OFDX"].values,
-        df["LATN"].values + KM_TO_DEG * df["OFDY"].values,
-        "-",
-        linewidth=0.25,
+        besttrack_u,
+        besttrack_v,
+        "-x",
         color="k",
+        markersize=4,
+        linewidth=.5,
+        label="BestTrack",
         transform=DATA_CRS,
-        )
+    )
 
     # format plot
     format_spines(ax)
@@ -173,7 +181,7 @@ def plot_leadtime_predictions(
     # setup legend
     plt.legend()
     handles, labels = plt.gca().get_legend_handles_labels()
-    plt.gca().legend(handles[:1], labels[:1], loc=2)
+    plt.gca().legend(handles, labels, loc=2, frameon=True, fontsize=6)
 
     # set storm title
     details = data_info.get_storm_details(df, 0)
@@ -182,4 +190,114 @@ def plot_leadtime_predictions(
 
     draw_coastlines(ax)
 
+    ax.set_extent(extent, crs=ct.crs.PlateCarree())
+
     return details
+
+
+def plot_probability_ellipses_vector(
+        df,
+        leadtimes,
+        contours,
+        alpha=0.4,
+        annotate_leadtimes=True,
+        colors=None,
+):
+
+    for lead_time in leadtimes:
+        df_plot = df.loc[(df["ftime(hr)"] == lead_time)]
+        if df_plot.empty:
+            print(str(lead_time) + " dataframe is empty")
+            continue
+
+        # plot forecast
+        if lead_time == leadtimes[0]:
+            label = "TCAN"
+        else:
+            label = None
+        mahalanobis.plot_cdf(
+            df_plot["LONN"].values + KM_TO_DEG * df_plot["mu_u"].values,
+            df_plot["LATN"].values + KM_TO_DEG * df_plot["mu_v"].values,
+            KM_TO_DEG * df_plot["sigma_u"].values,
+            KM_TO_DEG * df_plot["sigma_v"].values,
+            df_plot["rho"].values,
+            contours=contours,
+            data_crs=DATA_CRS,
+            alpha=alpha,
+            colors=colors,
+            label=label,
+            )
+        if annotate_leadtimes:
+            plt.text(
+                df_plot["LONN"].values,
+                df_plot["LATN"].values,
+                df_plot["ftime(hr)"].values[0],
+                color="k",
+                fontsize=8,
+                horizontalalignment="left",
+                verticalalignment="bottom",
+                transform=DATA_CRS,
+            )
+
+    return None
+
+
+def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, alpha=1., plot_nhc_cone=False):
+
+    if colors is None:
+        colors = ("gold",)
+
+    df_storm = df_storm.sort_values("ftime(hr)").reset_index(drop=True)
+    leadtimes = df_storm["ftime(hr)"].values
+    x_interp = np.arange(leadtimes[0], leadtimes[-1]+1, 1)
+
+    # interpolate things
+    mu_u_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["mu_u"].values, x_interp)
+    mu_v_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["mu_v"].values, x_interp)
+    sigma_u_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["sigma_u"].values, x_interp)
+    sigma_v_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["sigma_v"].values, x_interp)
+    rho_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["rho"].values, x_interp)
+
+    lonn_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["LONN"].values, x_interp)
+    latn_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["LATN"].values, x_interp)
+
+    ofdx_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["OFDX"].values, x_interp)
+    ofdy_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["OFDY"].values, x_interp)
+
+    nhc_cone_radius_interp = compute_predictions.interpolate_leadtimes(leadtimes, df_storm["nhc_cone_radius"].values, x_interp)
+
+    d_interp = {
+        "ftime(hr)": x_interp,
+        "mu_u": mu_u_interp,
+        "mu_v": mu_v_interp,
+        "sigma_u": sigma_u_interp,
+        "sigma_v": sigma_v_interp,
+        "rho": rho_interp,
+        "LONN": lonn_interp,
+        "LATN": latn_interp,
+        "OFDX": ofdx_interp,
+        "OFDY": ofdy_interp,
+        "nhc_cone_radius": nhc_cone_radius_interp,
+
+    }
+
+    df_storm_interp = pd.DataFrame(data=d_interp)
+    df_storm_interp[["Name", "year", "time"]] = df_storm[["Name", "year", "time"]]
+    df_storm_interp.loc[~df_storm_interp["ftime(hr)"].isin(leadtimes), ["OFDX", "OFDY"]] = np.nan
+
+    details = plot_probability_ellipses(
+        df_storm_interp,
+        ax=ax,
+        leadtimes=df_storm_interp["ftime(hr)"].unique(),
+        contours=(.6667, ),
+        extent=extent,
+        annotate_leadtimes=False,
+        alpha=alpha,
+        colors=colors,
+        vector=vector,
+        plot_nhc_cone=plot_nhc_cone,
+    )
+
+    return details
+
+#%%

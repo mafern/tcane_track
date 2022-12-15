@@ -1,6 +1,7 @@
 """Collate and save the model predictions."""
 
 import numpy as np
+import scipy
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
 __version__ = "13 December 2022"
@@ -25,3 +26,12 @@ def save_predictions(model, settings, predictions_filename, df_data, x_data, lab
     df_predictions.to_csv(predictions_filename)
 
     return None
+
+
+def interpolate_leadtimes(leadtimes, y, x_interp=None):
+    if x_interp is None:
+        x_interp = np.arange(leadtimes[0], leadtimes[-1]+1)
+
+    f_interp = scipy.interpolate.interp1d(leadtimes, y , kind="cubic")
+    y_interp = f_interp(x_interp)
+    return y_interp
