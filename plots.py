@@ -236,7 +236,7 @@ def plot_probability_ellipses_vector(
                 plt.text(
                     df_nonan["LONN"].values,
                     df_nonan["LATN"].values,
-                    df_nonan["ftime(hr)"].values[0],
+                    int(df_nonan["ftime(hr)"].values[0]),
                     color="k",
                     fontsize=5,
                     horizontalalignment="left",
