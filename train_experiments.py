@@ -30,6 +30,7 @@ def train_experiments(
     metrics_path,
     predictions_path,
     overwrite_model=False,
+    overwrite_predictions=False,
 ):
     """Train the defined suite of experiments.
 
@@ -120,7 +121,19 @@ def train_experiments(
                 # Check if the model exists and overwrite is off.
                 model_savename = model_path + model_name + '/' + model_name + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
-                    print(f"Saved {model_name} already exists. Skipping...")
+                    print(f"Saved {model_name} already exists. Skipping fit...")
+                    if overwrite_predictions is True:
+                        print(f"  Re-saving predictions...")
+                        model = tf.keras.models.load_model(model_path + model_name + '/' + model_name + "_model", compile=False)
+                        prediction_filename = predictions_path + model_name + "_testing_predictions.csv"
+                        compute_predictions.save_predictions(
+                            model,
+                            settings,
+                            prediction_filename,
+                            df_test,
+                            x_test,
+                            label_test,
+                        )
                     continue
                 else:
                     print(f"Training {model_name}")
