@@ -2,11 +2,12 @@
 import os.path
 
 __author__ = "Randal J. Barnes and Elizabeth A. Barnes"
-__date__   = "30 September 2022"
+__date__   = "16 December 2022"
 
 DIRECTORIES = [
     "figures",
     "figures/Model_diagnostics",
+    "figures/analysis",
     "model_metrics",
     "saved_models",
     "saved_metrics",
