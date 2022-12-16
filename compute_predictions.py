@@ -2,6 +2,8 @@
 
 import numpy as np
 import scipy
+import scipy.interpolate
+import pandas as pd
 
 __author__ = "Elizabeth A. Barnes and Randal J Barnes"
 __version__ = "13 December 2022"
@@ -35,3 +37,22 @@ def interpolate_leadtimes(leadtimes, y, x_interp=None):
     f_interp = scipy.interpolate.interp1d(leadtimes, y , kind="cubic")
     y_interp = f_interp(x_interp)
     return y_interp
+
+
+def add_lead_zero(df_storm):
+
+    row = df_storm[df_storm["ftime(hr)"] == df_storm["ftime(hr)"].min()].copy()
+
+    row["ftime(hr)"] = 0.
+    row["mu_u"] = 0.
+    row["mu_v"] = 0.
+    row["sigma_u"] = 15.
+    row["sigma_v"] = 15.
+    row["OFDX"] = 0.
+    row["OFDY"] = 0.
+    row["LATN"] = row["LAT0"]
+    row["LONN"] = row["LON0"]
+
+    return pd.concat([row,df_storm], ignore_index=True)
+
+#%%
