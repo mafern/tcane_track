@@ -313,4 +313,3 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
 
     return details
 
-#%%
