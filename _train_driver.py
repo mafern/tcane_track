@@ -9,9 +9,9 @@ import tensorflow as tf
 from train_experiments import train_experiments
 
 DATA_PATH = "data/"
-MODEL_PATH = "../track_martin/saved_models/default_2023/"
-METRICS_PATH = "../track_martin/saved_metrics/default_2023/"
-PREDICTIONS_PATH = "../track_martin/saved_predictions/default_2023/"
+MODEL_PATH = "../track_martin/saved_models/default_l2o/"
+METRICS_PATH = "../track_martin/saved_metrics/default_l2o/"
+PREDICTIONS_PATH = "../track_martin/saved_predictions/default_l2o/"
 
 tf.config.set_visible_devices([], "GPU")  # turn-off tensorflow-metal if it is on
 np.warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -49,27 +49,27 @@ __version__ = "13 December 2022"
 EXP_NAME_LIST = (
     # "centered_bivariate_normal_000_EPCP24",
 
-    "default_2023_EP12",
-    "default_2023_EP24",
-    "default_2023_EP36",
-    "default_2023_EP48",
-    "default_2023_EP60",
-    "default_2023_EP72",
-    "default_2023_EP84",
-    "default_2023_EP96",
-    "default_2023_EP108",
-    "default_2023_EP120",
+    "default_l2o_EP12",
+    "default_l2o_EP24",
+    "default_l2o_EP36",
+    "default_l2o_EP48",
+    "default_l2o_EP60",
+    "default_l2o_EP72",
+    "default_l2o_EP84",
+    "default_l2o_EP96",
+    "default_l2o_EP108",
+    "default_l2o_EP120",
 
-    "default_2023_AL12",
-    "default_2023_AL24",
-    "default_2023_AL36",
-    "default_2023_AL48",
-    "default_2023_AL60",
-    "default_2023_AL72",
-    "default_2023_AL84",
-    "default_2023_AL96",
-    "default_2023_AL108",
-    "default_2023_AL120",
+    "default_l2o_AL12",
+    "default_l2o_AL24",
+    "default_l2o_AL36",
+    "default_l2o_AL48",
+    "default_l2o_AL60",
+    "default_l2o_AL72",
+    "default_l2o_AL84",
+    "default_l2o_AL96",
+    "default_l2o_AL108",
+    "default_l2o_AL120",
     )
 
 if __name__ == "__main__":

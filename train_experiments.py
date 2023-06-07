@@ -68,7 +68,9 @@ def train_experiments(
 
         # Set testing years based on the specified test conditions.
         if settings["test_condition"] == "leave-one-out":
-            testing_years_list = np.arange(2013, 2023)
+            # testing_years_list = np.arange(2013, 2023)
+            import itertools
+            testing_years_list = list(itertools.combinations(np.arange(2013, 2023), 2))
         elif settings["test_condition"] == "years":
             testing_years_list = np.copy(settings["years_test"])
         else:
@@ -76,7 +78,8 @@ def train_experiments(
 
         # Loop through the testing years.
         for testing_years in testing_years_list:
-            settings["years_test"] = (testing_years,)
+            # settings["years_test"] = (testing_years,)
+            settings["years_test"] = testing_years
 
             # Loop through the random seeds.
             for rng_seed in settings["rng_seed_list"]:
