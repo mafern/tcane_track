@@ -9,9 +9,9 @@ import tensorflow as tf
 from train_experiments import train_experiments
 
 DATA_PATH = "data/"
-MODEL_PATH = "saved_models/"
-METRICS_PATH = "saved_metrics/"
-PREDICTIONS_PATH = "saved_predictions/"
+MODEL_PATH = "../track_martin/saved_models/default_2023/"
+METRICS_PATH = "../track_martin/saved_metrics/default_2023/"
+PREDICTIONS_PATH = "../track_martin/saved_predictions/default_2023/"
 
 tf.config.set_visible_devices([], "GPU")  # turn-off tensorflow-metal if it is on
 np.warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -20,30 +20,56 @@ __author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
 __version__ = "13 December 2022"
 
 # List of experiments to run
+# EXP_NAME_LIST = (
+#     # "centered_bivariate_normal_000_EPCP24",
+#
+#     "centered_bivariate_normal_100_EPCP12",
+#     "centered_bivariate_normal_101_EPCP24",
+#     "centered_bivariate_normal_102_EPCP36",
+#     "centered_bivariate_normal_103_EPCP48",
+#     "centered_bivariate_normal_104_EPCP60",
+#     "centered_bivariate_normal_105_EPCP72",
+#     "centered_bivariate_normal_106_EPCP84",
+#     "centered_bivariate_normal_107_EPCP96",
+#     "centered_bivariate_normal_108_EPCP108",
+#     "centered_bivariate_normal_109_EPCP120",
+#
+#     "centered_bivariate_normal_200_AL12",
+#     "centered_bivariate_normal_201_AL24",
+#     "centered_bivariate_normal_202_AL36",
+#     "centered_bivariate_normal_203_AL48",
+#     "centered_bivariate_normal_204_AL60",
+#     "centered_bivariate_normal_205_AL72",
+#     "centered_bivariate_normal_206_AL84",
+#     "centered_bivariate_normal_207_AL96",
+#     "centered_bivariate_normal_208_AL108",
+#     "centered_bivariate_normal_209_AL120",
+#     )
+
 EXP_NAME_LIST = (
     # "centered_bivariate_normal_000_EPCP24",
 
-    "centered_bivariate_normal_100_EPCP12",
-    "centered_bivariate_normal_101_EPCP24",
-    "centered_bivariate_normal_102_EPCP36",
-    "centered_bivariate_normal_103_EPCP48",
-    "centered_bivariate_normal_104_EPCP60",
-    "centered_bivariate_normal_105_EPCP72",
-    "centered_bivariate_normal_106_EPCP84",
-    "centered_bivariate_normal_107_EPCP96",
-    "centered_bivariate_normal_108_EPCP108",
-    "centered_bivariate_normal_109_EPCP120",
+    "default_2023_EP12",
+    "default_2023_EP24",
+    "default_2023_EP36",
+    "default_2023_EP48",
+    "default_2023_EP60",
+    "default_2023_EP72",
+    "default_2023_EP84",
+    "default_2023_EP96",
+    "default_2023_EP108",
+    "default_2023_EP120",
 
-    "centered_bivariate_normal_200_AL12",
-    "centered_bivariate_normal_201_AL24",
-    "centered_bivariate_normal_202_AL36",
-    "centered_bivariate_normal_203_AL48",
-    "centered_bivariate_normal_204_AL60",
-    "centered_bivariate_normal_205_AL72",
-    "centered_bivariate_normal_206_AL84",
-    "centered_bivariate_normal_207_AL96",
-    "centered_bivariate_normal_208_AL108",
-    "centered_bivariate_normal_209_AL120",
+    "default_2023_AL12",
+    "default_2023_AL24",
+    "default_2023_AL36",
+    "default_2023_AL48",
+    "default_2023_AL60",
+    "default_2023_AL72",
+    "default_2023_AL84",
+    "default_2023_AL96",
+    "default_2023_AL108",
+    "default_2023_AL120",
     )
 
 if __name__ == "__main__":
