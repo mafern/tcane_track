@@ -132,8 +132,10 @@ def plot_probability_ellipses(
                 label = "NHC Cone"
             else:
                 label = None
+            # circle = plt.Circle((row["LONN"], row["LATN"]), NMI_TO_DEG*row["nhc_cone_radius"],
+            #                     color=colors[1], alpha=.075, label=label, transform=DATA_CRS,)
             circle = plt.Circle((row["LONN"], row["LATN"]), NMI_TO_DEG*row["nhc_cone_radius"],
-                                color=colors[1], alpha=.075, label=label, transform=DATA_CRS,)
+                                color='grey', alpha=.85, label=label, transform=DATA_CRS, fill=False,)
             ax.add_patch(circle)
 
     # get uninterpolated leadtimes
@@ -143,7 +145,7 @@ def plot_probability_ellipses(
         df_nonan["LONN"].values,
         df_nonan["LATN"].values,
         marker=".",
-        markersize=1,
+        markersize=3,
         alpha=.5,
         linestyle="None",
         color="k",
@@ -157,7 +159,7 @@ def plot_probability_ellipses(
     plt.plot(
         besttrack_u,
         besttrack_v,
-        "-x",
+        "x",
         color="k",
         markersize=4,
         linewidth=.5,
@@ -201,7 +203,7 @@ def plot_probability_ellipses_vector(
         df,
         leadtimes,
         contours,
-        alpha=0.4,
+        alpha=0.55,
         annotate_leadtimes=True,
         colors=None,
 ):
@@ -238,7 +240,7 @@ def plot_probability_ellipses_vector(
                     df_nonan["LATN"].values,
                     int(df_nonan["ftime(hr)"].values[0]),
                     color="k",
-                    fontsize=5,
+                    fontsize=6.5,
                     horizontalalignment="left",
                     verticalalignment="bottom",
                     transform=DATA_CRS,
@@ -312,4 +314,3 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
     )
 
     return details
-
