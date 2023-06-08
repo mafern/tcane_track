@@ -87,5 +87,7 @@ def save_metrics(
         d[k_key] = metrics_valtest[k]
 
     # save the dataframe
-    df = pd.DataFrame(data=d, index=[0])
+    # df = pd.DataFrame(data=d, index=[0])
+    # df.to_pickle(metric_filename)
+    df = pd.DataFrame(data=d).transpose()
     df.to_pickle(metric_filename)
