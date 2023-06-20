@@ -72,6 +72,13 @@ def save_transfer_blueprint(
     None
 
     """
+    if settings['basin'] == 'AL': basin_name = 'atlc'
+    else: basin_name = 'epcp'
+    if settings['predictand'] == 'OFDV': label_name = 'late'
+    else: label_name = 'erly'
+    lead_name = str(settings['leadtime']).zfill(3)
+    filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
+
     blueprint = {}
 
     # General traits
@@ -154,5 +161,5 @@ def save_transfer_blueprint(
         "predictions": model.predict(x_test[0:N_TEST]),
     }
 
-    with open(model_path + model_name + '/' + model_name + "_blueprint.json", "w") as handle:
+    with open(model_path + model_name + '/' + filename + "_blueprint.json", "w") as handle:
         json.dump(blueprint, handle, indent="   ", cls=toolbox.NumpyEncoder)

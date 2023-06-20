@@ -66,6 +66,14 @@ def train_experiments(
     for exp_name in exp_name_list:
         settings = experiment_settings.get_settings(exp_name)
 
+        # get new filename
+        if settings['basin'] == 'AL': basin_name = 'atlc'
+        else: basin_name = 'epcp'
+        if settings['predictand'] == 'OFDV': label_name = 'late'
+        else: label_name = 'erly'
+        lead_name = str(settings['leadtime']).zfill(3)
+        filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
+
         # Set testing years based on the specified test conditions.
         if settings["test_condition"] == "leave-one-out":
             # testing_years_list = np.arange(2013, 2023)
@@ -122,12 +130,12 @@ def train_experiments(
                 )
 
                 # Check if the model exists and overwrite is off.
-                model_savename = model_path + model_name + '/' + model_name + "_weights.h5"
+                model_savename = model_path + model_name + '/' + filename + "_weights.h5"
                 if os.path.exists(model_savename) and overwrite_model is False:
                     print(f"Saved {model_name} already exists. Skipping fit...")
                     if overwrite_predictions is True:
                         print(f"  Re-saving predictions...")
-                        model = tf.keras.models.load_model(model_path + model_name + '/' + model_name + "_model", compile=False)
+                        model = tf.keras.models.load_model(model_path + model_name + '/' + filename + "_model", compile=False)
                         prediction_filename = predictions_path + model_name + "_testing_predictions.csv"
                         compute_predictions.save_predictions(
                             model,

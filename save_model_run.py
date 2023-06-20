@@ -59,17 +59,24 @@ def save_model_run(
     None
 
     """
+    # set up name
+    if settings['basin'] == 'AL': basin_name = 'atlc'
+    else: basin_name = 'epcp'
+    if settings['predictand'] == 'OFDV': label_name = 'late'
+    else: label_name = 'erly'
+    lead_name = str(settings['leadtime']).zfill(3)
+    filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
     # Save the model, weights, and history.
     try:
         tf.keras.models.save_model(
-            model, model_path + model_name + '/' + model_name + "_model", overwrite=True
+            model, model_path + model_name + '/' + filename + "_model", overwrite=True
             )
     except Exception:
         print("unable to save the model, skipping and saving the weights.")
 
-    model.save_weights(model_path + model_name + '/' + model_name + "_weights.h5")
+    model.save_weights(model_path + model_name + '/' + filename + "_weights.h5")
 
-    with open(model_path + model_name + '/' + model_name + "_history.pickle", "wb") as handle:
+    with open(model_path + model_name + '/' + filename + "_history.pickle", "wb") as handle:
         pickle.dump(model.history.history, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save the metadata.
@@ -81,5 +88,5 @@ def save_model_run(
         "DATA_SUMMARY": data_summary,
         "FIT_SUMMARY": fit_summary,
     }
-    with open(model_path + model_name + '/' + model_name + "_metadata.json", "w") as handle:
+    with open(model_path + model_name + '/' + filename + "_metadata.json", "w") as handle:
         json.dump(metadata, handle, indent="   ", cls=toolbox.NumpyEncoder)
