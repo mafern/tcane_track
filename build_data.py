@@ -233,6 +233,9 @@ def build_data(data_path, settings, verbose=0):
 
     # Split out the validation data.
     if settings["val_condition"] == "random":
+        if settings["n_val"] <= 1:
+            n_val = int(settings["n_val"]*len(df))
+            settings["n_val"] = n_val
         index = np.arange(0, settings["n_val"])
         if len(index) < 100:
             raise Warning("Are you sure you want n_val < 100?")
