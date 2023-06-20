@@ -62,7 +62,7 @@ def save_model_run(
     # set up name
     if settings['basin'] == 'AL': basin_name = 'atlc'
     else: basin_name = 'epcp'
-    if settings['predictand'] == 'OFDV': label_name = 'late'
+    if settings['predictand_x'] == 'OFDX': label_name = 'late'
     else: label_name = 'erly'
     lead_name = str(settings['leadtime']).zfill(3)
     filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
