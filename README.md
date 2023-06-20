@@ -4,7 +4,7 @@ Neural networks are used to estimate consensus hurricane track errors, as well a
 
 ## Tensorflow Code
 ***
-This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 0.15.0 and numpy 1.21.4. 
+This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 0.15.0 and numpy 1.21.4.
 
 ## Order of Operations
 
@@ -34,8 +34,14 @@ pip install silence-tensorflow
 pip install tqdm
 ```
 
+### Compatibility Notes
+For Linux users, the code requires libstdc++.so.6 version >= 3.4.29.  
+1. To find the version installed on your system, run `strings /usr/lib64/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
+2. To find the version installed in your Anaconda or Miniconda, run `strings /home/your-username/path-to-conda/anaconda3/lib/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
+3. To use the latest version of GLIBCXX, add LD_LIBRARY path to your .bashrc. That can be done with the command: `echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/miniconda3/lib'>>~/.bashrc`
+
 ### Credits
-This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu) and [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes) and Dr. Mark DeMaria. 
+This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu) and [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes) and Dr. Mark DeMaria.
 
 [//]: # (#### Funding sources)
 
