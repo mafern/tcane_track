@@ -63,6 +63,13 @@ def train_experiments(
     None
 
     """
+    # if metric or prediction path does not exist, make it
+    # (keras save_model already does this)
+    if not os.path.exists(metrics_path):
+        os.makedirs(metrics_path)
+    if not os.path.exists(predictions_path):
+        os.makedirs(predictions_path)
+        
     for exp_name in exp_name_list:
         settings = experiment_settings.get_settings(exp_name)
 
