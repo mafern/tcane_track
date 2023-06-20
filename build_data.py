@@ -166,11 +166,11 @@ def build_data(data_path, settings, verbose=0):
 
     # PREDICTAND_X : The distance east (km) of the best track position from the
     # NHC or CPHC official track forecast (best track - official).
-    df_raw["PREDICTAND_X"] = df_raw["OFDX"]
+    df_raw["PREDICTAND_X"] = df_raw[settings["predictand_x"]]
 
     # PREDICTAND_Y : The distance north (km) of the best track position from the
     # NHC or CPHC official track forecast (best track - official).
-    df_raw["PREDICTAND_Y"] = df_raw["OFDY"]
+    df_raw["PREDICTAND_Y"] = df_raw[settings["predictand_y"]]
 
     df = df_raw[
         (df_raw["ATCF"].str.contains(settings["basin"]))
