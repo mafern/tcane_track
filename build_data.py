@@ -127,30 +127,30 @@ def build_data(data_path, settings, verbose=0):
     # Setup for the selected features
     if settings["x_names"] is None:
         x_names = [
-            "NCT",
-            "VMAX0",
-            "AVDX",  # AVDX = -50, then the GFS forecast was 50 km west of the consensus longitude.
-            "EMDX",
-            "EGDX",
-            "HWDX",
-            "AVDY",
-            "EMDY",
-            "EGDY",
-            "HWDY",
-            "LONC",  # in degrees EAST
-            "LATC",
-            "VMXC",
-            "DV12",
-            "SLAT",
-            "SHDC",
-            "SSTN",
-            "DTL",
             "DSDV",
             "LGDV",
             "HWDV",
             "AVDV",
+            "VMXC",
+            "NCT",
+            "AVDX",  # AVDX = -50, then the GFS forecast was 50 km west of the consensus longitude.
+            "AVDY",
+            "EMDX",
+            "EMDY",
+            "EGDX",
+            "EGDY",
+            "HWDX",
+            "HWDY",
             "SPDX",
-            "SPDY"
+            "SPDY",
+            "LONC",  # in degrees EAST
+            "LATC",
+            "VMAX0",
+            "DV12",
+            "SLAT",
+            "SSTN",
+            "SHDC",
+            "DTL"
         ]
     else:
         x_names = settings["x_names"]
