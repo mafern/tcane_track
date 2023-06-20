@@ -21,8 +21,8 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import optimizers
 import tensorflow_probability as tfp
 
-from custom_metrics import CustomMAE, InterquartileCapture, SignTest
-from custom_loss import compute_bivariate_normal_nll
+from custom_metrics import *
+from custom_loss import *
 
 __author__ = "Elizabeth A. Barnes and Randal J. Barnes"
 __version__ = "12 November 2022"
@@ -94,11 +94,9 @@ def make_model(settings, x_train, label_train, model_compile=False):
             optimizer=optimizers.Adam(
                 learning_rate=settings["learning_rate"],
             ),
-            loss=compute_bivariate_normal_nll,
+            loss=eval(settings["loss_function"]),
             metrics=[
-                CustomMAE(name="custom_mae"),
-                InterquartileCapture(name="interquartile_capture"),
-                SignTest(name="sign_test"),
+                eval(function)(name=fname) for function, fname in zip(settings["metrics"].keys(), settings["metrics"].values())
             ],
         )
 
