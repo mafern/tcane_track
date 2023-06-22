@@ -162,7 +162,6 @@ def build_data(data_path, settings, verbose=0):
     # Get the data from the specified file and filter out the unwanted rows.
     datafile_path = data_path + settings["filename"]
     df_raw = pd.read_table(datafile_path, sep="\s+")
-    df_raw = df_raw.rename(columns={"Date": "year"})
 
     # PREDICTAND_X : The distance east (km) of the best track position from the
     # NHC or CPHC official track forecast (best track - official).
@@ -173,8 +172,8 @@ def build_data(data_path, settings, verbose=0):
     df_raw["PREDICTAND_Y"] = df_raw[settings["predictand_y"]]
 
     df = df_raw[
-        (df_raw["ATCF"].str.contains(settings["basin"]))
-        & (df_raw["ftime(hr)"] == settings["leadtime"])
+        (df_raw["ATCFID"].str.contains(settings["basin"]))
+        & (df_raw["FHOUR"] == settings["leadtime"])
         ]
 
     # Replace missing values with nan.
@@ -204,7 +203,7 @@ def build_data(data_path, settings, verbose=0):
         years = settings["years_test"]
         if verbose != 0:
             print("years" + str(years) + " withheld for testing")
-        index = df.index[df["year"].isin(years)]
+        index = df.index[df["YEAR"].isin(years)]
         df_test = df.iloc[index]
         x_test = df_test[x_names].to_numpy()
         y_test = np.squeeze(df_test[y_names].to_numpy())
@@ -242,7 +241,7 @@ def build_data(data_path, settings, verbose=0):
     elif settings["val_condition"] == "years":
         if verbose != 0:
             print("years" + str(settings["n_val"]) + " withheld for testing")
-        index = df.index[df["year"].isin(settings["n_val"])]
+        index = df.index[df["YEAR"].isin(settings["n_val"])]
     else:
         raise NotImplementedError
 

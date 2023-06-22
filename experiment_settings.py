@@ -71,7 +71,7 @@ class Experiments():
         Make an experiment dictionary with the following settings:
                 - expname: name of the experiment (how it will be saved and called)
                 - basin: ocean basin, either 'AL' (Atlantic) or 'EP' (Eastern/Central Pacific)
-                - leadtime: multiples of 12 up to 120 hours, or None to generate separate experiments for each leadtime
+                - leadtime: multiples of 12 up to 120 hours (no 84, 108), or None to generate separate experiments for each leadtime
                 - x_names: features to use -- entering x_names that are already in default_x_names removes them, otherwise they are added
                 - predictand x, y: the label, either 'OFDX', 'OFDY' (official forecast error) or 'OBDX', 'OBDY' (consensus error)
                 - uncertainty: whether to center the bivariate normal ("centered_bivariate_normal") or allow it to fit ("bivariate_normal")
@@ -104,7 +104,7 @@ class Experiments():
         x_names = default_x_names
         print("using features: ", x_names)
 
-        if leadtimes is None: leadtimes = [int(ll) for ll in np.arange(12, 120+12, 12)]
+        if leadtimes is None: leadtimes = [12, 24, 36, 48, 60, 72, 96, 120]
         if not isinstance(leadtimes, list):
             leadtimes = [leadtimes]
         dictionary = {}
@@ -134,5 +134,5 @@ class Experiments():
 
     @property
     def avail_x_names(self):
-        avail_x_names = ['year', 'time', 'ftime(hr)', 'VMAX0', 'NCI', 'VMAXN', 'DSDV', 'LGDV', 'HWDV', 'AVDV', 'VMXC', 'DV12', 'SLAT', 'SSTN', 'SHDC', 'DTL', 'D200', 'T200', 'RHMD', 'SPDX', 'SPDY', 'LON0', 'LAT0', 'NCT', 'LONN', 'LATN', 'AVDX', 'EMDX', 'EGDX', 'HWDX', 'LONC', 'AVDY', 'EMDY', 'EGDY', 'HWDY', 'LATC']
+        avail_x_names = ['YEAR', 'MMDDHH', 'FHOUR', 'VMAX0', 'NCI', 'VMAXN', 'DSDV', 'LGDV', 'HWDV', 'AVDV', 'VMXC', 'DV12', 'SLAT', 'SSTN', 'SHDC', 'DTL', 'D200', 'T200', 'RHMD', 'SPDX', 'SPDY', 'LON0', 'LAT0', 'NCT', 'LONN', 'LATN', 'AVDX', 'EMDX', 'EGDX', 'HWDX', 'LONC', 'AVDY', 'EMDY', 'EGDY', 'HWDY', 'LATC']
         return avail_x_names

@@ -209,7 +209,7 @@ def plot_probability_ellipses_vector(
 ):
 
     for lead_time in leadtimes:
-        df_plot = df.loc[(df["ftime(hr)"] == lead_time)]
+        df_plot = df.loc[(df["FHOUR"] == lead_time)]
         if df_plot.empty:
             # print(str(lead_time) + " dataframe is empty")
             continue
@@ -238,7 +238,7 @@ def plot_probability_ellipses_vector(
                 plt.text(
                     df_nonan["LONN"].values,
                     df_nonan["LATN"].values,
-                    int(df_nonan["ftime(hr)"].values[0]),
+                    int(df_nonan["FHOUR"].values[0]),
                     color="k",
                     fontsize=6.5,
                     horizontalalignment="left",
@@ -255,8 +255,8 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
     if colors is None:
         colors = ("gold",)
 
-    df_storm = df_storm.sort_values("ftime(hr)").reset_index(drop=True)
-    leadtimes = df_storm["ftime(hr)"].values
+    df_storm = df_storm.sort_values("FHOUR").reset_index(drop=True)
+    leadtimes = df_storm["FHOUR"].values
     x_interp = np.arange(leadtimes[0], leadtimes[-1]+1, 1)
 
     # interpolate things
@@ -282,7 +282,7 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
     sigma_v_interp = np.clip(sigma_v_interp, 0., None)
 
     d_interp = {
-        "ftime(hr)": x_interp,
+        "FHOUR": x_interp,
         "mu_u": mu_u_interp,
         "mu_v": mu_v_interp,
         "sigma_u": sigma_u_interp,
@@ -297,13 +297,13 @@ def plot_banana_of_uncertainty(ax, df_storm, extent, vector=True, colors=None, a
     }
 
     df_storm_interp = pd.DataFrame(data=d_interp)
-    df_storm_interp[["Name", "year", "time"]] = df_storm[["Name", "year", "time"]]
-    df_storm_interp.loc[~df_storm_interp["ftime(hr)"].isin(leadtimes), ["OFDX", "OFDY"]] = np.nan
+    df_storm_interp[["NAME", "YEAR", "MMDDHH"]] = df_storm[["NAME", "YEAR", "MMDDHH"]]
+    df_storm_interp.loc[~df_storm_interp["FHOUR"].isin(leadtimes), ["OFDX", "OFDY"]] = np.nan
 
     details = plot_probability_ellipses(
         df_storm_interp,
         ax=ax,
-        leadtimes=df_storm_interp["ftime(hr)"].unique(),
+        leadtimes=df_storm_interp["FHOUR"].unique(),
         contours=(.6667, ),
         extent=extent,
         annotate_leadtimes=True,

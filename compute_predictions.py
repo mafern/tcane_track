@@ -41,9 +41,9 @@ def interpolate_leadtimes(leadtimes, y, x_interp=None):
 
 def add_lead_zero(df_storm):
 
-    row = df_storm[df_storm["ftime(hr)"] == df_storm["ftime(hr)"].min()].copy()
+    row = df_storm[df_storm["FHOUR"] == df_storm["FHOUR"].min()].copy()
 
-    row["ftime(hr)"] = 0.
+    row["FHOUR"] = 0.
     row["mu_u"] = 0.
     row["mu_v"] = 0.
     row["sigma_u"] = 15.
