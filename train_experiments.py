@@ -74,8 +74,8 @@ def train_experiments(
         settings = experiment_settings.get_settings(exp_name)
 
         # get new filename
-        if settings['basin'] == 'AL': basin_name = 'atlc'
-        else: basin_name = 'epcp'
+        if settings['basin'] == 'AL': basin_name = 'al'
+        else: basin_name = 'ep'
         if settings['predictand_x'] == 'OFDX': label_name = 'late'
         else: label_name = 'erly'
         lead_name = str(settings['leadtime']).zfill(3)

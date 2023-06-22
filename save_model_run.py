@@ -60,8 +60,8 @@ def save_model_run(
 
     """
     # set up name
-    if settings['basin'] == 'AL': basin_name = 'atlc'
-    else: basin_name = 'epcp'
+    if settings['basin'] == 'AL': basin_name = 'al'
+    else: basin_name = 'ep'
     if settings['predictand_x'] == 'OFDX': label_name = 'late'
     else: label_name = 'erly'
     lead_name = str(settings['leadtime']).zfill(3)
