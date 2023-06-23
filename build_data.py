@@ -127,10 +127,6 @@ def build_data(data_path, settings, verbose=0):
     # Setup for the selected features
     if settings["x_names"] is None:
         x_names = [
-            "DSDV",
-            "LGDV",
-            "HWDV",
-            "AVDV",
             "VMXC",
             "NCT",
             "AVDX",  # AVDX = -50, then the GFS forecast was 50 km west of the consensus longitude.
