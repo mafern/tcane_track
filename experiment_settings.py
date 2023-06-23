@@ -17,7 +17,7 @@ class Experiments():
     """
     Class to manage experiments (settings), including generating new experiments and running experiments.
     """
-    def __init__(self, filename="experiments.json", default_x_names=["DSDV", "LGDV", "HWDV", "AVDV", "VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SLAT", "SSTN", "SHDC", "DTL"]):
+    def __init__(self, filename="experiments.json", default_x_names=["VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SLAT", "SSTN", "SHDC", "DTL"]):
         # load the dictionary and keys
         try:
             self.filename = filename
@@ -111,7 +111,7 @@ class Experiments():
         for leadtime in list(leadtimes):
             # check if the proposed experiment name already exists
             assert expname+str(leadtime) not in self.keys, "experiment with that name already exists"
-            dictionary[expname+str(leadtime)] = {"filename": "nnfit_vlist_15may2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand_x, "predictand_y": predictand_y, "metrics": metrics,}
+            dictionary[expname+str(leadtime)] = {"filename": "nnfit_vlist_21jun2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand_x, "predictand_y": predictand_y, "metrics": metrics,}
         return dictionary
 
     # function wrapping train_experiments
