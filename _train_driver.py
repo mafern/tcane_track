@@ -30,6 +30,9 @@ exp_inds = [index for index, exp_string in enumerate(testing.get_exp_list) if ex
 EXP_NAME_VEC = testing.get_exp_list[np.min(exp_inds):np.max(exp_inds)+1]
 print(EXP_NAME_VEC)
 
+ow_model = input("overwrite existing models? (True, False): ")
+ow_preds = input("overwrite existing predictions? (True, False): ")
+
 DATA_PATH = "data/"
 MODEL_PATH = os.path.join("saved_models", expname)+'/'
 METRICS_PATH = os.path.join("saved_metrics/", expname)+'/'
@@ -46,8 +49,8 @@ if __name__ == "__main__":
         MODEL_PATH,
         METRICS_PATH,
         PREDICTIONS_PATH,
-        overwrite_model=False,
-        overwrite_predictions=True,
+        overwrite_model=ow_model,
+        overwrite_predictions=ow_preds,
         )
     elapsed_time = time.time() - start_time
     print(f"Total elapsed time: {elapsed_time:.2f} seconds")
