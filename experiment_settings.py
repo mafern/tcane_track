@@ -104,14 +104,14 @@ class Experiments():
         x_names = default_x_names
         print("using features: ", x_names)
 
-        if leadtimes is None: leadtimes = [12, 24, 36, 48, 60, 72, 96, 120]
+        if leadtimes is None: leadtimes = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120]
         if not isinstance(leadtimes, list):
             leadtimes = [leadtimes]
         dictionary = {}
         for leadtime in list(leadtimes):
             # check if the proposed experiment name already exists
             assert expname+str(leadtime) not in self.keys, "experiment with that name already exists"
-            dictionary[expname+str(leadtime)] = {"filename": "nnfit_vlist_21jun2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand_x, "predictand_y": predictand_y, "metrics": metrics,}
+            dictionary[expname+str(leadtime)] = {"filename": "nnfit_vlist_23jun2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand_x, "predictand_y": predictand_y, "metrics": metrics,}
         return dictionary
 
     # function wrapping train_experiments
