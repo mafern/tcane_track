@@ -8,7 +8,7 @@ def get_storm_details(df, isample):
     storm_year = int(storm["YEAR"])
 
     details = (
-        storm_nameNAME
+        storm_name
         + " "
         + str(storm_year)
         + "-"
