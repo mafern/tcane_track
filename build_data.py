@@ -172,20 +172,11 @@ def build_data(data_path, settings, verbose=0):
         & (df_raw["FHOUR"] == settings["leadtime"])
         ]
 
-    # # Replace missing values with nan.
-    # df = df.replace(missing, np.nan)
-    # df = df.dropna(axis=0)
-    # df = df.reset_index(drop=True)
-
     # Drop missing values only when they occur in used data columns
     used_columns = x_names+[settings['predictand_x'], settings['predictand_y']]
-    bad_rows = np.where(np.sum(df[used_columns] == missing, axis=1) == 0)[0]
-    df = df.iloc[bad_rows]
+    good_rows = np.where(np.sum(df[used_columns] == missing, axis=1) == 0)[0]
+    df = df.iloc[good_rows]
     df = df.reset_index(drop=True)
-
-    # if missing is not None:
-    #     df = df.drop(df.index[df[y_names[0]] == missing])
-    #     df = df.drop(df.index[df[y_names[1]] == missing])
 
     # Shuffle the rows in the df Dataframe, using the numpy rng.
     # rng = np.random.default_rng(settings['rng_seed'])
@@ -343,3 +334,4 @@ def build_data(data_path, settings, verbose=0):
         df_test,
         df_valtest,
     )
+
