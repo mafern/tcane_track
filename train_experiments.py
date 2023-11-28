@@ -129,10 +129,6 @@ def train_experiments(
                         exp_name
                         + "_"
                         + str(testing_years)
-                        + "_"
-                        + settings["uncertainty_type"]
-                        + "_"
-                        + f"rng_seed_{settings['rng_seed']}"
                 )
 
                 # Check if the model exists and overwrite is off.
