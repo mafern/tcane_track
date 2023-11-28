@@ -25,6 +25,8 @@ def save_predictions(model, settings, predictions_filename, df_data, x_data, lab
         y_pred[:, 1] - label_data[:, 1],
     )
 
+    # sort so it is consistent with intensity
+    df_predictions = df_predictions.sort_values(['YEAR', 'NAME', 'MMDDHH', 'FHOUR'])
     df_predictions.to_csv(predictions_filename)
 
     return None
