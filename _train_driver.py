@@ -30,8 +30,8 @@ exp_inds = [index for index, exp_string in enumerate(testing.get_exp_list) if ex
 EXP_NAME_VEC = testing.get_exp_list[np.min(exp_inds):np.max(exp_inds)+1]
 print(EXP_NAME_VEC)
 
-ow_model = input("overwrite existing models? (True, False): ")
-ow_preds = input("overwrite existing predictions? (True, False): ")
+ow_model = input("overwrite existing models? (True, False): ") == 'True'
+ow_preds = input("overwrite existing predictions? (True, False): ") == 'True'
 
 DATA_PATH = "data/"
 MODEL_PATH = os.path.join("saved_models", expname)+'/'
