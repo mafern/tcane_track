@@ -66,14 +66,14 @@ class Experiments():
         else:
             print("must pass confirm=1 to overwrite main file with backup")
 
-    def make_exp_dictionary(self, expname, basin, *, leadtimes=None, x_names=[], predictand_x="OFDX", predictand_y="OFDY", uncertainty="centered_bivariate_normal", hiddens=[5, 5], dropout=[0., 0., 0.], ridge=[0.0, 0.0], learning=0.0001, batch=64, seed_list=[123], rng_seed=None, act_fun="relu", n_epochs=25_000, patience=250, test_condition="leave-one-out", years_test=[2022,], val_condition="random", n_val=200, n_train="max", loss_function="compute_bivariate_normal_nll", metrics={"CustomMAE": "custom_mae", "InterquartileCapture": "interquartile_capture", "SignTest": "sign_test"}):
+    def make_exp_dictionary(self, expname, basin, *, leadtimes=0, x_names=[], predictand="OFD", uncertainty="centered_bivariate_normal", hiddens=[5, 5], dropout=[0., 0., 0.], ridge=[0.0, 0.0], learning=0.0001, batch=64, seed_list=[123], rng_seed=None, act_fun="relu", n_epochs=25_000, patience=250, test_condition="leave-one-out", years_test=[2022,], val_condition="random", n_val=200, n_train="max", loss_function="compute_bivariate_normal_nll", metrics={"CustomMAE": "custom_mae", "InterquartileCapture": "interquartile_capture", "SignTest": "sign_test"}):
         """
         Make an experiment dictionary with the following settings:
                 - expname: name of the experiment (how it will be saved and called)
                 - basin: ocean basin, either 'AL' (Atlantic) or 'EP' (Eastern/Central Pacific)
-                - leadtime: multiples of 12 up to 120 hours (no 84, 108), or None to generate separate experiments for each leadtime
+                - leadtime: multiples of 12 up to 120 hours, or 0 to generate separate experiments for each leadtime
                 - x_names: features to use -- entering x_names that are already in default_x_names removes them, otherwise they are added
-                - predictand x, y: the label, either 'OFDX', 'OFDY' (official forecast error) or 'OBDX', 'OBDY' (consensus error)
+                - predictand: the label, either 'OFD' (official forecast error) or 'OBD' (consensus error)
                 - uncertainty: whether to center the bivariate normal ("centered_bivariate_normal") or allow it to fit ("bivariate_normal")
                 - hiddens: number of nodes in each layer (length of list determines number of layers)
                 - dropout: fraction for dropout in each layer
@@ -104,14 +104,14 @@ class Experiments():
         x_names = default_x_names
         print("using features: ", x_names)
 
-        if leadtimes is None: leadtimes = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120]
+        if leadtimes == 0: leadtimes = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120]
         if not isinstance(leadtimes, list):
             leadtimes = [leadtimes]
         dictionary = {}
         for leadtime in list(leadtimes):
             # check if the proposed experiment name already exists
-            assert expname+str(leadtime) not in self.keys, "experiment with that name already exists"
-            dictionary[expname+str(leadtime)] = {"filename": "nnfit_vlist_03Nov2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand_x, "predictand_y": predictand_y, "metrics": metrics,}
+            assert expname+'_'+predictand+'_'+basin+str(leadtime) not in self.keys, "experiment with that name already exists"
+            dictionary[expname+'_'+predictand+'_'+basin+str(leadtime)] = {"filename": "nnfit_vlist_03Nov2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand+'X', "predictand_y": predictand+'Y', "metrics": metrics,}
         return dictionary
 
     # function wrapping train_experiments
