@@ -8,13 +8,10 @@ This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 
 
 ## Order of Operations
 
-TODO: Update this section.
-
 ***
-* Step 0: ```setup.py``` (setups up the correct directory structure)
-* Step 1: ```_train_driver.py```
-* Step 3: ```_plot_metrics.ipynb```
-* Step 4: ```_plot_multilead_forecasts.ipynb```
+* Step 1: setups up the correct directory structure using```setup.py```
+* Step 2: define new experiments using ```experiment_settings.py```
+* Step 3: run experiments using ```_train_driver.py```
 
 ## General Notes
 ***
@@ -41,7 +38,7 @@ For Linux users, the code requires libstdc++.so.6 version >= 3.4.29.
 3. To use the latest version of GLIBCXX, add LD_LIBRARY path to your .bashrc. That can be done with the command: `echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/miniconda3/lib'>>~/.bashrc`
 
 ### Credits
-This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu) and [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes) and Dr. Mark DeMaria.
+This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu) and [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes), Dr. Mark DeMaria, and [Dr. Martin A. Fernandez](https://mafern.github.io/).
 
 [//]: # (#### Funding sources)
 
