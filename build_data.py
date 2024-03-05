@@ -13,8 +13,8 @@ import pprint
 
 import toolbox
 
-__author__ = "Elizabeth A. Barnes and Randal J Barnes"
-__version__ = "12 November 2022"
+__author__ = "Elizabeth A. Barnes, Randal J Barnes, and Martin A. Fernandez"
+__version__ = "5 March 2024"
 
 
 def build_data(data_path, settings, verbose=0):
@@ -186,7 +186,7 @@ def build_data(data_path, settings, verbose=0):
     # ---------------------------------
     # Training/Validation/Testing Split
 
-    # Split out the validation data.
+    # Split out the testing data.
     if settings["test_condition"] is None:
         # These will be reset below.
         x_test = None
@@ -233,7 +233,7 @@ def build_data(data_path, settings, verbose=0):
             raise Warning("Are you sure you want n_val < 100?")
     elif settings["val_condition"] == "years":
         if verbose != 0:
-            print("years" + str(settings["n_val"]) + " withheld for testing")
+            print("years" + str(settings["n_val"]) + " withheld for validation")
         index = df.index[df["YEAR"].isin(settings["n_val"])]
     else:
         raise NotImplementedError

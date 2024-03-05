@@ -8,8 +8,8 @@ compute_bivariate_normal_nll(y_true, param)
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-__author__ = "Randal J Barnes and Elizabeth A. Barnes"
-__version__ = "08 November 2022"
+__author__ = "Randal J Barnes, Elizabeth A. Barnes, and Martin A. Fernandez"
+__version__ = "5 March 2024"
 
 
 def compute_bivariate_normal_nll(y_true, param):
@@ -122,5 +122,5 @@ def compute_bivariate_normal_nll(y_true, param):
         ),
     )
 
-    loss = -tf.math.log(dist.prob(y_true[:, 0:2]) + tf.keras.backend.epsilon())
+    loss = -tf.math.log(dist.prob(y_true[:, 0:2]) + tf.keras.backend.epsilon()/1e5)
     return tf.reduce_mean(loss, axis=-1)

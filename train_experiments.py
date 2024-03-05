@@ -19,8 +19,8 @@ from save_model_run import save_model_run
 from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
 
-__author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "13 December 2022"
+__author__ = "Elizabeth A. Barnes, Randal J Barnes, Mark DeMaria, and Martin A. Fernandez"
+__version__ = 5 March 2024"
 
 
 def train_experiments(
@@ -83,7 +83,7 @@ def train_experiments(
 
         # Set testing years based on the specified test conditions.
         if settings["test_condition"] == "leave-one-out":
-            testing_years_list = np.arange(2013, 2023)
+            testing_years_list = np.arange(2013, 2024)
         elif settings["test_condition"] == "years":
             testing_years_list = np.copy(settings["years_test"])
         elif settings["test_condition"] == None:

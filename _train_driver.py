@@ -13,8 +13,8 @@ import os
 tf.config.set_visible_devices([], "GPU")  # turn-off tensorflow-metal if it is on
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
-__author__ = "Elizabeth A. Barnes, Randal J Barnes, and Mark DeMaria"
-__version__ = "13 December 2022"
+__author__ = "Elizabeth A. Barnes, Randal J Barnes, Mark DeMaria, and Martin A. Fernandez"
+__version__ = "5 March 2024"
 
 testing = experiment_settings.Experiments()
 print('index range and short names for experiments')
@@ -30,8 +30,8 @@ exp_inds = [index for index, exp_string in enumerate(testing.get_exp_list) if ex
 EXP_NAME_VEC = testing.get_exp_list[np.min(exp_inds):np.max(exp_inds)+1]
 print(EXP_NAME_VEC)
 
-ow_model = input("overwrite existing models? (True, False): ") == 'True'
-ow_preds = input("overwrite existing predictions? (True, False): ") == 'True'
+ow_model = input("overwrite existing models? (True, False): ").lower() == 'true'
+ow_preds = input("overwrite existing predictions? (True, False): ").lower() == 'true'
 
 DATA_PATH = "data/"
 MODEL_PATH = os.path.join("saved_models", expname)+'/'

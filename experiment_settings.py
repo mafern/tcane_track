@@ -35,12 +35,16 @@ class Experiments():
         "add an experiment (dictionary) or experiments to the save file"
         # add to the dictionary, resave
         experiments = self.experiments.copy()
-        for exp_name in new_exp:
-            experiments[exp_name] = new_exp[exp_name]
-        with open(self.filename, "w") as exp_file:
-            exp_file.write(json.dumps(experiments))
-        # reload the experiments
-        self.experiments = experiments
+        try:
+            for exp_name in new_exp:
+                experiments[exp_name] = new_exp[exp_name]
+            with open(self.filename, "w") as exp_file:
+                exp_file.write(json.dumps(experiments))
+            # reload the experiments
+            self.experiments = experiments
+        except:
+            with open(self.filename, "w") as exp_file:
+                exp_file.write(json.dumps(self.experiments))
         self.keys = list(self.experiments.keys())
 
     def delete_experiment(self, exp_name):
@@ -111,7 +115,7 @@ class Experiments():
         for leadtime in list(leadtimes):
             # check if the proposed experiment name already exists
             assert expname+'_'+predictand+'_'+basin+str(leadtime) not in self.keys, "experiment with that name already exists"
-            dictionary[expname+'_'+predictand+'_'+basin+str(leadtime)] = {"filename": "nnfit_vlist_03Nov2023.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand+'X', "predictand_y": predictand+'Y', "metrics": metrics,}
+            dictionary[expname+'_'+predictand+'_'+basin+str(leadtime)] = {"filename": "nnfit_vlist_27Feb2024.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand+'X', "predictand_y": predictand+'Y', "metrics": metrics,}
         return dictionary
 
     # function wrapping train_experiments
