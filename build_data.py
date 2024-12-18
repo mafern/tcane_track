@@ -143,7 +143,7 @@ def build_data(data_path, settings, verbose=0):
             "LATC",
             "VMAX0",
             "DV12",
-            "SLAT",
+            # "SLAT",
             "SSTN",
             "SHDC",
             "DTL"

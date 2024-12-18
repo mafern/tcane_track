@@ -20,7 +20,7 @@ from save_transfer_blueprint import save_transfer_blueprint
 from train_model import train_model
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, Mark DeMaria, and Martin A. Fernandez"
-__version__ = 5 March 2024"
+__version__ = "5 March 2024"
 
 
 def train_experiments(
