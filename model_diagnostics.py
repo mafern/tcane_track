@@ -11,6 +11,7 @@ compute_sign_test(model, x_data, label_data)
 """
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import mahalanobis
 
@@ -165,7 +166,7 @@ def plot_history(history, model_name):
 
     # Draw and save the plot.
     plt.tight_layout()
-    plt.savefig("figures/model_diagnostics/" + model_name + ".png", dpi=DPIFIG)
+    plt.savefig(os.path.dirname(__file__)+"/figures/model_diagnostics/" + model_name + ".png", dpi=DPIFIG)
     plt.close()
     # plt.show()
 

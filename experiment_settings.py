@@ -17,7 +17,7 @@ class Experiments():
     """
     Class to manage experiments (settings), including generating new experiments and running experiments.
     """
-    def __init__(self, filename="experiments.json", default_x_names=["VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SLAT", "SSTN", "SHDC", "DTL"]):
+    def __init__(self, filename=os.path.dirname(__file__)+"/experiments.json", default_x_names=["VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SSTN", "SHDC", "DTL"]):
         # load the dictionary and keys
         try:
             self.filename = filename
