@@ -34,17 +34,25 @@ This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 
 ## Python Environment
 The following python environment was used to implement this code.
 ```
-conda create --name env-hurr-tfp python=3.9
-conda activate env-hurr-tfp
+conda create --name env-tcane python=3.9
+conda activate env-tcane
 pip install tensorflow==2.7.0
 pip install tensorflow-probability==0.15.0
-pip install numpy==1.19.5
-pip install --upgrade scipy pandas statsmodels matplotlib seaborn cmasher cmocean
+pip install scipy==1.9.1
+pip install scikit-learn==1.6.1
+pip install pandas==1.4.4
+pip install statsmodels==0.13.0
+pip install matplotlib==3.5.3
+pip install seaborn==0.13.2
+pip install protobuf==3.20.0
+pip install contourpy==1.2.0
+pip install --upgrade cmasher cmocean
 pip install --upgrade palettable progressbar2 tabulate icecream flake8 pytest
-pip install --upgrade keras-tuner sklearn
+pip install --upgrade keras-tuner 
 pip install --upgrade jupyterlab black isort jupyterlab_code_formatter
-pip install silence-tensorflow
+pip install silence-tensorflow==1.2.3
 pip install tqdm
+pip install numpy==1.21
 ```
 
 ## Compatibility Notes
