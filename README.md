@@ -32,28 +32,26 @@ This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 
 
 
 ## Python Environment
-The following python environment was used to implement this code.
+The following python environment was used to implement this code. If you are running on a Linux machine, please also follow the `Compatibility Notes` provided in the following section to ensure you are using the latest version of `GLIBCXX`. 
 ```
 conda create --name env-tcane python=3.9
 conda activate env-tcane
 pip install tensorflow==2.7.0
 pip install tensorflow-probability==0.15.0
 pip install scipy==1.9.1
-pip install scikit-learn==1.6.1
 pip install pandas==1.4.4
-pip install statsmodels==0.13.0
 pip install matplotlib==3.5.3
-pip install seaborn==0.13.2
-pip install protobuf==3.20.0
-pip install contourpy==1.2.0
-pip install --upgrade cmasher cmocean
-pip install --upgrade palettable progressbar2 tabulate icecream flake8 pytest
-pip install --upgrade keras-tuner 
+pip install statsmodels==0.13.0
+pip install --upgrade seaborn
+pip install --upgrade palettable progressbar2 tabulate icecream flake8
+pip install scikit-learn==1.6.1
+pip install keras-tuner==1.4.7
 pip install --upgrade jupyterlab black isort jupyterlab_code_formatter
 pip install silence-tensorflow==1.2.3
 pip install tqdm
-pip install numpy==1.21
+pip install numpy==1.21.0
 ```
+Note that `tensorflow` does not always play nicely with other packages. Common errors are with the `contourpy`, `protobuf`, and `numpy` libraries. The package versions we have provided here worked on our machine; if they don't work for you, you may need to upgrade or downgrade a version of a package to get it to work. And don't neglect the next section if you are on a Linux machine. 
 
 ## Compatibility Notes
 For Linux users, the code requires libstdc++.so.6 version >= 3.4.29.  
