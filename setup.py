@@ -6,7 +6,7 @@ __date__   = "16 December 2022"
 
 DIRECTORIES = [
     "figures",
-    "figures/Model_diagnostics",
+    "figures/model_diagnostics",
     "figures/analysis",
     "model_metrics",
     "saved_models",
