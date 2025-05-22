@@ -2,6 +2,8 @@
 ***
 Neural networks are used to estimate hurricane track errors in the form of bivariate normal distributions.
 
+For the version of the code used in the article ["Predicting Tropical Cyclone Track Forecast Errors using a Probabilistic Neural Network"](https://journals.ametsoc.org/view/journals/aies/aop/AIES-D-24-0066.1/AIES-D-24-0066.1.xml), see the [AIES-D-24-0066](https://github.com/mafern/tcane_track/tree/AIES-D-24-0066) branch.
+
 ## Tensorflow Code
 This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 0.15.0 and numpy 1.19.5.
 
