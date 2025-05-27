@@ -11,7 +11,7 @@ from train_experiments import train_experiments
 import os
 
 tf.config.set_visible_devices([], "GPU")  # turn-off tensorflow-metal if it is on
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 __author__ = "Elizabeth A. Barnes, Randal J Barnes, Mark DeMaria, and Martin A. Fernandez"
 __version__ = "5 March 2024"
