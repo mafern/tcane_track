@@ -32,6 +32,11 @@ This code was written in python 3.9.7, tensorflow 2.7.0, tensorflow-probability 
     * saved model directories (one for each basin, lead time, and testing year) will be in the `saved_models` directory in a sub-directory with the experiment name
     * similarly, each saved prediction csv will be in the `saved_predictions` directory in a sub-directory with the experiment name
 
+## Compatibility Notes
+For Linux users, the code requires libstdc++.so.6 version >= 3.4.29.  
+1. To find the version installed on your system, run `strings /usr/lib64/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
+2. To find the version installed in your Anaconda or Miniconda, run `strings /home/your-username/path-to-conda/anaconda3/lib/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
+3. To use the latest version of GLIBCXX, add LD_LIBRARY path to your .bashrc. That can be done with the command: `echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/miniconda3/lib'>>~/.bashrc`
 
 ## Python Environment
 The following python environment was used to implement this code. If you are running on a Linux machine, please also follow the `Compatibility Notes` provided in the following section to ensure you are using the latest version of `GLIBCXX`. 
@@ -55,16 +60,10 @@ pip install numpy==1.21.0
 ```
 Note that `tensorflow` does not always play nicely with other packages. Common errors are with the `contourpy`, `protobuf`, and `numpy` libraries. The package versions we have provided here worked on our machine; if they don't work for you, you may need to upgrade or downgrade a version of a package to get it to work. And don't neglect the next section if you are on a Linux machine. 
 
-## Compatibility Notes
-For Linux users, the code requires libstdc++.so.6 version >= 3.4.29.  
-1. To find the version installed on your system, run `strings /usr/lib64/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
-2. To find the version installed in your Anaconda or Miniconda, run `strings /home/your-username/path-to-conda/anaconda3/lib/libstdc++.so.6 | grep ^GLIBCXX_3.4.2`
-3. To use the latest version of GLIBCXX, add LD_LIBRARY path to your .bashrc. That can be done with the command: `echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/user/miniconda3/lib'>>~/.bashrc`
-
 ***
 
 ### Credits
-This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu), [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes), [Dr. Martin A. Fernandez](https://mafern.github.io/), and Dr. Mark DeMaria, as well as other colleagues at CIRA.
+This work is a collaborative effort between [Dr. Elizabeth A. Barnes](https://barnes.atmos.colostate.edu), [Dr. Randal J. Barnes](https://cse.umn.edu/cege/randal-j-barnes), [Dr. Martin A. Fernandez](https://mafern.github.io/), Dr. Mark DeMaria, and [Dr. Marie McGraw](https://marie-mcgraw.github.io/), as well as other colleagues at CIRA.
 
 ### Funding sources
 
