@@ -29,7 +29,7 @@ def save_predictions(model, settings, predictions_filename, df_data, x_data, lab
     df_predictions = df_predictions.sort_values(['YEAR', 'NAME', 'MMDDHH', 'FHOUR'])
     df_predictions.to_csv(predictions_filename)
 
-    return None
+    return df_predictions
 
 
 def interpolate_leadtimes(leadtimes, y, x_interp=None):
@@ -57,4 +57,3 @@ def add_lead_zero(df_storm):
 
     return pd.concat([row,df_storm], ignore_index=True)
 
-#%%

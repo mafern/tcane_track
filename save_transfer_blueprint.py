@@ -76,8 +76,7 @@ def save_transfer_blueprint(
     else: basin_name = 'ep'
     if settings['predictand_x'] == 'OFDX': label_name = 'late'
     else: label_name = 'erly'
-    lead_name = str(settings['leadtime']).zfill(3)
-    filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
+    filename = "tcane_" + basin_name + "_track_" + label_name
 
     blueprint = {}
 

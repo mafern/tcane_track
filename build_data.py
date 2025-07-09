@@ -143,10 +143,10 @@ def build_data(data_path, settings, verbose=0):
             "LATC",
             "VMAX0",
             "DV12",
-            # "SLAT",
             "SSTN",
             "SHDC",
-            "DTL"
+            "DTL",
+            "FHOUR"
         ]
     else:
         x_names = settings["x_names"]
@@ -169,7 +169,7 @@ def build_data(data_path, settings, verbose=0):
 
     df = df_raw[
         (df_raw["ATCFID"].str.contains(settings["basin"]))
-        & (df_raw["FHOUR"] == settings["leadtime"])
+        & (np.isin(df_raw["FHOUR"], np.arange(12, 120+12, 12)))
         ]
 
     # Drop missing values only when they occur in used data columns
@@ -255,7 +255,7 @@ def build_data(data_path, settings, verbose=0):
     if settings["n_train"] == "max":
         df_train = df.copy()
     else:
-        df_train = df.iloc[: settings["n_train"]]
+        df_train = df.iloc[:settings["n_train"]]
 
     x_train = df_train[x_names].to_numpy()
     y_train = np.squeeze(df_train[y_names].to_numpy())

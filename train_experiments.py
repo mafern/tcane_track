@@ -78,8 +78,7 @@ def train_experiments(
         else: basin_name = 'ep'
         if settings['predictand_x'] == 'OFDX': label_name = 'late'
         else: label_name = 'erly'
-        lead_name = str(settings['leadtime']).zfill(3)
-        filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
+        filename = "tcane_" + basin_name + "_track_" + label_name
 
         # Set testing years based on the specified test conditions.
         if settings["test_condition"] == "leave-one-out":
@@ -139,13 +138,37 @@ def train_experiments(
                         print(f"  Re-saving predictions...")
                         model = tf.keras.models.load_model(model_path + model_name + '/' + filename + "_model", compile=False)
                         prediction_filename = predictions_path + model_name + "_testing_predictions.csv"
-                        compute_predictions.save_predictions(
+                        df_test = compute_predictions.save_predictions(
                             model,
                             settings,
                             prediction_filename,
                             df_test,
                             x_test,
                             label_test,
+                        )
+                        df_train = compute_predictions.save_predictions(
+                            model,
+                            settings,
+                            None,
+                            df_train,
+                            x_train,
+                            label_train,
+                        )
+                        df_val = compute_predictions.save_predictions(
+                            model,
+                            settings,
+                            None,
+                            df_val,
+                            x_val,
+                            label_val,
+                        )
+                        df_valtest = compute_predictions.save_predictions(
+                            model,
+                            settings,
+                            None,
+                            df_valtest,
+                            x_valtest,
+                            label_valtest,
                         )
                     continue
                 else:
@@ -192,24 +215,8 @@ def train_experiments(
                 # Additional plots and metrics
                 model_diagnostics.plot_history(history, model_name)
 
-                metric_filename = metrics_path + model_name + "_metrics.pickle"
-                compute_metrics.save_metrics(
-                    model,
-                    settings,
-                    exp_name,
-                    metric_filename,
-                    x_train,
-                    label_train,
-                    x_val,
-                    label_val,
-                    x_test,
-                    label_test,
-                    x_valtest,
-                    label_valtest,
-                )
-
                 prediction_filename = predictions_path + model_name + "_testing_predictions.csv"
-                compute_predictions.save_predictions(
+                df_test = compute_predictions.save_predictions(
                     model,
                     settings,
                     prediction_filename,
@@ -217,3 +224,39 @@ def train_experiments(
                     x_test,
                     label_test,
                 )
+                df_train = compute_predictions.save_predictions(
+                    model,
+                    settings,
+                    None,
+                    df_train,
+                    x_train,
+                    label_train,
+                )
+                df_val = compute_predictions.save_predictions(
+                    model,
+                    settings,
+                    None,
+                    df_val,
+                    x_val,
+                    label_val
+                )
+                df_valtest = compute_predictions.save_predictions(
+                    model,
+                    settings,
+                    None,
+                    df_valtest,
+                    x_valtest,
+                    label_valtest,
+                )
+
+                metric_filename = metrics_path + model_name + "_metrics.pickle"
+                compute_metrics.save_metrics(
+                    settings,
+                    exp_name,
+                    metric_filename,
+                    df_train,
+                    df_val,
+                    df_test,
+                    df_valtest,
+                )
+

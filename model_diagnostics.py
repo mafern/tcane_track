@@ -171,22 +171,14 @@ def plot_history(history, model_name):
     # plt.show()
 
 
-def compute_average_errors(model, x_data, label_data):
+def compute_average_errors(df_predictions):
     """Compute the average Euclidean distance between the conditional means
     and the labels.
 
     Arguments
     ---------
-    model : tensorflow model
-        trained neural network for predictions
-
-    x_data : numpy.ndarray
-        array of observed predictors
-        shape = [n_data, n_features].
-
-    label_data : numpy.ndarray
-        array of observed predictands
-        shape = [n_data,].
+    df_predictions : data frame of predictions from
+        the trained neural network
 
     Return
     ------
@@ -199,18 +191,18 @@ def compute_average_errors(model, x_data, label_data):
     * The Euclidean distance does not account for the elliptical
     scaling of the x and y components. It is a crude measure.
     """
-    y_pred = model.predict(x_data)
+    label_data = df_predictions[["PREDICTAND_X", "PREDICTAND_Y"]]
     mean_error = np.mean(
         np.hypot(
-            y_pred[:, 0] - label_data[:, 0],
-            y_pred[:, 1] - label_data[:, 1],
+            df_predictions["mu_u"] - label_data.iloc[:, 0],
+            df_predictions["mu_v"] - label_data.iloc[:, 1],
             )
         )
 
     mean_official_error = np.mean(
         np.hypot(
-            label_data[:, 0],
-            label_data[:, 1],
+            label_data.iloc[:, 0],
+            label_data.iloc[:, 1],
             )
         )
 
@@ -219,7 +211,7 @@ def compute_average_errors(model, x_data, label_data):
     return mean_error, mean_error_reduction
 
 
-def compute_iqr_capture(model, x_data, label_data):
+def compute_iqr_capture(df_predictions):
     """Compute the interquartile capture using the Mahalanobis distance.
 
     Computes the fraction of label_data that fall between the Mahalanobis
@@ -228,50 +220,42 @@ def compute_iqr_capture(model, x_data, label_data):
 
     Arguments
     ---------
-    model : tensorflow model
-        trained neural network for predictions
-
-    x_data : numpy.ndarray
-        array of observed predictors
-        shape = [n_data, n_features].
-
-    label_data : numpy.ndarray
-        array of observed predictands
-        shape = [n_data,].
+    df_predictions : data frame of predictions from
+        the trained neural network
 
     Return
     ------
     iqr_capture : float
 
     """
-    y_pred = model.predict(x_data)
+    label_data = df_predictions[["PREDICTAND_X", "PREDICTAND_Y"]]
     cdf = mahalanobis.compute_cdf(
-        y_pred[:, 0],
-        y_pred[:, 1],
-        y_pred[:, 2],
-        y_pred[:, 3],
-        y_pred[:, 4],
-        label_data[:, 0],
-        label_data[:, 1],
+        df_predictions["mu_u"],
+        df_predictions["mu_v"],
+        df_predictions["sigma_u"],
+        df_predictions["sigma_v"],
+        df_predictions["rho"],
+        label_data.iloc[:, 0],
+        label_data.iloc[:, 1]
     )
     iqr_capture = np.logical_and(cdf > 0.25, cdf < 0.75)
 
     return np.mean(iqr_capture.astype(int))
 
 
-def compute_pit(model, x_data, label_data):
+def compute_pit(df_predictions):
     """Compute the PIT histogram using the Mahalanobis cdf."""
     bins = np.linspace(0, 1, 11)
 
-    y_pred = model.predict(x_data)
+    label_data = df_predictions[["PREDICTAND_X", "PREDICTAND_Y"]]
     F = mahalanobis.compute_cdf(
-        y_pred[:, 0],
-        y_pred[:, 1],
-        y_pred[:, 2],
-        y_pred[:, 3],
-        y_pred[:, 4],
-        label_data[:, 0],
-        label_data[:, 1],
+        df_predictions["mu_u"],
+        df_predictions["mu_v"],
+        df_predictions["sigma_u"],
+        df_predictions["sigma_v"],
+        df_predictions["rho"],
+        label_data.iloc[:, 0],
+        label_data.iloc[:, 1]
     )
     pit_hist = np.histogram(
         F,
@@ -288,20 +272,20 @@ def compute_pit(model, x_data, label_data):
     return bins, pit_hist, D, EDp
 
 
-def compute_sign_test(model, x_data, label_data):
+def compute_sign_test(df_predictions):
     """Compute the fraction of label values falling outside of
     the 0.50 Mahalanobis ellipse.
 
     """
-    y_pred = model.predict(x_data)
+    label_data = df_predictions[["PREDICTAND_X", "PREDICTAND_Y"]]
     cdf = mahalanobis.compute_cdf(
-        y_pred[:, 0],
-        y_pred[:, 1],
-        y_pred[:, 2],
-        y_pred[:, 3],
-        y_pred[:, 4],
-        label_data[:, 0],
-        label_data[:, 1],
+        df_predictions["mu_u"],
+        df_predictions["mu_v"],
+        df_predictions["sigma_u"],
+        df_predictions["sigma_v"],
+        df_predictions["rho"],
+        label_data.iloc[:, 0],
+        label_data.iloc[:, 1]
     )
     outside = (cdf > 0.50)
 

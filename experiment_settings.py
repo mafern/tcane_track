@@ -17,7 +17,7 @@ class Experiments():
     """
     Class to manage experiments (settings), including generating new experiments and running experiments.
     """
-    def __init__(self, filename=os.path.dirname(__file__)+"/experiments.json", default_x_names=["VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SSTN", "SHDC", "DTL"]):
+    def __init__(self, filename=os.path.dirname(__file__)+"/experiments.json", default_x_names=["VMXC", "NCT", "AVDX", "AVDY", "EMDX", "EMDY", "EGDX", "EGDY", "HWDX", "HWDY", "SPDX", "SPDY", "LONC", "LATC", "VMAX0", "DV12", "SSTN", "SHDC", "DTL", "FHOUR"]):
         # load the dictionary and keys
         try:
             self.filename = filename
@@ -70,12 +70,11 @@ class Experiments():
         else:
             print("must pass confirm=1 to overwrite main file with backup")
 
-    def make_exp_dictionary(self, expname, basin, *, leadtimes=0, x_names=[], predictand="OFD", uncertainty="centered_bivariate_normal", hiddens=[5, 5], dropout=[0., 0., 0.], ridge=[0.0, 0.0], learning=0.0001, batch=64, seed_list=[123], rng_seed=None, act_fun="relu", n_epochs=25_000, patience=250, test_condition="leave-one-out", years_test=[2022,], val_condition="random", n_val=200, n_train="max", loss_function="compute_bivariate_normal_nll", metrics={"CustomMAE": "custom_mae", "InterquartileCapture": "interquartile_capture", "SignTest": "sign_test"}):
+    def make_exp_dictionary(self, expname, basin, *, x_names=[], predictand="OFD", uncertainty="centered_bivariate_normal", hiddens=[5, 5], dropout=[0., 0., 0.], ridge=[0.0, 0.0], learning=0.0001, batch=64, seed_list=[123], rng_seed=None, act_fun="relu", n_epochs=25_000, patience=250, test_condition="leave-one-out", years_test=[2022,], val_condition="random", n_val=200*8, n_train="max", loss_function="compute_bivariate_normal_nll", metrics={"CustomMAE": "custom_mae", "InterquartileCapture": "interquartile_capture", "SignTest": "sign_test"}):
         """
         Make an experiment dictionary with the following settings:
                 - expname: name of the experiment (how it will be saved and called)
                 - basin: ocean basin, either 'AL' (Atlantic) or 'EP' (Eastern/Central Pacific)
-                - leadtime: multiples of 12 up to 120 hours, or 0 to generate separate experiments for each leadtime
                 - x_names: features to use -- entering x_names that are already in default_x_names removes them, otherwise they are added
                 - predictand: the label, either 'OFD' (official forecast error) or 'OBD' (consensus error)
                 - uncertainty: whether to center the bivariate normal ("centered_bivariate_normal") or allow it to fit ("bivariate_normal")
@@ -108,14 +107,10 @@ class Experiments():
         x_names = default_x_names
         print("using features: ", x_names)
 
-        if leadtimes == 0: leadtimes = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120]
-        if not isinstance(leadtimes, list):
-            leadtimes = [leadtimes]
         dictionary = {}
-        for leadtime in list(leadtimes):
-            # check if the proposed experiment name already exists
-            assert expname+'_'+predictand+'_'+basin+str(leadtime) not in self.keys, "experiment with that name already exists"
-            dictionary[expname+'_'+predictand+'_'+basin+str(leadtime)] = {"filename": "nnfit_vlist_07Nov2024.dat", "uncertainty_type": uncertainty, "leadtime": leadtime, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand+'X', "predictand_y": predictand+'Y', "metrics": metrics,}
+        # check if the proposed experiment name already exists
+        assert expname+'_'+predictand+'_'+basin not in self.keys, "experiment with that name already exists"
+        dictionary[expname+'_'+predictand+'_'+basin] = {"filename": "nnfit_vlist_07Nov2024.dat", "uncertainty_type": uncertainty, "basin": basin, "hiddens": hiddens, "dropout_rate": dropout, "ridge_param": ridge, "learning_rate": learning, "batch_size": batch, "rng_seed_list": seed_list, "rng_seed": rng_seed, "act_fun": act_fun, "n_epochs": n_epochs, "patience": patience, "test_condition": test_condition, "years_test": years_test, "val_condition": val_condition, "n_val": n_val, "n_train": n_train, "x_names": x_names, "loss_function": loss_function, "predictand_x": predictand+'X', "predictand_y": predictand+'Y', "metrics": metrics,}
         return dictionary
 
     # function wrapping train_experiments

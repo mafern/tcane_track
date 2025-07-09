@@ -64,8 +64,7 @@ def save_model_run(
     else: basin_name = 'ep'
     if settings['predictand_x'] == 'OFDX': label_name = 'late'
     else: label_name = 'erly'
-    lead_name = str(settings['leadtime']).zfill(3)
-    filename = "tcane_" + basin_name + "_track_" + label_name + '_' + lead_name
+    filename = "tcane_" + basin_name + "_track_" + label_name
     # Save the model, weights, and history.
     try:
         tf.keras.models.save_model(
