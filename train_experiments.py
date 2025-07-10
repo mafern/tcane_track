@@ -124,6 +124,8 @@ def train_experiments(
                     continue
 
                 # Create the model name.
+                if settings["test_condition"] == None:
+                    testing_years = 'RT'
                 model_name = (
                         exp_name
                         + "_"
